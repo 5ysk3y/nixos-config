@@ -290,10 +290,6 @@ ignore-timeout=1";
      enable = true;
      extraConfig = "pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses";
    };
-
-   gnome-keyring = {
-     enable = true;
-   };
  };
 
   ## END SERVICES ##
