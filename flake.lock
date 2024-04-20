@@ -265,19 +265,19 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1713266738,
+        "lastModified": 1713620868,
         "narHash": "sha256-zmeq/AGEVJ0buTfApl0q84JTsdFN1uXXn2ovNiNrh8g=",
         "ref": "main",
-        "rev": "d99cdd6c45f0d9347a9352fa6fdedaf402d50177",
+        "rev": "3fcf89d3231d036d6a3a5281d4c55543edc207c7",
         "shallow": true,
         "type": "git",
-        "url": "ssh://git@gitlab.local/5ysk3y/nix-secrets.git"
+        "url": "ssh://git@github.com/5ysk3y/nix-secrets.git"
       },
       "original": {
         "ref": "main",
         "shallow": true,
         "type": "git",
-        "url": "ssh://git@gitlab.local/5ysk3y/nix-secrets.git"
+        "url": "ssh://git@github.com/5ysk3y/nix-secrets.git"
       }
     },
     "nixpkgs": {
