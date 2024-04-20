@@ -425,6 +425,22 @@
         "type": "github"
       }
     },
+    "qute-dracula": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1647823577,
+        "narHash": "sha256-BXTvYFZnzEDlNEOTaWm4m8MEelVrRsUkNdwYKxaxw/g=",
+        "owner": "dracula",
+        "repo": "qutebrowser",
+        "rev": "791de19ce6a43f0fa52405eea57cba43b4c05a22",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dracula",
+        "repo": "qutebrowser",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "doomemacs": "doomemacs",
@@ -436,6 +452,7 @@
         "nix-secrets": "nix-secrets",
         "nixpkgs": "nixpkgs_5",
         "nixpkgs-stable": "nixpkgs-stable_2",
+        "qute-dracula": "qute-dracula",
         "sops-nix": "sops-nix"
       }
     },
