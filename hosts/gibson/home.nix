@@ -29,16 +29,12 @@ in
     packages = with pkgs; [
         bat
         bc
-        pkgs-stable.bitwarden
-        # https://community.bitwarden.com/t/unlock-with-pin-setting-cannot-be-set/64959
-        # Pin configuration bug preventing use of pin numbers.
+        bitwarden
         cider
-        clipboard-jh
         dracula-theme
         fontconfig
         glib
         grimblast
-        hydra-check
         jellyfin-mpv-shim
         jq
         keyutils
@@ -59,12 +55,9 @@ in
         signal-desktop
         sops
         spice-gtk
-        stow
-        swww
         toot
         vlc
         vulkan-tools
-        wayvnc
         webcord
         wl-clipboard
         zscroll
