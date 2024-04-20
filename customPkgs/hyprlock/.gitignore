@@ -1,8 +1,0 @@
-.cache
-.direnv
-.envrc
-.vscode/
-build/
-compile_commands.json
-protocols/*.c
-protocols/*.h

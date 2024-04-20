@@ -20,7 +20,6 @@
           enable = true;
           general = {
             grace = 30;
-            pam_module = "login";
           };
         };
       };
