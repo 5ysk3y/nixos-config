@@ -1,8 +1,0 @@
-# pack-refs with: peeled fully-peeled sorted 
-1cbc2b9c22c13b6cb41437fcab1db001acd0151f refs/remotes/origin/fonts
-2bce52f094c49109520ad37fc8f0d051acaace55 refs/remotes/origin/main
-03720cd9e402403a6bcb7ecc9e4e448a102a2b9f refs/remotes/origin/nix
-b8018c590ec14a7abbf86bf59b388bf952f0efe5 refs/remotes/origin/nvidia-and-stuff-fixes
-94ac7fef1abf0786655e1691fffa7d34147a2536 refs/tags/v0.1.0
-0fe10282559f02ea945f0ce8f1277cd695179442 refs/tags/v0.2.0
-bc87adf9ec997090f15d9b662d6ca2f86e25f264 refs/tags/v0.3.0

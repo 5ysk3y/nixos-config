@@ -250,16 +250,17 @@
         "systems": "systems_6"
       },
       "locked": {
-        "dirtyRev": "307e473759d1268b50a087095cc005c941f3bb0d-dirty",
-        "dirtyShortRev": "307e473-dirty",
         "lastModified": 1713552491,
-        "narHash": "sha256-OMjLncA/T6SrWejbF4gtgrOOrorYvq1qiEmzsJHezM4=",
-        "type": "git",
-        "url": "file:./customPkgs/hyprlock"
+        "narHash": "sha256-qsXB8swg2FkVRYx8FdD28iXQsz5Pyd0hxV8pnyI49aI=",
+        "owner": "hyprwm",
+        "repo": "Hyprlock",
+        "rev": "307e473759d1268b50a087095cc005c941f3bb0d",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:./customPkgs/hyprlock"
+        "owner": "hyprwm",
+        "repo": "Hyprlock",
+        "type": "github"
       }
     },
     "nix-secrets": {
