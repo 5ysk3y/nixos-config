@@ -135,6 +135,10 @@ in
           sudo = {
             u2fAuth = true;
           };
+
+          hyprlock = {
+            u2fAuth = true;
+          };
         };
 
         u2f = {

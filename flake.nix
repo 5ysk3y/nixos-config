@@ -25,8 +25,7 @@
     };
 
     hyprlock = {
-      #url = "github:hyprwm/Hyprlock";
-      url = "git+file:./customPkgs/hyprlock";
+      url = "github:hyprwm/Hyprlock";
     };
 
     hyprland = {
