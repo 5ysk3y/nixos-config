@@ -83,7 +83,6 @@ in {
             arguments = [" --create-frame --tty"];
           };
           startWithUserSession = true;
-          defaultEditor = true;
         };
       }
     ))
