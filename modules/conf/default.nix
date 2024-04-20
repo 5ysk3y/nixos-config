@@ -2,6 +2,7 @@
 
 let
     syncDir = "${config.home.homeDirectory}/Sync";
+    draculaPath = builtins.toString inputs.qute-dracula.outPath;
 in
 {
 
@@ -90,7 +91,7 @@ config = lib.mkIf config.confSymlinks.enable {
   };
 
   home.file."${config.xdg.configHome}/qutebrowser/dracula" = lib.mkIf config.programs.qutebrowser.enable {
-    source = ../applications/qutebrowser/dracula;
+    source = draculaPath;
     recursive = true;
   };
 

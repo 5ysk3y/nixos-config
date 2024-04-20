@@ -41,6 +41,11 @@
       flake = false;
     };
 
+    qute-dracula = {
+      url = "github:dracula/qutebrowser";
+      flake = false;
+    };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
     };
