@@ -224,10 +224,6 @@ polkit.addRule(function(action, subject) {
        };
      };
    
-    gnome.gnome-keyring = {
-      enable = true;
-    };
-
     pcscd = {
       enable = true;
     };
