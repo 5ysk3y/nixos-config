@@ -126,7 +126,7 @@
 
           $HYPRLAND_CONFIG_PATH = /home/rickie/.config/hypr
 
-          source = ${config.home.homeDirectory}/nixos-config/hosts/${vars.hostname}/applications/hypr/hyprland.conf
+          source = ${config.home.homeDirectory}/nix-config/hosts/${vars.hostname}/applications/hypr/hyprland.conf
            '';
 
       };
