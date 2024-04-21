@@ -1,12 +1,9 @@
-{ config, lib, pkgs, pkgs-stable, hyprlock, hypridle, inputs, doomemacs, ... }:
+{ config, lib, pkgs, pkgs-stable, hyprlock, hypridle, inputs, doomemacs, vars, hostname, ... }:
 
-let
-  secretsPath = builtins.toString inputs.nix-secrets;
-in
 {
   home = {
-    username = "rickie";
-    homeDirectory = "/home/${config.home.username}";
+    username = "${vars.username}";
+    homeDirectory = "/home/${vars.username}";
 
     activation = {
       setupEtc = config.lib.dag.entryAfter [ "writeBoundary" ] ''
@@ -120,7 +117,7 @@ in
         cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
         mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
 	shred = "shred -zfu";
-  nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode block --who='${config.home.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ~/nix-config $@ --option eval-cache false --show-trace";
+  nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ~/nix-config $@ --option eval-cache false --show-trace";
         spicy = "spicy --spice-ca-file=/etc/pki/libvirt-spice/ca-cert.pem --uri 'spice://127.0.0.1' -p 5900 -s 5901 --title 'th3h4x0r' -f > /dev/null 2>&1 &|";
         pass = "pass -c main";
       };
@@ -333,7 +330,7 @@ ignore-timeout=1";
 
   sops = {
     age.keyFile = "${config.home.homeDirectory}/Sync/Private/Keys/sops-nix";
-    defaultSopsFile = "${secretsPath}/secrets/secrets.yaml";
+    defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
 
     defaultSymlinkPath = "/run/user/1000/secrets";
@@ -357,14 +354,14 @@ ignore-timeout=1";
       # gnupg
       gnupg-BFC2DEE396C3C60124F1DD48D021869A34507FAE = {
         format = "binary";
-        sopsFile = "${secretsPath}/secrets/gnupg/BFC2DEE396C3C60124F1DD48D021869A34507FAE.key";
+        sopsFile = "${vars.secretsPath}/secrets/gnupg/BFC2DEE396C3C60124F1DD48D021869A34507FAE.key";
         path = "${config.home.homeDirectory}/.gnupg/private-keys-v1.d/BFC2DEE396C3C60124F1DD48D021869A34507FAE.key";
       };
 
       # pass
       gnupg-pass = {
         format = "binary";
-        sopsFile = "${secretsPath}/secrets/gnupg/main.enc.gpg";
+        sopsFile = "${vars.secretsPath}/secrets/gnupg/main.enc.gpg";
         path = "${config.home.homeDirectory}/.local/share/pass/main.gpg";
       };
     };

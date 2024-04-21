@@ -1,4 +1,4 @@
-{ config, lib, pkgs, vars, ... }:
+{ config, lib, pkgs, hostname, ... }:
 
 {
 
@@ -25,7 +25,7 @@
       };
     })
 
-    (mkIf (config.applications.hypr.apps.hyprlock && vars.hostname == "gibson") {
+    (mkIf (config.applications.hypr.apps.hyprlock && hostname == "gibson") {
       programs = {
         hyprlock = {
           backgrounds = [
@@ -70,7 +70,7 @@
       };
     })
 
-    (mkIf (config.applications.hypr.apps.hyprlock && vars.hostname == "gibson") {
+    (mkIf (config.applications.hypr.apps.hyprlock && hostname == "gibson") {
       programs = {
         hyprlock = {
           input-fields = [
