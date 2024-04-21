@@ -29,7 +29,9 @@ in
     packages = with pkgs; [
         bat
         bc
-        bitwarden
+        # Bitwarden = pkgs.stable until they fix this
+        # Disgusting bug: https://github.com/bitwarden/clients/issues/8695
+        pkgs-stable.bitwarden
         cider
         dracula-theme
         fontconfig
