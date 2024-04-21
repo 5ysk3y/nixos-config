@@ -319,7 +319,6 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
 
     gamescope = {
       enable = true;
-      package = (pkgs.callPackage ../../customPkgs/gamescope/default.nix { });
     };
 
     gamemode = {
@@ -340,12 +339,6 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
     steam = { 
       enable = true;
     };
-
-    #streamdeck-ui = {
-    #  enable = true;
-    #  autoStart = true;
-    #  package = (pkgs.callPackage ../../customPkgs/streamdeck-ui/default.nix { });
-    #};
 
     virt-manager = {
       enable = true;
@@ -417,6 +410,16 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
             keyutils
           ];
         };
+
+        gamescope = pkgs.gamescope.overrideAttrs (_: oldAttrs: {
+          src = pkgs.fetchFromGitHub {
+            owner = "ValveSoftware";
+            repo = "gamescope";
+            rev = "a559b04";
+            fetchSubmodules = true;
+            hash = "sha256-GGXCAZxBsDHe5URMG8+iLAS6aGubOeM3C18cloAXdxQ=";
+          };
+        });
       };
     };
   };
