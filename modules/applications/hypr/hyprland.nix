@@ -28,7 +28,7 @@
           "-all"
           ];
         };
-        extraConfig = with vars; ''
+        extraConfig = ''
           input {
               kb_file =
               kb_layout = us
