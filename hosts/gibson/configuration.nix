@@ -1,18 +1,14 @@
 # Gibson NixOS Main Configuration
 
-{ config, lib, pkgs, pkgs-stable, inputs, vars, ... }:
+{ config, lib, pkgs, pkgs-stable, inputs, hostname, vars, ... }:
 
-let
-  secretsPath = builtins.toString inputs.nix-secrets;
-  username = "rickie";
-in
 { imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./boot/bootloader.nix
     ];
 
-  networking.hostName = "gibson"; # Define your hostname.
+  networking.hostName = "${hostname}"; # Define your hostname.
   
   # networking.wireless.enable = true; # Enables wireless support via wpa_supplicant.
 
@@ -47,9 +43,9 @@ in
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.rickie = { 
+  users.users."${vars.username}" = {
     isNormalUser = true; 
-    description = "Rickie"; 
+    description = "${vars.username}";
     extraGroups = [ "networkmanager" "wheel" "audio" "clightd" "libvirtd" "gamemode" ]; 
 #   packages = with pkgs; [    ];
 #   USER PKGS MANAGED IN HOME.NIX    
@@ -167,7 +163,7 @@ polkit.addRule(function(action, subject) {
 
     sudo = {
       extraRules = [
-        { users = [ "${username}" ];
+        { users = [ "${vars.username}" ];
         commands = [
           { command = "/run/current-system/sw/bin/clightd";
             options = [ "SETENV" "NOPASSWD" ]; 
@@ -234,7 +230,7 @@ polkit.addRule(function(action, subject) {
 
     syncthing = {
       enable = true;
-      user = "${username}";
+      user = "${vars.username}";
       dataDir = "${config.users.users.rickie.home}/Sync";
       configDir = "${config.users.users.rickie.home}/.config/syncthing";
       openDefaultPorts = true;
@@ -370,7 +366,7 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
 
   nix = {
    nixPath = [ 
-     "nixos-config=${config.users.users.rickie.home}/nix-config/hosts/${config.networking.hostName}/configuration.nix"
+     "nixos-config=${config.users.users.rickie.home}/nix-config/hosts/${hostname}/configuration.nix"
      "nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels"
    ];
    package = pkgs.nixFlakes;
@@ -456,7 +452,7 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
 
   sops = {
     age.keyFile = "${config.users.users.rickie.home}/Sync/Private/Keys/sops-nix";
-    defaultSopsFile = "${secretsPath}/secrets/secrets.yaml";
+    defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
 
     secrets = {
@@ -467,19 +463,19 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
 
       syncthing-cert = {
         format = "binary";
-        sopsFile = "${secretsPath}/secrets/syncthing/syncthing.enc.cert";
-        owner = "${username}";
+        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.cert";
+        owner = "${vars.username}";
       };
 
       syncthing-key = {
         format = "binary";
-        sopsFile = "${secretsPath}/secrets/syncthing/syncthing.enc.key";
-        owner = "${username}";
+        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.key";
+        owner = "${vars.username}";
       };
 
       # Yubikey
       "system/pam/yubikeyPub" = {
-        owner = "${username}";
+        owner = "${vars.username}";
       };
 
       # System
@@ -550,7 +546,7 @@ if [ ! -d "$DIR" ]; then
     receiveOnly
     mkdir -p $DIR/.stfolder
     echo "Directory created."
-    chown -R ${username}:users $DIR
+    chown -R ${vars.username}:users $DIR
     echo "Permissions Set."
     sleep 2
 
