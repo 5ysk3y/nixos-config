@@ -1,4 +1,4 @@
-{ config, lib, pkgs, vars, ... }:
+{ config, lib, pkgs, hostname, ... }:
 
 {
 
@@ -14,7 +14,7 @@
 
   config = with lib; mkIf config.applications.hypr.enable (mkMerge [
 
-    (mkIf (config.applications.hypr.apps.hypridle && vars.hostname == "gibson") {
+    (mkIf (config.applications.hypr.apps.hypridle && hostname == "gibson") {
       services = {
         hypridle = with pkgs; {
           enable = true;

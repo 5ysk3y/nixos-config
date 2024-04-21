@@ -58,22 +58,29 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, emacs-overlay, hyprlock, hypridle, home-manager, doomemacs, sops-nix, ... } @inputs: {
+  outputs = { self, nixpkgs, nixpkgs-stable, emacs-overlay, hyprlock, hypridle, home-manager, doomemacs, sops-nix, ... } @inputs:
+let
+  vars = rec {
+    username = "rickie";
+    nixos-config = "/home/${username}/nix-config";
+    secretsPath = builtins.toString inputs.nix-secrets;
+  };
 
+in
+{
 nixosConfigurations = {
     nixpkgs.overlays = [ (import self.inputs.emacs-overlay) ];
-
     # Begin Main Machine (Gibson)
     "gibson" = nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs = {
-        pkgs-stable = import nixpkgs-stable {
-          system = system;
-          config.allowUnfree = true;
+          pkgs-stable = import nixpkgs-stable {
+            system = system;
+            config.allowUnfree = true;
+          };
+          hostname = "gibson";
+          inherit system inputs vars;
         };
-
-        inherit system inputs;
-      };
 
       modules = [
         ./hosts/gibson/configuration.nix
@@ -82,15 +89,12 @@ nixosConfigurations = {
         # Begin Home Manager Setup
         home-manager.nixosModules.home-manager {
           home-manager.extraSpecialArgs = {
-            vars = {
-              hostname = "gibson";
-              username = "rickie";
-            };
             pkgs-stable = import nixpkgs-stable {
               system = system;
               config.allowUnfree = true;
             };
-            inherit inputs system doomemacs;
+          hostname = "gibson";
+            inherit inputs system doomemacs vars;
           };
 
           home-manager.useGlobalPkgs = true;
@@ -118,11 +122,7 @@ nixosConfigurations = {
           config.allowUnfree = true;
         };
 
-	vars = {
-	  hostname = "macbook";
-	  username = "rickie";
-        };
-        inherit inputs system;
+        inherit inputs system vars;
       };
 
       modules = [
@@ -136,12 +136,8 @@ nixosConfigurations = {
               config.allowUnfree = true;
             };
 
-            vars = {
-              hostname = "macbook";
-              username = "rickie";
-            };
 
-            inherit inputs doomemacs;
+            inherit inputs doomemacs vars;
           };
 
           home-manager.useGlobalPkgs = true;
