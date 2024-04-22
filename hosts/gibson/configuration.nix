@@ -359,7 +359,7 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
 
   nix = {
    nixPath = [ 
-     "nixos-config=${config.users.users.rickie.home}/nix-config/hosts/${hostname}/configuration.nix"
+     "nixos-config=${vars.nixos-config}/hosts/${hostname}/configuration.nix"
      "nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels"
    ];
    package = pkgs.nixFlakes;

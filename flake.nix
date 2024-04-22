@@ -62,7 +62,7 @@
 let
   vars = rec {
     username = "rickie";
-    nixos-config = "/home/${username}/nix-config";
+    nixos-config = "/home/${username}/nixos-config";
     secretsPath = builtins.toString inputs.nix-secrets;
   };
 
