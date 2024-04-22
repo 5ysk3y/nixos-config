@@ -1,4 +1,4 @@
-{ config, lib, pkgs, hostname, inputs, ... }: {
+{ config, lib, pkgs, hostname, vars, ... }: {
 
     options = with lib; {
       applications = {
@@ -17,7 +17,7 @@
               mainMonitor = {
                 "layer" = "top";
                 "position" = "top";
-                "includes" = [ "${config.home.homeDirectory}/nix-config/hosts/${hostname}/applications/waybar/waybar.conf" ];
+                "includes" = [ "${vars.nixos-config}/hosts/${hostname}/applications/waybar/waybar.conf" ];
                 "height" = 30;
 
                 "modules-left" = ["hyprland/workspaces"];

@@ -117,7 +117,7 @@
         cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
         mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
 	shred = "shred -zfu";
-  nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ~/nix-config $@ --option eval-cache false --show-trace";
+  nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ${vars.nixos-config} $@ --option eval-cache false --show-trace";
         spicy = "spicy --spice-ca-file=/etc/pki/libvirt-spice/ca-cert.pem --uri 'spice://127.0.0.1' -p 5900 -s 5901 --title 'th3h4x0r' -f > /dev/null 2>&1 &|";
         pass = "pass -c main";
       };
