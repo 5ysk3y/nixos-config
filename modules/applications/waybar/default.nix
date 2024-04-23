@@ -22,13 +22,21 @@
 
                 "modules-left" = ["hyprland/workspaces"];
                 "modules-center" = ["hyprland/window"];
-                "modules-right" = ["custom/rbw" "idle_inhibitor" "cpu" "memory" "disk" "temperature" "custom/steelseries" "custom/media" "pulseaudio"  "clock"];
+                "modules-right" = [ "group/quickHacks" "cpu" "memory" "temperature" "custom/steelseries" "custom/media" "pulseaudio"  "clock"];
 
                 "hyprland/workspaces" = {
                 "on-click" = "activate";
                 };
                 "hyprland/window" = {
                     "separate-outputs" = 1;
+                };
+
+                "group/quickHacks" = {
+                    "orientation" = "inherit";
+                    "drawer" = {
+                      "children-class" = "sub-icons";
+                    };
+                    "modules" = [ "custom/rbw" "idle_inhibitor" ];
                 };
 
                 "custom/rbw" = {
@@ -90,7 +98,7 @@
                 "custom/media" = {
                     "format" = " {}";
                     "escape" = "true";
-                    "max-length" = 40;
+                    "max-length" = 33;
                     "on-click" = "playerctl -s play-pause";
                     "on-click-right" = "playerctl -s stop";
                     "on-scroll-up" = "playerctl -s next";
@@ -301,13 +309,8 @@
 
                 #custom-rbw {
                     color: #FFF;
-                    padding-left: 5;
-                    padding-right: 5;
-                }
-
-                #custom-rbw.activated {
-                    background-color: #44475a;
-                    color: #FFF;
+                    padding: 0 10px;
+                    color: #ffffff;
                 }
 
                 #language {
