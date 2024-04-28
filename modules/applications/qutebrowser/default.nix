@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }: {
+{ config, lib, pkgs, inputs, vars, ... }: {
 
   options = with lib; {
     applications = {
@@ -65,12 +65,12 @@
             ",m" = "spawn mpv {url}";
             ";M" = "hint --rapid links spawn mpv {hint-url}";
             "<Ctrl+Shift+i>:" = "devtools";
-            "<Ctrl+l>" = "mode-enter insert ;; spawn -u /etc/profiles/per-user/rickie/bin/qute-rbw";
+            "<Ctrl+l>" = "mode-enter insert ;; spawn -u /etc/profiles/per-user/${vars.username}/bin/qute-rbw";
             "xb" = "config-cycle statusbar.hide";
           };
 
           insert = {
-            "<Ctrl+l>" = "spawn -u /etc/profiles/per-user/rickie/bin/qute-rbw";
+            "<Ctrl+l>" = "spawn -u /etc/profiles/per-user/${vars.username}/bin/qute-rbw";
           };
 
           passthrough = {
@@ -82,12 +82,9 @@
           yt = "https://youtube.com";
           htb = "https://app.hackthebox.eu/";
           thm = "https://tryhackme.com";
-          aur = "https://aur.archlinux.org/";
           nixpkgs = "https://search.nixos.org/packages";
-          shells = "http://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet";
+          nix-tracker = "https://nixpk.gs/pr-tracker.html";
           github = "https://github.com/";
-          hash = "https://hashes.org/";
-          edb = "https://www.exploit-db.com/";
           amazon = "https://www.amazon.co.uk/";
         }; # End quickmarks
 
