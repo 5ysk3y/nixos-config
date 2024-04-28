@@ -33,6 +33,7 @@
         keyutils
         krita
         lutris
+        neofetch
         obs-cmd
         pavucontrol
         pinentry-curses
@@ -249,6 +250,7 @@ bindkey -M viins '\e.' insert-last-word
 
     mako = {
       enable = true;
+      output = "DP-1";
       backgroundColor = "#282A36";
       textColor = "#FFFFFF";
       padding = "10";
