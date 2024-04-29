@@ -420,6 +420,18 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
             hash = "sha256-GGXCAZxBsDHe5URMG8+iLAS6aGubOeM3C18cloAXdxQ=";
           };
         });
+
+        waybar = pkgs.waybar.overrideAttrs (_: oldAttrs: {
+          version = "0.10.2";
+
+          src = pkgs.fetchFromGitHub {
+            owner = "Alexays";
+            repo = "Waybar";
+            rev = oldAttrs.version;
+            fetchSubmodules = true;
+            hash = "sha256-xinTLjZJhL4048jpAbN3i6nSxKAqnbesbK/GBX+1CkE=";
+          };
+        });
       };
     };
   };
