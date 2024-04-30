@@ -33,6 +33,7 @@
         keyutils
         krita
         lutris
+        mpvpaper
         neofetch
         obs-cmd
         pavucontrol
@@ -48,7 +49,6 @@
         signal-desktop
         sops
         spice-gtk
-        swww
         toot
         vlc
         vulkan-tools
