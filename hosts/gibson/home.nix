@@ -28,6 +28,7 @@
         fontconfig
         glib
         grimblast
+        heroic
         jellyfin-mpv-shim
         jq
         keyutils
