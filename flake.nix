@@ -29,7 +29,7 @@
     };
 
     hyprland = {
-      url = "github:hyprwm/Hyprland?ref=v0.39.1";
+      url = "github:hyprwm/Hyprland?ref=v0.40.0&submodules=1;";
     };
 
     hypridle = {
