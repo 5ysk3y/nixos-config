@@ -13,7 +13,7 @@
     };
 
     sessionVariables = {
-      SOPS_AGE_KEY_FILE = "${config.home.homeDirectory}/Sync/Private/Keys/sops-nix";
+      SOPS_AGE_KEY_FILE = "${vars.syncthingPath}/Private/Keys/sops-nix";
       EMAIL = "$(cat ${config.sops.secrets."services/git/email".path} )";
       NIXOS_OZONE_WL = 1;
     };
@@ -327,7 +327,7 @@ ignore-timeout=1";
   };
 
   sops = {
-    age.keyFile = "${config.home.homeDirectory}/Sync/Private/Keys/sops-nix";
+    age.keyFile = "${vars.syncthingPath}/Private/Keys/sops-nix";
     defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
 
