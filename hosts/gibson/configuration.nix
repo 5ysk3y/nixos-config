@@ -231,8 +231,8 @@ polkit.addRule(function(action, subject) {
     syncthing = {
       enable = true;
       user = "${vars.username}";
-      dataDir = "${config.users.users.rickie.home}/Sync";
-      configDir = "${config.users.users.rickie.home}/.config/syncthing";
+      dataDir = "${vars.syncthingPath}";
+      configDir = "/home/${vars.username}/.config/syncthing";
       openDefaultPorts = true;
 
       overrideDevices = true;     # overrides any devices added or deleted through the WebUI
@@ -264,8 +264,8 @@ polkit.addRule(function(action, subject) {
         };
 
         folders = {
-          "${config.users.users.rickie.home}/Sync" = {
-            path = "${config.users.users.rickie.home}/Sync";
+          "${vars.syncthingPath}" = {
+            path = "${vars.syncthingPath}";
             devices = [ "SyncMaster" ];
             id = "sync";
             label = "Sync";
@@ -415,9 +415,9 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
           src = pkgs.fetchFromGitHub {
             owner = "ValveSoftware";
             repo = "gamescope";
-            rev = "a559b04";
+            rev = "fb5e86b";
             fetchSubmodules = true;
-            hash = "sha256-GGXCAZxBsDHe5URMG8+iLAS6aGubOeM3C18cloAXdxQ=";
+            hash = "sha256-2B4R+r9T8QF3vpz/9Lp43INfqv2QclxJoPnz3h9ajYI=";
           };
         });
 
@@ -476,7 +476,7 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
   };
 
   sops = {
-    age.keyFile = "${config.users.users.rickie.home}/Sync/Private/Keys/sops-nix";
+    age.keyFile = "${vars.syncthingPath}/Private/Keys/sops-nix";
     defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
 
@@ -514,7 +514,7 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
         content = ''
 ## THIS TOOK HOURS OF MY FUCKING LIFE MAN
 
-DIR=${config.users.users.rickie.home}/Sync
+DIR=${vars.syncthingPath}
 TOKEN=${config.sops.placeholder."services/syncthing/token"}
 
 function checkSync {
