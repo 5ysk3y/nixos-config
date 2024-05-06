@@ -15,6 +15,7 @@
     sessionVariables = {
       SOPS_AGE_KEY_FILE = "${config.home.homeDirectory}/Sync/Private/Keys/sops-nix";
       EMAIL = "$(cat ${config.sops.secrets."services/git/email".path} )";
+      NIXOS_OZONE_WL = 1;
     };
 
     packages = with pkgs; [
