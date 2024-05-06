@@ -19,7 +19,7 @@
         hypridle = with pkgs; {
           enable = true;
           lockCmd = "pidof hyprlock || hyprlock --immediate";
-          afterSleepCmd = "sleep 1; pkill qpwgraph; hyprctl --batch dispatch dpms on; dispatch -- exec makoctl mode -s default; dispatch -- exec undim_screen; dispatch -- exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph; dispatch -- exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp";
+          afterSleepCmd = "sleep 1; pkill qpwgraph; hyprctl --batch 'dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec undim_screen; dispatch exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp'";
           listeners = [
             {
               timeout = 300;
