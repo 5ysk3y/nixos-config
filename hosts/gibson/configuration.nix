@@ -415,31 +415,9 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
           src = pkgs.fetchFromGitHub {
             owner = "ValveSoftware";
             repo = "gamescope";
-            rev = "fb5e86b";
+            rev = "a559b04";
             fetchSubmodules = true;
-            hash = "sha256-2B4R+r9T8QF3vpz/9Lp43INfqv2QclxJoPnz3h9ajYI=";
-          };
-        });
-
-        waybar = pkgs.waybar.overrideAttrs (_: oldAttrs: {
-          src = pkgs.fetchFromGitHub {
-            owner = "Alexays";
-            repo = "Waybar";
-            rev = "f41458e";
-            fetchSubmodules = true;
-            hash = "sha256-U8akaULdFoh0Kskxe+K9KRwkLt8Ul11d7NyiyxKsLiY=";
-          };
-        });
-
-        rofi-rbw-wayland = pkgs.rofi-rbw-wayland.overrideAttrs (_: oldAttrs: {
-          version = "1.4.2";
-
-          src = pkgs.fetchFromGitHub {
-            owner = "fdw";
-            repo = "rofi-rbw";
-            rev = "995c318";
-            fetchSubmodules = true;
-            hash = "sha256-wUb89GkNB2lEfb42hMvcxpbjc1O+wx8AkFjq7aJwAko=";
+            hash = "sha256-GGXCAZxBsDHe5URMG8+iLAS6aGubOeM3C18cloAXdxQ=";
           };
         });
       };
