@@ -1,4 +1,4 @@
-{ config, lib, pkgs, pkgs-stable, hyprlock, hypridle, inputs, doomemacs, vars, hostname, ... }:
+{ config, lib, pkgs, pkgs-stable, inputs, doomemacs, vars, hostname, ... }:
 
 {
   home = {
@@ -380,7 +380,5 @@ ignore-timeout=1";
 
   imports = [
     ../../modules
-    inputs.hyprlock.homeManagerModules.hyprlock
-    inputs.hypridle.homeManagerModules.hypridle
   ];
 }
