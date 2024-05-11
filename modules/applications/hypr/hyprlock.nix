@@ -21,6 +21,7 @@
           settings = {
             general = {
               grace = 30;
+              hide_cursor = true;
             };
           };
         };
@@ -31,7 +32,7 @@
       programs = {
         hyprlock = {
           settings = {
-            backgrounds = [
+            background = [
               {
                 monitor = "DP-1";
                 path = "${config.xdg.configHome}/Wallpapers/hex_lockscreen_middle.png";
@@ -78,30 +79,41 @@
       programs = {
         hyprlock = {
           settings = {
-            input-fields = [
+            input-field = [
               {
                 monitor = "DP-1";
                 fade_on_empty = false;
                 dots_center = true;
-                size = {
-                  width = 250;
-                  height = 50;
-                };
+                size = "250, 50";
                 outer_color = "rgb(255, 184, 108)";
                 inner_color = "rgb(0, 0, 0)";
                 font_color = "rgb(255, 255, 255)";
               }
             ];
 
-            labels = [
+            label = [
               {
                 monitor = "DP-1";
                 text = "cmd[update:10000] echo \"$(date +'%R')\"";
                 font_family = "Hack";
-                position = {
-                  x = 0;
-                  y = 80;
-                };
+                position = "0, 80";
+                halign = "center";
+                valign = "center";
+                color = "rgba(255, 255, 255, 1)";
+                font_size = 60;
+
+                shadow_passes = 1;
+                shadow_size = 6;
+                shadow_color = "rgba(255, 184, 108, 0.5)";
+                shadow_boost = 1.6;
+              }
+              {
+                monitor = "DP-1";
+                text = "$FAIL";
+                font_family = "Hack";
+                position = "0, 200";
+                halign = "center";
+                valign = "center";
                 color = "rgba(255, 255, 255, 1)";
                 font_size = 60;
 
