@@ -1,16 +1,21 @@
 ## Custom Configuration Module
 
-The purpose of this module is to setup existing configuration for the following services, either by way of symlinks or embedded config within Nix itself:
+The purpose of this module is to setup configuration files for applications that dont have native nix or home-manager modules. Right now configuration can be toggled for the following services, and they are applied either by way of symlinks to existing files or embedded config within Nix itself:
 
-- Cider (External symlink) = False by default : cider
-- GNUPG (External symlink) = True by default : gnupg
-- Jellyfin MPV Shim (Embedded Config) = False by default : jellyfinShim
-- OpenRGB (Embedded Config) = False by default : openrgb
-- QPWGraph (Embedded Config) = qpwgraph = False by default : qpwgraph
-- SSH (External Symlink) = ssh = True by default : ssh
-- StreamdeckUI (Embedded Config) = streamdeckui = False by default : streamdeckui
+| Name              | Applied? | Key          | Default |
+|-------------------|----------|--------------|---------|
+| Cider             | symlink  | cider        | false   |
+| GNUPG             | symlink  | gnupg        | true    |
+| Jellyfin MPV Shim | embedded | jellyfinShim | false   |
+| OpenRGB           | embedded | openrgb      | false   |
+| QPWGraph          | embedded | qpwgraph     | false   |
+| Rofi              | embedded | n/a          | n/a     |
+| SSH               | symlink  | ssh          | true    |
+| StreamdeckUI      | embedded | streamdeckui | false   |
 
 By default, the confSymlink set is enabled but the above defaults are used for each individual service unless specified otherwise.
+
+The only non-configurable option in this module is `rofi` which is included automatically when `applications.qutebrowser` is enabled in home.nix, and is there to theme rofi for qutebrowsers password manager `rofi-rbw`.
 
 #### Example:
 

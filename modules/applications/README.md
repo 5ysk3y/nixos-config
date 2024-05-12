@@ -9,7 +9,7 @@ The purpose of this module is to wrap around a number of existing Nix packages a
     * Hyprlock = Toggles hyprlock inclusive of per-host config
   * DoomEmacs = Toggles emacs, doom and custom config files
   * Qutebrowser = Toggles qutebrowser, inclusive of themes, keybinds etc
-  * Rofi = Toggles rofi and custom theming
+  * Fuzzel = Toggles fuzzel inclusive of per-host config
 
 By default, all scripts are set to the defaults shown in the below example unless specified otherwise.
 
@@ -36,7 +36,7 @@ applications = {
   waybar = true;
   doomemacs = true;
   qutebrowser = true;
-  rofi = true;
+  fuzzel = true;
 };
 ```
 
@@ -46,7 +46,7 @@ In this example, despite the individual `hypr` apps being enabled, it will not a
 
 ***
 
-In this example we explicitly enable the hypr set of applications but then turn off hypridle and hyprlock, meaning that only hyprland will be installed. We've also explicitly turned off rofi so that also will not install.
+In this example we explicitly enable the hypr set of applications but then turn off hypridle and hyprlock, meaning that only hyprland will be installed. We've also explicitly turned off fuzzel so that also will not install.
 
 ``` nix
 applications = {
@@ -57,6 +57,6 @@ applications = {
       hyprlock = false;
     };
   };
-  rofi = false;
+  fuzzel = false;
 };
 ```
