@@ -287,6 +287,20 @@ ignore-timeout=1";
      enable = true;
      extraConfig = "pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses";
    };
+
+   wayland-pipewire-idle-inhibit = {
+     enable = true;
+     systemdTarget = "graphical-session.target";
+       settings = {
+        verbosity = "INFO";
+        media_minimum_duration = 10;
+        idle_inhibitor = "wayland";
+
+        sink_whitelist = [
+          { name = "HDMI/External"; }
+        ];
+      };
+   };
  };
 
   ## END SERVICES ##
@@ -380,5 +394,6 @@ ignore-timeout=1";
 
   imports = [
     ../../modules
+    inputs.wayland-pipewire-idle-inhibit.homeModules.default
   ];
 }

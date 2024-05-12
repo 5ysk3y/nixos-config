@@ -88,7 +88,6 @@
       lxqt.lxqt-policykit
       openssl
       pulseaudio
-      sway-audio-idle-inhibit
       v4l-utils
       vim 
       wineWowPackages.unstableFull
