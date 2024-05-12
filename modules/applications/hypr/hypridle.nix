@@ -20,8 +20,8 @@
           enable = true;
           settings = {
             general = {
-              lockCmd = "pidof hyprlock || hyprlock --immediate";
-              afterSleepCmd = "sleep 1; pkill qpwgraph; hyprctl --batch 'dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec undim_screen; dispatch exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp'";
+              lock_cmd = "pidof hyprlock || hyprlock --immediate";
+              after_sleep_cmd = "sleep 1; pkill qpwgraph; hyprctl --batch 'dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec undim_screen; dispatch exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp'";
             };
 
             listener = [
