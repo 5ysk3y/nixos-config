@@ -3,7 +3,7 @@
     ./doomemacs
     ./hypr
     ./qutebrowser
-    ./rofi
+    ./fuzzel
     ./waybar
   ];
 }

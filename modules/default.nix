@@ -20,7 +20,7 @@
     waybar = mkDefault true;
     doomemacs = mkDefault true;
     qutebrowser = mkDefault true;
-    rofi = mkDefault true;
+    fuzzel = mkDefault true;
   };
 
   # Symlinked Config File Defaults

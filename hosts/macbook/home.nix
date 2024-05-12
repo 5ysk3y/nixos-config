@@ -81,7 +81,7 @@ in
     hypr.enable = true;
     doomemacs = true;
     qutebrowser = true;
-    rofi = true;
+    fuzzel = true;
   };
 
   ## END CUSTOM MODULES
