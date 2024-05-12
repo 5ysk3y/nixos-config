@@ -115,7 +115,7 @@
                 halign = "center";
                 valign = "center";
                 color = "rgba(255, 255, 255, 1)";
-                font_size = 60;
+                font_size = 20;
 
                 shadow_passes = 1;
                 shadow_size = 6;
