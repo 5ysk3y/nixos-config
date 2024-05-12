@@ -97,7 +97,11 @@
 
       }; # End qutebrowser
 
-    }; # End programs
+      rofi = {
+        enable = true;
+        package = pkgs.rofi-wayland;
+      }; # End Rofi
 
+    }; # End programs
   }; # End config
 }
