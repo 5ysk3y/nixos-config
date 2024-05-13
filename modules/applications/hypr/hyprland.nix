@@ -25,7 +25,7 @@
         systemd = {
           enable = true;
           variables = [
-          "-all"
+          "--all"
           ];
         };
         extraConfig = ''
