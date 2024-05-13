@@ -37,7 +37,6 @@
   ]);
 
   imports = [
-    ./idle
     ./waybar
   ];
 }
