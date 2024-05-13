@@ -380,9 +380,9 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
    };
    gc = {
      automatic = true;
-     dates = "daily";
+     dates = "weekly";
      persistent = true;
-     options = "-d";
+     options = "--delete-older-then 7d";
    };
   };
 
