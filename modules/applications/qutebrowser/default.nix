@@ -1,4 +1,17 @@
-{ config, lib, pkgs, inputs, vars, ... }: {
+{ config, lib, pkgs, inputs, vars, ... }:
+let
+  qute-rbw = pkgs.writeShellScriptBin "qute-rbw" ''
+      ${pkgs.rbw}/bin/rbw unlocked > /dev/null 2>&1
+      RC="$?"
+
+      if [[ "$RC" -eq 1 ]]; then
+          ${pkgs.kitty}/bin/kitty -T "rbw password prompt" ${pkgs.rbw}/bin/rbw unlock > /dev/null 2>&1 && ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow qutebrowser && ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
+      else
+          ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
+      fi
+  '';
+in
+{
 
   options = with lib; {
     applications = {
@@ -65,12 +78,12 @@
             ",m" = "spawn mpv {url}";
             ";M" = "hint --rapid links spawn mpv {hint-url}";
             "<Ctrl+Shift+i>:" = "devtools";
-            "<Ctrl+l>" = "mode-enter insert ;; spawn -u /etc/profiles/per-user/${vars.username}/bin/qute-rbw";
+            "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${qute-rbw.outPath}/bin/qute-rbw";
             "xb" = "config-cycle statusbar.hide";
           };
 
           insert = {
-            "<Ctrl+l>" = "spawn -u /etc/profiles/per-user/${vars.username}/bin/qute-rbw";
+            "<Ctrl+l>" = "spawn -u ${qute-rbw.outPath}/bin/qute-rbw";
           };
 
           passthrough = {
