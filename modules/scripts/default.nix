@@ -9,9 +9,6 @@
       nix = mkOption {
         type = types.bool;
       };
-      qutebrowser = mkOption {
-        type = types.bool;
-      };
     };
   };
 
@@ -28,15 +25,5 @@
         (import ./nix {inherit pkgs;})
       ];
     })
-
-    (mkIf (config.scripts.qutebrowser) {
-      home.packages = with pkgs; [
-        (import ./qutebrowser {inherit pkgs;})
-      ];
-    })
   ]);
-
-  imports = [
-    ./waybar
-  ];
 }

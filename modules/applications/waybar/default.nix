@@ -1,4 +1,17 @@
-{ config, lib, pkgs, hostname, vars, ... }: {
+{ config, lib, pkgs, hostname, vars, ... }:
+let
+
+    scripts = rec {
+      check_rbw = (import ./scripts/check_rbw.nix {inherit pkgs;});
+      current_song = (import ./scripts/current_song.nix {inherit pkgs;});
+      mouse_battery = (import ./scripts/mouse_battery.nix {inherit pkgs;});
+      mouse_colour = (import ./scripts/mouse_colour.nix {inherit pkgs;});
+      music_panel = (import ./scripts/music_panel.nix {inherit pkgs; inherit current_song;});
+    };
+
+in
+
+{
 
     options = with lib; {
       applications = {
@@ -43,7 +56,7 @@
                     "format" = "{}";
                     "escape" = "true";
                     "interval" = 30;
-                    "exec" = "check_rbw";
+                    "exec" = "${scripts.check_rbw.outPath}/bin/check_rbw";
                 };
                 "idle_inhibitor" = {
                     "format" = "{icon}";
@@ -90,9 +103,9 @@
                         "0" = " ";
                         "charging" = "  ";
                         };
-                    "exec" = "mouse_battery";
+                    "exec" = "${scripts.mouse_battery.outPath}/bin/mouse_battery";
                     "restart-interval" = 10;
-                    "on-click" = "mouse_colour";
+                    "on-click" = "${scripts.mouse_colour.outPath}/bin/mouse_colour";
                 };
 
                 "custom/media" = {
@@ -103,7 +116,8 @@
                     "on-click-right" = "playerctl -s stop";
                     "on-scroll-up" = "playerctl -s next";
                     "on-scroll-down" = "playerctl -s previous";
-                    "exec" = "music_panel";
+                    "exec" = "${scripts.music_panel.outPath}/bin/music_panel";
+                    "restart-interval" = 10;
                 };
 
                 "pulseaudio" = {

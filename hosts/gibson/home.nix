@@ -76,9 +76,6 @@
 
   scripts = {
     enable = true;
-    waybar = {
-      enable = true;
-    };
   };
 
   applications = {
