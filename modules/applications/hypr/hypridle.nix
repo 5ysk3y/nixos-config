@@ -83,7 +83,7 @@ in
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock --immediate";
-              after_sleep_cmd = "sleep 1; pkill qpwgraph; ${undim_screen.outPath}/bin/undim_screen; hyprctl --batch 'dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp'";
+              after_sleep_cmd = "sleep 1; ${undim_screen.outPath}/bin/undim_screen; hyprctl --batch 'dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp'";
               ignore_dbus_inhibit = false;
             };
 
