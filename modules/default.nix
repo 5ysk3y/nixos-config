@@ -44,14 +44,7 @@
 
   scripts = with lib; {
     enable = mkDefault false;
-    waybar = {
-      enable = mkDefault false;
-      check_rbw = mkDefault true;
-      music_panel = mkDefault true;
-      mouse_info = mkDefault true;
-    };
     gaming = mkDefault true;
     nix = mkDefault true;
-    qutebrowser = mkDefault true;
   };
 }
