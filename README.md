@@ -1,16 +1,16 @@
 # Menu
 
-- [Introduction](#dotfiles)
+- [Introduction](#nixos-config)
 - [Applications](#applications)
 - [Installation](#installation)
 - [Screenshot](#screenshot)
 
-# dotfiles
+# NixOS Config
 **TL/DR**
 
 *This is a work-in-progress NixOS system repo! The nix-based reproducability aspect of it is unlikely to work for most other people without diving into/adjusting the code itself.*
 
-Hi there, thanks for checking out my Nix config. I'm pretty new to the OS (circa beginning of 2024), so there's like a lot that will change or move around in this repo. There are also a tonne of improvements I can make, with time, so to any Nix aficionados out there: "Be Nice" if you scrutinise my setup :D
+Hi there, thanks for checking out my Nix config. I'm pretty new to the OS (circa beginning of 2024), so there's probably a lot that will change or move around in this repo. There are also a tonne of improvements I can make, with time, so to any Nix aficionados out there: "Be Nice" if you scrutinise my setup :D
 
 My configurations namely revolve around applications using vim-style keybindings, and I tend to use Dracula theme/colour-scheme. This is (mostly) all defined declaratively using Nix. In the cases where files may contain sensitive information (e.g. gnupg private keys), I use [sops-nix](https://github.com/Mic92/sops-nix) to encrypt the data. These secrets are stored in a private repository, despite their state of encryption, as an added security layer.
 
@@ -25,12 +25,12 @@ Here are a list of the current applications I use (other config files may be als
 - *Compositor:* [Hyprland](https://github.com/hyprwm/hyprland) / [Wayland](https://gitlab.freedesktop.org/wayland/wayland)
 - *Notifications:* [mako](https://github.com/emersion/mako)
 - *Bar:* [Waybar](https://github.com/Alexays/Waybar)
-- *Menu:* [Rofi-Wayland](https://github.com/lbonn/rofi)
+- *Menu:* [Fuzzel](https://codeberg.org/dnkl/fuzzel)
 - *Player* [Cider](https://github.com/ciderapp/Cider)
 - *Passwords* [Pass](https://www.passwordstore.org/) / [Bitwarden](https://github.com/bitwarden/clients)
 - *Shell:* [Kitty](https://github.com/kovidgoyal/kitty) 
 - *Browser:* [Qutebrowser](https://github.com/qutebrowser/qutebrowser)
-- *Screenshots*: [Grimshot](https://github.com/swaywm/sway/blob/master/contrib/grimshot)
+- *Screenshots*: [Grimblast](https://github.com/hyprwm/contrib/tree/main/grimblast)
 
 Other well know software such as Discord/Signal and Wine/Mesa packages are included (as I run AMD hardware). Most other things should also be included declaratively.
 
@@ -50,6 +50,7 @@ sudo nix \
     --write-efi-boot-entries \
     --disk main /dev/sdX
 ```
+> Spoilers - this probably wont work but I'll leave it here anyway :D
 
 ***
 
