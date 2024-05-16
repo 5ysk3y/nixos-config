@@ -2,7 +2,7 @@
 
 pkgs.writeShellApplication {
     name = "nix-build-system";
-    runtimeInputs = with pkgs; [ nvd gnuawk ];
+    runtimeInputs = with pkgs; [ nvd gawk ];
     text = ''
        CONFIG="${vars.nixos-config}"
        HOME="/home/${vars.username}"
@@ -21,7 +21,7 @@ pkgs.writeShellApplication {
 
        echo "Build complete. Checking result"
        nvd diff /run/current-system $HOME/result | tee "$OUTFILE".out
-       awk -i inplace '{$0=gensub(/\s*\S+/,"",2)}1' $OUTFILE
+       awk -i inplace '{$0=gensub(/\s*\S+/,"",2)}1' "$OUTFILE"
        echo "Result has been stored in \"$HOME\"/\"$OUTFILE\". Finished"
     '';
 }
