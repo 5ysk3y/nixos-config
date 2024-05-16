@@ -6,7 +6,7 @@ let
       current_song = (import ./scripts/current_song.nix {inherit pkgs;});
       mouse_battery = (import ./scripts/mouse_battery.nix {inherit pkgs;});
       mouse_colour = (import ./scripts/mouse_colour.nix {inherit pkgs;});
-      music_panel = (import ./scripts/music_panel.nix {inherit pkgs; inherit current_song;});
+      music_panel = (import ./scripts/music_panel.nix {inherit pkgs current_song;});
     };
 
 in
