@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }: {
+{ config, lib, pkgs, vars, ... }: {
 
   options = with lib; {
     scripts = {
@@ -22,7 +22,7 @@
 
     (mkIf (config.scripts.nix) {
       home.packages = with pkgs; [
-        (import ./nix {inherit pkgs;})
+        (import ./nix {inherit pkgs; inherit vars;})
       ];
     })
   ]);
