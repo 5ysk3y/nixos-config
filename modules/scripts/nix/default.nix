@@ -1,21 +1,27 @@
-{ pkgs }:
+{ pkgs, vars }:
 
 pkgs.writeShellApplication {
-    name = "queryUpdates";
-    runtimeInputs = with pkgs; [ coreutils findutils ];
+    name = "nix-build-system";
+    runtimeInputs = with pkgs; [ nvd gnuawk ];
     text = ''
-HM_LAST=$(find /home/rickie/.local/state/nix/profiles/ -type d -o -type l 2>/dev/null | sort -h | tail -2 | head -1)
-HM_CURRENT="/home/rickie/.local/state/nix/profiles/home-manager"
+       CONFIG="${vars.nixos-config}"
+       HOME="/home/${vars.username}"
+       OUTFILE="changes_$(date +%d-%m@%T)"
 
-SYSTEM_LAST=$(find /nix/var/nix/profiles/ -type d -o -type l 2>/dev/null | sort -h | tail -2 | head -1)
-SYSTEM_CURRENT="/nix/var/nix/profiles/system"
+       echo "Welcome!"
+       echo "Backing up flake lock file"
+       cp $CONFIG/flake.lock $CONFIG/flake.lock.bak
+       echo "Done"
+       cd $CONFIG
+       nix flake update
+       echo "Flake updated"
+       cd $HOME
+       echo "Beginning build. This may take some time."
+       sudo nixos-rebuild --flake $CONFIG build --option eval-cache false --show-trace
 
-echo "Updated system pkgs from the last rebuild:"
-echo ""
-nix store diff-closures "$SYSTEM_LAST" "$SYSTEM_CURRENT"
-echo ""
-echo "Updated home-manager pkgs from the last rebuild:"
-echo ""
-nix store diff-closures "$HM_LAST" "$HM_CURRENT"
+       echo "Build complete. Checking result"
+       nvd diff /run/current-system $HOME/result | tee "$OUTFILE".out
+       awk -i inplace '{$0=gensub(/\s*\S+/,"",2)}1' $OUTFILE
+       echo "Result has been stored in \"$HOME\"/\"$OUTFILE\". Finished"
     '';
 }
