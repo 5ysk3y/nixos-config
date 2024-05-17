@@ -414,9 +414,9 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
           src = pkgs.fetchFromGitHub {
             owner = "ValveSoftware";
             repo = "gamescope";
-            rev = "a559b04";
+            rev = "751e728";
             fetchSubmodules = true;
-            hash = "sha256-GGXCAZxBsDHe5URMG8+iLAS6aGubOeM3C18cloAXdxQ=";
+            hash = "sha256-WQddB3lR2zIJW6rNn2nrkA1sJuFsm9rFfzCQN1EWaj4=";
           };
         });
       };
