@@ -6,7 +6,7 @@ pkgs.writeShellApplication {
     text = ''
        CONFIG="${vars.nixos-config}"
        HOME="/home/${vars.username}"
-       OUTFILE="changes_$(date +%d-%m@%T)"
+       OUTFILE="changes_$(date +%d-%m@%T).out"
 
        echo "Welcome!"
        echo "Backing up flake lock file"
@@ -17,11 +17,18 @@ pkgs.writeShellApplication {
        echo "Flake updated"
        cd $HOME
        echo "Beginning build. This may take some time."
+       echo ""
        sudo nixos-rebuild --flake $CONFIG build --option eval-cache false --show-trace
 
-       echo "Build complete. Checking result"
-       nvd diff /run/current-system $HOME/result | tee "$OUTFILE".out
+       echo ""
+       echo "Build complete. Providing result:"
+       echo ""
+       nvd diff /run/current-system $HOME/result | tee "$OUTFILE"
+
+       #Cleanup
        awk -i inplace '{$0=gensub(/\s*\S+/,"",2)}1' "$OUTFILE"
+       rm $HOME/result
+
        echo "Result has been stored in \"$HOME\"/\"$OUTFILE\". Finished"
     '';
 }
