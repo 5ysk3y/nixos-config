@@ -86,6 +86,7 @@
       libmodule
       lm_sensors
       lxqt.lxqt-policykit
+      nix-prefetch-github
       openssl
       pulseaudio
       v4l-utils
@@ -419,13 +420,13 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
         });
 
         gamescope = pkgs.gamescope.overrideAttrs (finalAttrs: previousAttrs: {
-          version = "3.14.17";
+          version = "3.14.18";
           src = pkgs.fetchFromGitHub {
             owner = "ValveSoftware";
             repo = "gamescope";
             rev = "refs/tags/${finalAttrs.version}";
             fetchSubmodules = true;
-            hash = "sha256-Cp/CwVWNCNzE8LQsjK06nNrsoc3KehEkmdxb8eGtn98=";
+            hash = "sha256-XcefR0wiDHQY7wMX+LQTEntffi2RdMW8m2HNQMz035A=";
           };
         });
       };
