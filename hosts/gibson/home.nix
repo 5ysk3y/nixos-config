@@ -65,7 +65,6 @@
   confSymlinks = {
     enable = true;
     configs = {
-      cider = true;
       jellyfinShim = true;
       openrgb = true;
       qpwgraph = true;
