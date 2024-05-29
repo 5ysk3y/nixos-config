@@ -28,7 +28,6 @@
   confSymlinks = with lib; {
     enable = mkDefault true;
     configs = {
-      cider = mkDefault false;
       gnupg = mkDefault true;
       jellyfinShim = mkDefault false;
       openrgb = mkDefault false;

@@ -23,10 +23,6 @@ options = {
                 type = lib.types.bool;
             };
 
-            cider = lib.mkOption {
-                type = lib.types.bool;
-            };
-
             webcord = lib.mkOption {
                 type = lib.types.bool;
             };
@@ -77,11 +73,6 @@ config = lib.mkIf config.confSymlinks.enable {
 
   home.file."${config.xdg.configHome}/WebCord" = lib.mkIf config.confSymlinks.configs.webcord {
     source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/WebCord";
-    recursive = true;
-  };
-
-  home.file."${config.xdg.configHome}/Cider" = lib.mkIf config.confSymlinks.configs.cider {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/Cider";
     recursive = true;
   };
 
