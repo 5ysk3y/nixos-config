@@ -123,7 +123,7 @@ in
                 "pulseaudio" = {
                     "format" = "{icon} {volume}%";
                     "format-muted" = " Muted";
-                    "ignored-sinks" = ["Starship/Matisse HD Audio Controller Analog Stereo" "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)"];
+                    "ignored-sinks" = ["Starship/Matisse HD Audio Controller Analog Stereo" "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)" "Scarlett Solo USB Headphones / Line 1-2"];
                     "scroll-step" = 10;
                     "format-icons" = {
                         "default" = ["" "" ""];
@@ -140,6 +140,18 @@ in
 
             
             style = ''
+                @define-color background-darker rgba(30, 31, 41, 230);
+                @define-color background #282a36;
+                @define-color selection #44475a;
+                @define-color foreground #f8f8f2;
+                @define-color comment #6272a4;
+                @define-color cyan #8be9fd;
+                @define-color green #50fa7b;
+                @define-color orange #ffb86c;
+                @define-color pink #ff79c6;
+                @define-color purple #bd93f9;
+                @define-color red #ff5555;
+                @define-color yellow #f1fa8c;
                 * {
                     /* `otf-font-awesome` is required to be installed for icons */
                     font-family: noto sans mono, FontAwesome6Free, SymbolsNerdFont;
@@ -159,12 +171,8 @@ in
                 }
 
                 window#waybar {
-                    background-color: rgba(43, 48, 59, 0.9);
-                    /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
-                    color: #ffffff;
-                    transition-property: background-color;
-                    transition-duration: .5s;
-                    border-radius: 0px;
+                    background: @background-darker;
+                    color: white;
                 }
 
                 window#waybar.hidden {
@@ -238,7 +246,7 @@ in
                 }
 
                 #clock {
-                    background-color: #64727D;
+                    background-color: @pink;
                 }
 
                 label {
@@ -258,12 +266,12 @@ in
                 }
 
                 #cpu {
-                    background-color: #50fa7b;
+                    background-color: @yellow;
                     color: #000000;
                 }
 
                 #memory {
-                    background-color: #6272a4;
+                    background-color: @purple;
                     color: #FFFFFF;
                 }
 
@@ -272,13 +280,13 @@ in
                 }
 
                 #pulseaudio {
-                    background-color: #f1fa8c;
+                    background-color: @green;
                     color: #000000;
                 }
 
                 #custom-volume {
-                    background-color: #f1fa8c;
-                    color: #000000;
+                    background-color: @background;
+                    color: white;
                     padding: 5 6 5 6;
                     margin-left: 3px;
                     margin-right: 3px;
@@ -304,12 +312,12 @@ in
                 }
 
                 #temperature {
-                    background-color: #ffb86c;
+                    background-color: @orange;
                     color: #000000;
                 }
 
                 #temperature.critical {
-                    background-color: #eb4d4b;
+                    background-color: @red;
                 }
 
                 #idle_inhibitor {

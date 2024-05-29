@@ -80,6 +80,7 @@ in
             "<Ctrl+Shift+i>:" = "devtools";
             "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${qute-rbw.outPath}/bin/qute-rbw";
             "xb" = "config-cycle statusbar.hide";
+            "er" = "spawn -u readability";
           };
 
           insert = {
