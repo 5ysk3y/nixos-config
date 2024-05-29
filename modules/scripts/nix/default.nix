@@ -29,6 +29,6 @@ pkgs.writeShellApplication {
        awk -i inplace '{$0=gensub(/\s*\S+/,"",2)}1' "$OUTFILE"
        rm $HOME/result
 
-       echo "Result has been stored in \"$HOME\"/\"$OUTFILE\". Finished"
+       echo "Result has been stored in $HOME/$OUTFILE. Finished"
     '';
 }
