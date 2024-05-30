@@ -1,4 +1,4 @@
-{ config, lib, pkgs, hostname, ... }:
+{ config, lib, pkgs, inputs, hostname, ... }:
 
 let
 
@@ -80,11 +80,13 @@ in
       services = {
         hypridle = with pkgs; {
           enable = true;
+          package = inputs.hypridle.packages.${pkgs.system}.hypridle;
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock --immediate";
               after_sleep_cmd = "sleep 1; ${undim_screen.outPath}/bin/undim_screen; hyprctl --batch 'dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp'";
               ignore_dbus_inhibit = false;
+              ignore_systemd_inhibit = false;
             };
 
             listener = [
