@@ -9,16 +9,23 @@ pkgs.writeShellApplication {
        OUTFILE="changes_$(date +%d-%m@%T).out"
 
        echo "Welcome!"
-       echo "Backing up flake lock file"
-       cp $CONFIG/flake.lock $CONFIG/flake.lock.bak
-       echo "Done"
+       if [ ! -f $CONFIG/flake.lock.bak ]; then
+         echo "Backing up flake lock file"
+         cp $CONFIG/flake.lock $CONFIG/flake.lock.bak
+         echo "Done"
+         echo ""
+       else
+         echo "WARNING: flake.lock backup already exists, not backing up."
+         echo ""
+       fi
        cd $CONFIG
        nix flake update
+       echo ""
        echo "Flake updated"
        cd $HOME
        echo "Beginning build. This may take some time."
        echo ""
-       sudo nixos-rebuild --flake $CONFIG build --option eval-cache false --show-trace
+       systemd-inhibit --no-pager --no-legend --mode=block --who='${vars.username}' --why='NixOS System Building' sudo nixos-rebuild --flake $CONFIG build --option eval-cache false --show-trace
 
        echo ""
        echo "Build complete. Providing result:"
