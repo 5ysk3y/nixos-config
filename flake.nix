@@ -95,7 +95,7 @@ nixosConfigurations = with inputs; {
             config.allowUnfree = true;
           };
           hostname = "gibson";
-          inherit system inputs vars doomemacs;
+          inherit system inputs vars;
         };
 
       modules = with specialArgs; [
