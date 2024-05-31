@@ -1,4 +1,4 @@
-{ config, lib, pkgs, pkgs-stable, inputs, doomemacs, vars, hostname, ... }:
+{ config, lib, pkgs, pkgs-stable, pkgs-old, inputs, doomemacs, vars, hostname, ... }:
 
 {
   home = {
@@ -21,14 +21,12 @@
     packages = with pkgs; [
         bat
         bc
-        # Bitwarden = pkgs.stable until they fix this
-        # Disgusting bug: https://github.com/bitwarden/clients/issues/8695
-        pkgs-stable.bitwarden
+        pkgs-old.bitwarden
         cider
         dracula-theme
         fontconfig
         glib
-        grimblast
+        pkgs-old.grimblast
         heroic
         jellyfin-mpv-shim
         jq

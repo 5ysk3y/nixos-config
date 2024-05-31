@@ -10,6 +10,10 @@
 
     # nixPkgs Stable
     nixpkgs-stable = {
+      url = "github:nixos/nixpkgs/24.05";
+    };
+
+    nixpkgs-old = {
       url = "github:nixos/nixpkgs/23.11";
     };
 
@@ -63,7 +67,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-stable, emacs-overlay, hyprlock, hypridle, home-manager, doomemacs, sops-nix, ... } @inputs:
+  outputs = { self, ... } @inputs:
 let
   vars = rec {
     username = "rickie";
@@ -71,11 +75,13 @@ let
     syncthingPath = "/home/${username}/Sync";
     secretsPath = builtins.toString inputs.nix-secrets;
   };
-
 in
 {
-nixosConfigurations = {
-    nixpkgs.overlays = [ (import self.inputs.emacs-overlay) ];
+nixosConfigurations = with inputs; {
+    nixpkgs.overlays = [
+      (import self.inputs.emacs-overlay)
+    ];
+
     # Begin Main Machine (Gibson)
     "gibson" = nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
@@ -84,23 +90,23 @@ nixosConfigurations = {
             system = system;
             config.allowUnfree = true;
           };
+          pkgs-old = import nixpkgs-old {
+            system = system;
+            config.allowUnfree = true;
+          };
           hostname = "gibson";
-          inherit system inputs vars;
+          inherit system inputs vars doomemacs;
         };
 
-      modules = [
-        ./hosts/gibson/configuration.nix
+      modules = with specialArgs; [
+        ./hosts/${hostname}/configuration.nix
+        (import ./hosts/${hostname}/overlays)
         sops-nix.nixosModules.sops # System-wide sops-nix
 
         # Begin Home Manager Setup
-        home-manager.nixosModules.home-manager {
+        home-manager.nixosModules.home-manager rec {
           home-manager.extraSpecialArgs = {
-            pkgs-stable = import nixpkgs-stable {
-              system = system;
-              config.allowUnfree = true;
-            };
-          hostname = "gibson";
-            inherit inputs system doomemacs vars;
+            inherit inputs vars doomemacs hostname pkgs-stable pkgs-old;
           };
 
           home-manager.useGlobalPkgs = true;
@@ -109,9 +115,9 @@ nixosConfigurations = {
             inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
           ];
 
-          home-manager.users.rickie = {
+          home-manager.users.rickie = with specialArgs; {
             imports = [
-              ./hosts/gibson/home.nix
+              ./hosts/${hostname}/home.nix
             ];
           };
 
@@ -127,23 +133,17 @@ nixosConfigurations = {
           system = system;
           config.allowUnfree = true;
         };
-
+        hostname = "macbook";
         inherit inputs system vars;
       };
 
-      modules = [
-        ./hosts/macbook/configuration.nix
+      modules = with specialArgs; [
+        ./hosts/${hostname}/configuration.nix
 
         # Begin Home Manager Setup
         home-manager.nixosModules.home-manager {
           home-manager.extraSpecialArgs = {
-            pkgs-stable = import nixpkgs-stable {
-              system = system;
-              config.allowUnfree = true;
-            };
-
-
-            inherit inputs doomemacs vars;
+            inherit inputs vars doomemacs hostname pkgs-stable;
           };
 
           home-manager.useGlobalPkgs = true;
@@ -152,9 +152,9 @@ nixosConfigurations = {
             inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
           ];
 
-          home-manager.users.rickie = {
+          home-manager.users.rickie = with specialArgs; {
             imports = [
-              ./hosts/macbook/home.nix
+              ./hosts/${hostname}/home.nix
             ];
           };
 
