@@ -1,6 +1,6 @@
 # Gibson NixOS Main Configuration
 
-{ config, lib, pkgs, pkgs-stable, inputs, hostname, vars, ... }:
+{ config, lib, pkgs, inputs, hostname, vars, ... }:
 
 { imports =
     [ # Include the results of the hardware scan.
