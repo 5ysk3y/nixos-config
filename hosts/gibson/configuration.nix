@@ -110,6 +110,12 @@
     };
   };
 
+  xdg = {
+    portal = {
+      enable = true;
+    };
+  };
+
   # Security Ruleset
   security = {
     rtkit = {
