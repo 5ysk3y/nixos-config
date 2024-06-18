@@ -301,6 +301,7 @@ ignore-timeout=1";
 
  # XDG Spec Handling
   xdg = {
+    enable = true;
     portal = {
       enable = true;
       config = {
