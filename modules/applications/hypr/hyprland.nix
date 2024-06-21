@@ -79,7 +79,8 @@
           }
 
           master {
-              new_is_master = false
+              new_status = master
+              new_on_top = true
           }
 
           gestures {
