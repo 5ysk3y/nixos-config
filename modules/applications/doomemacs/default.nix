@@ -6,7 +6,7 @@
 #  1. Official: <https://www.gnu.org/software/emacs/tour/index.html>
 #  2. Doom Emacs: <https://github.com/doomemacs/doomemacs/blob/master/docs/index.org>
 #
-{ config, lib, pkgs, doomemacs, ... }:
+{ config, lib, pkgs, vars, doomemacs, ... }:
 with lib; let
 
   envExtra = ''
@@ -52,18 +52,13 @@ in {
 
       programs.zsh.envExtra = envExtra;
 
-      #xdg.configFile."doom" = {
-      #  source = ./doom;
-      #  force = true;
-      #};
-
       home.file."${config.xdg.configHome}/doom" = {
         source = ./doom;
         recursive = true;
       };
 
-      home.activation.installDoomEmacs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-         ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=rickie:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
+      home.activation.installDoomEmacs = with vars; lib.hm.dag.entryAfter ["writeBoundary"] ''
+         ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
       '';
     }
 
