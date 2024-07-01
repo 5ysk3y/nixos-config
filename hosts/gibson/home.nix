@@ -32,7 +32,6 @@
         jq
         keyutils
         krita
-        lutris
         mpvpaper
         neofetch
         obs-cmd

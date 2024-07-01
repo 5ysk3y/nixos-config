@@ -13,19 +13,6 @@
     })
 
     (final: prev: {
-      gamescope = prev.gamescope.overrideAttrs (finalAttrs: previousAttrs: {
-        version = "3.14.18";
-        src = prev.fetchFromGitHub {
-          owner = "ValveSoftware";
-          repo = "gamescope";
-          rev = "refs/tags/${finalAttrs.version}";
-          fetchSubmodules = true;
-          hash = "sha256-XcefR0wiDHQY7wMX+LQTEntffi2RdMW8m2HNQMz035A=";
-        };
-      });
-    })
-
-    (final: prev: {
       steam = prev.steam.override {
         extraPkgs = pkgs: with pkgs; [
           xorg.libXcursor
