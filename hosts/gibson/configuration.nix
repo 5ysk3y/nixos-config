@@ -411,9 +411,10 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
       };
     };
 
-    graphics = {
-      enable = true;
-      enable32Bit = true;
+    amdgpu = {
+      opencl = {
+        enable = true;
+      };
     };
 
     bluetooth = {
