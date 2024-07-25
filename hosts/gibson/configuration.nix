@@ -141,13 +141,15 @@
           hyprlock = {
             u2fAuth = true;
           };
-        };
+      };
 
-        u2f = {
-          enable = true;
+      u2f = {
+        enable = true;
+        control = "sufficient";
+        settings = {
           cue = true;
-          control = "sufficient";
           authFile = config.sops.secrets."system/pam/yubikeyPub".path;
+        };
       };
     };
 
