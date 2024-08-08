@@ -53,10 +53,14 @@
               col.active_border = 0xffbd93f9
               col.inactive_border = 0xff44475a
               no_border_on_floating = true
-              #cursor_inactive_timeout = 5
 
               apply_sens_to_raw = 0 # whether to apply the sensitivity to raw input (e.g. used by games where you aim using your mouse)
               layout = master
+          }
+
+          cursor {
+            default_monitor = DP-1
+            inactive_timeout = 5
           }
 
           decoration {
@@ -124,6 +128,8 @@
           $WS8 = 8-ext2
           $WS9 = 9-ext3
           $WS0 = 10-ext4
+
+          env = HYPRCURSOR_SIZE,50
 
           $HYPRLAND_CONFIG_PATH = /home/rickie/.config/hypr
 
