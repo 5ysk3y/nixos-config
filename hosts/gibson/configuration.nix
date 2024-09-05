@@ -91,7 +91,7 @@
       pulseaudio
       v4l-utils
       vim 
-      wineWowPackages.unstableFull
+      wineWowPackages.stagingFull
       xdg-utils
       ];
 
