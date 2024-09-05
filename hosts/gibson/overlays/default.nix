@@ -12,6 +12,21 @@
       });
     })
 
+
+    (final: prev: {
+      gamescope = prev.gamescope.overrideAttrs (finalAttrs: previousAttrs: {
+        version = "3.15.2";
+        buildInputs = previousAttrs.buildInputs ++ [ pkgs.lcms2 ];
+        src = prev.fetchFromGitHub {
+          owner = "ValveSoftware";
+          repo = "gamescope";
+          rev = "refs/tags/${finalAttrs.version}";
+          fetchSubmodules = true;
+          hash = "sha256-g6H68dYMmpQYlwhZ6b84yY/qbAP18iNrmYOWf9rL5gc=";
+        };
+      });
+    })
+
     (final: prev: {
       steam = prev.steam.override {
         extraPkgs = pkgs: with pkgs; [
