@@ -14,7 +14,6 @@
 
     sessionVariables = {
       SOPS_AGE_KEY_FILE = "${vars.syncthingPath}/Private/Keys/sops-nix";
-      EMAIL = "$(cat ${config.sops.secrets."services/git/email".path} )";
       NIXOS_OZONE_WL = 1;
     };
 
@@ -129,6 +128,8 @@ vim() {
 }
 
 bindkey -M viins '\e.' insert-last-word
+
+export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
       '';
     };
   # User shell - END #
