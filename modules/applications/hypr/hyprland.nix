@@ -117,6 +117,10 @@
                 workspace_center_on = 1
           }
 
+          xwayland {
+                  enabled = false
+          }
+
           $WS1 = 1-main
           $WS2 = 2-web
           $WS3 = 3-game
