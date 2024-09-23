@@ -391,7 +391,7 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
      automatic = true;
      dates = "weekly";
      persistent = true;
-     options = "--delete-older-then 7d";
+     options = "--delete-older-than 7d";
    };
   };
 
