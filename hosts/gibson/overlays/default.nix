@@ -15,14 +15,14 @@
 
     (final: prev: {
       gamescope = prev.gamescope.overrideAttrs (finalAttrs: previousAttrs: {
-        version = "3.15.6";
+        version = "3.15.11";
         nativeBuildInputs = previousAttrs.nativeBuildInputs ++ [ pkgs.git ];
         src = prev.fetchFromGitHub {
           owner = "ValveSoftware";
           repo = "gamescope";
           rev = "refs/tags/${finalAttrs.version}";
           fetchSubmodules = true;
-          hash = "sha256-MSW949T0UL4p3XF5yhpwY6sMCSGQ9xA3LO5syu2C8tA=";
+          hash = "sha256-O2pxaPDwEr9ko7Zplv65qRUDzIk1Q54Q7Rgs94VkTII=";
         };
       });
     })
