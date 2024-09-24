@@ -232,7 +232,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
 
     kitty = {
       enable = true;
-      theme = "Dracula";
+      themeFile = "Dracula";
       font = {
         name = "Noto Sans Mono";
         size = 10.0;
