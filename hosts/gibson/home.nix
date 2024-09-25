@@ -161,24 +161,6 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
 
     rbw = {
       enable = true;
-      package = pkgs.rbw.override (super: {
-          rustPlatform =
-            super.rustPlatform
-            // {
-              buildRustPackage = args:
-                super.rustPlatform.buildRustPackage (args
-                  // {
-                    version = "1.12.1";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "doy";
-                      repo = "rbw";
-                      rev = "1.12.1";
-                      hash = "sha256-+1kalFyhk2UL+iVzuFLDsSSTudrd4QpXw+3O4J+KsLc=";
-                    };
-                    cargoHash = "sha256-cKbbsDb449WANGT+x8APhzs+hf5SR3RBsCBWDNceRMA=";
-                  });
-            };
-        });
     };
 
     mpv = {
