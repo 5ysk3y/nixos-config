@@ -46,7 +46,7 @@
   users.users."${vars.username}" = {
     isNormalUser = true; 
     description = "${vars.username}";
-    extraGroups = [ "networkmanager" "wheel" "audio" "clightd" "libvirtd" "gamemode" ]; 
+    extraGroups = [ "networkmanager" "wheel" "audio" "video" "clightd" "libvirtd" "gamemode" ];
 #   packages = with pkgs; [    ];
 #   USER PKGS MANAGED IN HOME.NIX    
     shell = pkgs.zsh;
@@ -362,7 +362,6 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
         enableSSHSupport = true;
       };
     };
-
   };
 
   nix = {
