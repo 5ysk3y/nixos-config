@@ -10,8 +10,9 @@
   "video=DP-2:1920x1080@144"
   "video=HDMI-A-2:1920x1080@60"
   "acpi_enforce_resources=lax"
+  "acpi_backlight=native"
 ];
-  boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.kernelPackages = pkgs.linuxPackages_xanmod;
   boot.kernelModules = [ "kvm-amd" "i2c-dev" "i2c-piix4" "it87" "k10temp" ];
   boot.loader.systemd-boot.enable = true;  
   boot.loader.efi.canTouchEfiVariables = true;
