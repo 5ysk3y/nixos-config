@@ -15,6 +15,7 @@
     sessionVariables = {
       SOPS_AGE_KEY_FILE = "${vars.syncthingPath}/Private/Keys/sops-nix";
       NIXOS_OZONE_WL = 1;
+      QT_SCALE_FACTOR_ROUNDING_POLICY = "RoundPreferFloor";
     };
 
     packages = with pkgs; [
