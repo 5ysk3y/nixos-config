@@ -81,15 +81,17 @@ config = lib.mkIf config.confSymlinks.enable {
     recursive = true;
   };
 
-  home.file."${config.xdg.configHome}/qutebrowser/dracula" = lib.mkIf config.programs.qutebrowser.enable {
+  home.file."${config.xdg.configHome}/qutebrowser/dracula" = lib.mkIf config.applications.qutebrowser {
     source = draculaPath;
     recursive = true;
   };
 
   ## Config Files
-
+  
   ## Rofi-Wayland; for rofi-rbw qutebrowser script
-  home.file."${config.xdg.configHome}/rofi/config.rasi".text = lib.mkIf config.programs.qutebrowser.enable ''
+  home.file."${config.xdg.configHome}/rofi/config.rasi" = {
+      enable = lib.mkIf config.applications.qutebrowser true;
+      text = ''
     * {
         /* Dracula theme colour palette */
         drac-bgd: #282a36;
@@ -231,6 +233,7 @@ config = lib.mkIf config.confSymlinks.enable {
         text-color: inherit;
     }
     '';
+  };
 
   ## QPWGraph
 
