@@ -21,7 +21,7 @@
     packages = with pkgs; [
         bat
         bc
-        pkgs-old.bitwarden
+        bitwarden
         cider
         dracula-theme
         fontconfig
@@ -41,7 +41,6 @@
         protonup-qt
         pwvucontrol
         qpwgraph
-        qutebrowser
         restic
         rivalcfg
         rofi-rbw-wayland
@@ -209,7 +208,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
         pkgs.obs-studio-plugins.obs-vaapi
         pkgs.obs-studio-plugins.obs-pipewire-audio-capture
         pkgs.obs-studio-plugins.obs-scale-to-sound
-        pkgs.obs-studio-plugins.obs-vkcapture
+        #pkgs.obs-studio-plugins.obs-vkcapture
       ];
     };
 
