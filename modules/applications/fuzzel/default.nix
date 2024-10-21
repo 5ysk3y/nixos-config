@@ -2,7 +2,7 @@
 
     options = with lib; {
       applications = {
-          fuzzel = mkEnableOption "Enables rofi with custom configs";
+          fuzzel = mkEnableOption "Enables fuzzel with custom configs";
       };
     };
 
