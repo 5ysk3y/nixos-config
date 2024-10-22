@@ -1,4 +1,4 @@
-{ config, lib, pkgs, hostname, ... }:
+{ config, lib, pkgs, inputs, hostname, ... }:
 
 {
 
@@ -22,6 +22,7 @@
             general = {
               grace = 30;
               hide_cursor = true;
+              ignore_empty_input = true;
             };
           };
         };
@@ -31,6 +32,7 @@
     (mkIf (config.applications.hypr.apps.hyprlock && hostname == "gibson") {
       programs = {
         hyprlock = {
+        package = inputs.hyprlock.packages.${pkgs.system}.hyprlock;
           settings = {
             background = [
               {
@@ -75,7 +77,7 @@
       };
     })
 
-    (mkIf (config.applications.hypr.apps.hyprlock && hostname == "gibson") {
+    (mkIf (config.applications.hypr.apps.hyprlock && hostname == "macbook") {
       programs = {
         hyprlock = {
           settings = {
