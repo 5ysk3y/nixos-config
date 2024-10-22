@@ -72,8 +72,8 @@
         wantedBy = [ "syncthing.service" ];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
         };
-      };
     };
+  };
 
   # List packages installed in system profile. To search, run: $ nix search wget
   environment = {
