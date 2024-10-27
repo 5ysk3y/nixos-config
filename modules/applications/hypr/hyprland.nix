@@ -132,7 +132,7 @@
           $WS9 = 9-ext3
           $WS0 = 10-ext4
 
-          $HYPRLAND_CONFIG_PATH = /home/rickie/.config/hypr
+          $HYPRLAND_CONFIG_PATH = /home/${vars.username}/.config/hypr
 
           source = ${vars.nixos-config}/hosts/${hostname}/applications/hypr/hyprland.conf
            '';
