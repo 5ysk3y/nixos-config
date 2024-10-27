@@ -289,7 +289,7 @@ polkit.addRule(function(action, subject) {
 
     udev = {
       enable = true;
-      packages = with pkgs; [ yubikey-personalization libu2f-host ];
+      packages = with pkgs; [ yubikey-manager yubikey-personalization libu2f-host ];
       extraRules =
       '' 
 # SteelSeries Aerox 3
@@ -369,7 +369,7 @@ ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID
      "nixos-config=${vars.nixos-config}/hosts/${hostname}/configuration.nix"
      "nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels"
    ];
-   package = pkgs.nixFlakes;
+   package = pkgs.nixVersions.latest;
    extraOptions = ''
      experimental-features = nix-command flakes
    '';
