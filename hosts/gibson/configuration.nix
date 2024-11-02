@@ -5,7 +5,6 @@
 { imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./boot/bootloader.nix
     ];
 
   networking.hostName = "${hostname}"; # Define your hostname.
@@ -46,7 +45,7 @@
   users.users."${vars.username}" = {
     isNormalUser = true; 
     description = "${vars.username}";
-    extraGroups = [ "networkmanager" "wheel" "audio" "video" "clightd" "libvirtd" "gamemode" ];
+    extraGroups = [ "networkmanager" "wheel" "audio" "i2c" "clightd" "libvirtd" "gamemode" ];
 #   packages = with pkgs; [    ];
 #   USER PKGS MANAGED IN HOME.NIX    
     shell = pkgs.zsh;
@@ -308,6 +307,9 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1838", MODE="0666"
 SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTR{index}=="0", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl -d $devnode -c tilt_absolute=20000 -c zoom_absolute=150"
 
 ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID}=="1050", ENV{ID_VENDOR}=="Yubico", RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
+
+# Backlight control
+KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       '';
     };
 
