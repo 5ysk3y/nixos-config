@@ -20,7 +20,6 @@
 
     packages = with pkgs; [
         bat
-        bc
         bitwarden
         cider
         dracula-theme
