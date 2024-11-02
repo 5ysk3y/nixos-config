@@ -4,22 +4,23 @@ let
 
   dim_screen = pkgs.writeShellApplication {
     name = "dim_screen";
-    runtimeInputs = with pkgs; [ dbus hyprland ];
+    runtimeInputs = with pkgs; [ ddcutil hyprland ];
     text = ''
 getMonitorSerials() {
-   busctl call org.clightd.clightd /org/clightd/clightd/Backlight2 org.clightd.clightd.Backlight2 Get  | grep -o '"[^"]\+"' | sed 's/"//g'
+   ddcutil detect | grep Serial | awk '{print $3}'
 }
 
 checkBrightness() {
-     busctl call org.clightd.clightd /org/clightd/clightd/Backlight org.clightd.clightd.Backlight Get s "$1" | awk '{print $3}' | bc
+     ddcutil --sn="$1" getvcp 0x10 | awk -F"," '{print $1}' | grep -o '[0-9]\+' | tail -n1
 }
 
 dimScreen() {
     for s in $(getMonitorSerials); do
     BRIGHTNESS=$(checkBrightness "$s")
-      while [[ $BRIGHTNESS != 0 ]]
+      while [[ $BRIGHTNESS != "10" ]]
       do
-          busctl call org.clightd.clightd /org/clightd/clightd/Backlight org.clightd.clightd.Backlight SetAll d\(bdu\)s 0 true 0 0 NULL
+          ddcutil --sn="$s" setvcp 0x10 10
+
           BRIGHTNESS=$(checkBrightness "$s")
       done
     wait
@@ -37,19 +38,21 @@ hyprctl dispatch -- exec makoctl mode -s idle
     runtimeInputs = with pkgs; [ dbus gnugrep hyprland ];
     text = ''
 getMonitorSerials() {
-   busctl call org.clightd.clightd /org/clightd/clightd/Backlight2 org.clightd.clightd.Backlight2 Get  | grep -o '"[^"]\+"' | sed 's/"//g'
+   ddcutil detect | grep Serial | awk '{print $3}'
 }
 
 checkBrightness() {
-     busctl call org.clightd.clightd /org/clightd/clightd/Backlight org.clightd.clightd.Backlight Get s "$1" | awk '{print $3}' | bc
+     ddcutil --sn="$1" getvcp 0x10 | awk -F"," '{print $1}' | grep -o '[0-9]\+' | tail -n1
 }
+
 
 undimScreen() {
     for s in $(getMonitorSerials); do
     BRIGHTNESS=$(checkBrightness "$s")
-    while [[ $BRIGHTNESS != .8 ]]
+      while [[ $BRIGHTNESS != "80" ]]
       do
-          busctl call org.clightd.clightd /org/clightd/clightd/Backlight org.clightd.clightd.Backlight SetAll d\(bdu\)s 0.8 true 0 0 NULL
+          ddcutil --sn="$s" setvcp 0x10 80
+
           BRIGHTNESS=$(checkBrightness "$s")
       done
     wait
