@@ -9,19 +9,36 @@
     ];
 
   boot = {
+    kernelPackages = pkgs.linuxPackages_xanmod;
+    kernelModules = [ "kvm-amd" "amdgpu" "i2c-dev" "ddcci_backlight" "i2c-piix4" "it87" "k10temp" ];
+    kernelParams = [
+      "video=DP-1:2560x1440@144"
+      "video=DP-2:1920x1080@144"
+      "video=HDMI-A-2:1920x1080@60"
+      "acpi_enforce_resources=lax"
+    ];
+    extraModulePackages = with config.boot.kernelPackages; [ ddcci-driver ];
+    loader = {
+      systemd-boot = {
+        enable = true;
+      };
+      efi = {
+        canTouchEfiVariables = true;
+      };
+    };
     initrd = {
       luks = {
         devices = {
           "luks-ff1a20da-b20b-4dbb-9d0d-1471a4bb141f" = {
             device = "/dev/disk/by-uuid/ff1a20da-b20b-4dbb-9d0d-1471a4bb141f";
           };
+          "luks-13479742-2586-406b-9016-048d6937f0b7" = {
+            device = "/dev/disk/by-uuid/13479741-2586-406b-9016-048d6937f0b7";
+          };
         };
       };
-      kernelModules = [ ];
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "sd_mod" ];
     };
-    kernelModules = [ "kvm-amd" ];
-    extraModulePackages = [ ];
     resumeDevice = "/dev/disk/by-uuid/698a5b6d-64a8-49b5-956b-e84bfb809bb6";
   };
 
