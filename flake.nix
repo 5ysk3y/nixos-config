@@ -10,11 +10,11 @@
 
     # nixPkgs Stable
     nixpkgs-stable = {
-      url = "github:nixos/nixpkgs/24.05";
+      url = "github:nixos/nixpkgs/nixos-24.11";
     };
 
     nixpkgs-old = {
-      url = "github:nixos/nixpkgs/23.11";
+      url = "github:nixos/nixpkgs/nixos-24.05";
     };
 
     # Other Stuff
