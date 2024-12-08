@@ -1,5 +1,13 @@
 { config, lib, pkgs, inputs, vars, hostname, ... }:
 
+let
+
+  scripts = rec {
+      undim_screen = (import ./scripts/undim_screen.nix {inherit pkgs;});
+    };
+
+in
+
 {
 
   options = with lib; {
@@ -132,6 +140,8 @@
           $WS0 = 10-ext4
 
           $HYPRLAND_CONFIG_PATH = /home/${vars.username}/.config/hypr
+
+          exec-once = "${scripts.undim_screen.outPath}/bin/undim_screen"
 
           source = ${vars.nixos-config}/hosts/${hostname}/applications/hypr/hyprland.conf
            '';
