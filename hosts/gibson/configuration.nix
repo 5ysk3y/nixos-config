@@ -93,7 +93,6 @@
       i2c-tools
       libmodule
       lm_sensors
-      lxqt.lxqt-policykit
       nix-prefetch-github
       openssl
       pulseaudio
