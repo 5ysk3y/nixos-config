@@ -32,7 +32,6 @@
     (mkIf (config.applications.hypr.apps.hyprlock && hostname == "gibson") {
       programs = {
         hyprlock = {
-        package = inputs.hyprlock.packages.${pkgs.system}.hyprlock;
           settings = {
             background = [
               {
