@@ -1,6 +1,6 @@
 # Gibson NixOS Main Configuration
 
-{ config, lib, pkgs, inputs, hostname, vars, ... }:
+{ config, lib, pkgs, pkgs-stable, inputs, hostname, vars, ... }:
 
 { imports =
     [ # Include the results of the hardware scan.
@@ -54,8 +54,8 @@
   };
 
   fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "NerdFontsSymbolsOnly" ]; })
     (google-fonts.override { fonts = [ "Silkscreen" ]; })
+    nerd-fonts.symbols-only
     hack-font
     noto-fonts
     tamzen
@@ -71,6 +71,15 @@
         wantedBy = [ "syncthing.service" ];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
         };
+      "set-cpu-governor" = {
+        description = "Set CPU governor to performance";
+        after = [ "multi-user.target" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = [ "${pkgs.bash}/bin/bash -c 'echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'" ];
+        };
+      };
     };
   };
 
@@ -183,7 +192,6 @@ polkit.addRule(function(action, subject) {
 
   # List services that you want to enable:
 
-  # Enable the OpenSSH daemon. 
   services = {
     pipewire = {
       enable = true;
@@ -288,9 +296,9 @@ polkit.addRule(function(action, subject) {
 
     udev = {
       enable = true;
-      packages = with pkgs; [ yubikey-manager yubikey-personalization libu2f-host ];
+      packages = with pkgs; [ pkgs-stable.yubikey-manager yubikey-personalization libu2f-host ];
       extraRules =
-      '' 
+      ''
 # SteelSeries Aerox 3
 SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1836", MODE="0666"
 SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1836", MODE="0666"
