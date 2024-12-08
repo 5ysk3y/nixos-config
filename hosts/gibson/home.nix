@@ -27,6 +27,7 @@
         glib
         grimblast
         heroic
+        hyprpolkitagent
         jellyfin-mpv-shim
         jq
         keyutils
