@@ -4,23 +4,17 @@ let
 
   dim_screen = pkgs.writeShellApplication {
     name = "dim_screen";
-    runtimeInputs = with pkgs; [ ddcutil hyprland ];
+    runtimeInputs = with pkgs; [ ddcutil hyprland gnused gawk ];
     text = ''
-getMonitorSerials() {
-   ddcutil detect | grep Serial | awk '{print $3}'
-}
-
 checkBrightness() {
-     ddcutil --sn="$1" getvcp 0x10 | awk -F"," '{print $1}' | grep -o '[0-9]\+' | tail -n1
+    ddcutil --bus="$1" getvcp 10 | awk '{print $9}' | sed 's/,//g'
 }
-
 dimScreen() {
-    for s in $(getMonitorSerials); do
+    for s in 8 9 10; do
     BRIGHTNESS=$(checkBrightness "$s")
       while [[ $BRIGHTNESS != "10" ]]
       do
-          ddcutil --sn="$s" setvcp 0x10 10
-
+          ddcutil --bus="$s" setvcp 10 10
           BRIGHTNESS=$(checkBrightness "$s")
       done
     wait
@@ -35,24 +29,18 @@ hyprctl dispatch -- exec makoctl mode -s idle
 
   undim_screen = pkgs.writeShellApplication {
     name = "undim_screen";
-    runtimeInputs = with pkgs; [ dbus gnugrep hyprland ];
+    runtimeInputs = with pkgs; [ ddcutil hyprland gnused gawk ];
     text = ''
-getMonitorSerials() {
-   ddcutil detect | grep Serial | awk '{print $3}'
-}
-
 checkBrightness() {
-     ddcutil --sn="$1" getvcp 0x10 | awk -F"," '{print $1}' | grep -o '[0-9]\+' | tail -n1
+    ddcutil --bus="$1" getvcp 10 | awk '{print $9}' | sed 's/,//g'
 }
-
 
 undimScreen() {
-    for s in $(getMonitorSerials); do
+    for s in 8 9 10; do
     BRIGHTNESS=$(checkBrightness "$s")
       while [[ $BRIGHTNESS != "80" ]]
       do
-          ddcutil --sn="$s" setvcp 0x10 80
-
+          ddcutil --bus="$s" setvcp 10 80
           BRIGHTNESS=$(checkBrightness "$s")
       done
     wait
@@ -88,8 +76,6 @@ in
             general = {
               lock_cmd = "pidof hyprlock || hyprlock --immediate";
               after_sleep_cmd = "hyprctl --batch 'sleep 1; dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph'; ${undim_screen.outPath}/bin/undim_screen;";
-              ignore_dbus_inhibit = false;
-              ignore_systemd_inhibit = false;
             };
 
             listener = [
