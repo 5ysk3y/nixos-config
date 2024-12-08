@@ -25,7 +25,7 @@
         dracula-theme
         fontconfig
         glib
-        pkgs-old.grimblast
+        grimblast
         heroic
         jellyfin-mpv-shim
         jq
@@ -46,7 +46,6 @@
         signal-desktop
         sops
         spice-gtk
-        toot
         vlc
         vulkan-tools
         webcord
