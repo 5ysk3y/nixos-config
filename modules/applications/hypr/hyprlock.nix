@@ -36,7 +36,7 @@
             background = [
               {
                 monitor = "DP-1";
-                path = "${config.xdg.configHome}/Wallpapers/hex_lockscreen_middle.png";
+                path = "${config.xdg.configHome}/Wallpapers/3monitor/hackers_middle.png";
                 color = "rgba(0, 0, 0, 1)";
                 blur_size = 0;
                 blur_passes = 0;
@@ -48,7 +48,7 @@
               }
               {
                 monitor = "DP-2";
-                path = "${config.xdg.configHome}/Wallpapers/hex_lockscreen_left.png";
+                path = "${config.xdg.configHome}/Wallpapers/3monitor/hackers_left.png";
                 color = "rgba(0, 0, 0, 1)";
                 blur_size = 0;
                 blur_passes = 0;
@@ -60,7 +60,7 @@
               }
               {
                 monitor = "HDMI-A-2";
-                path = "${config.xdg.configHome}/Wallpapers/hex_lockscreen_right.png";
+                path = "${config.xdg.configHome}/Wallpapers/3monitor/hackers_right.png";
                 color = "rgba(0, 0, 0, 1)";
                 blur_size = 0;
                 blur_passes = 0;
