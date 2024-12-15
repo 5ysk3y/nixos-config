@@ -83,9 +83,7 @@ in
                 };
                 
                 "temperature" = {
-                    "thermal-zone" = 0;
-                    "interval" = 2;
-                    "hwmon-path" = "/sys/class/hwmon/hwmon3/temp1_input";
+                    "hwmon-path" = "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp3_input";
                     "critical-threshold" = 80;
                     "format-critical" = "{icon} {temperatureC}°C";
                     "format" = "{icon} {temperatureC}°C";
