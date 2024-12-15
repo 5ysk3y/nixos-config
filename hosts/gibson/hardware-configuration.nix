@@ -9,46 +9,37 @@
     ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_xanmod_stable;
-    kernelModules = [ "kvm-amd" "amdgpu" "i2c-dev" "i2c-piix4" "k10temp" ];
+    kernelPackages = pkgs.linuxPackages_zen;
+    kernelModules = [ "kvm-amd" "amdgpu" "amd-zen" "i2c-dev" "i2c-piix4" "k10temp" ];
     kernelParams = [
       "video=DP-1:2560x1440@144"
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-2:1920x1080@60"
       "acpi_enforce_resources=lax"
-      "amd_pstate=active"       # Enables the new AMD power state driver
-      "rcu_nocbs=0-11"          # Bypass RCU callbacks for smoother performance
-      "mitigations=off"         # Disable mitigations (if you prioritize performance over security)
-      "elevator=mq-deadline"
-      "processor.max_cstate=1"
-      "zswap.enabled=1"
-      "zswap.compression=zstd"
       "resume=/dev/disk/by-uuid/698a5b6d-64a8-49b5-956b-e84bfb809bb6"
-      "hibernate=shutdown"
     ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
       systemd-boot = {
         enable = true;
       };
-      efi = {
-        canTouchEfiVariables = true;
-      };
     };
     initrd = {
       luks = {
         devices = {
-          "luks-ff1a20da-b20b-4dbb-9d0d-1471a4bb141f" = {
+          "rootfs" = {
             device = "/dev/disk/by-uuid/ff1a20da-b20b-4dbb-9d0d-1471a4bb141f";
           };
-          "luks-13479742-2586-406b-9016-048d6937f0b7" = {
+          "swap" = {
             device = "/dev/disk/by-uuid/13479741-2586-406b-9016-048d6937f0b7";
           };
         };
       };
+      systemd = {
+        enable = true;
+      };
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "sd_mod" ];
     };
-    resumeDevice = "/dev/disk/by-uuid/698a5b6d-64a8-49b5-956b-e84bfb809bb6";
   };
 
   fileSystems."/" =
@@ -79,5 +70,4 @@
   # networking.interfaces.virbr0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "${system}";
-  hardware.cpu.amd.updateMicrocode = true;
 }

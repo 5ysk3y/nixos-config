@@ -45,11 +45,10 @@
   users.users."${vars.username}" = {
     isNormalUser = true; 
     description = "${vars.username}";
-    extraGroups = [ "networkmanager" "wheel" "audio" "i2c" "clightd" "libvirtd" "gamemode" ];
+    extraGroups = [ "networkmanager" "wheel" "audio" "i2c" "libvirtd" "gamemode" ];
 #   packages = with pkgs; [    ];
 #   USER PKGS MANAGED IN HOME.NIX    
     shell = pkgs.zsh;
-    ignoreShellProgramCheck = true; # Home Manager defines user zsh configuration
     hashedPasswordFile = config.sops.secrets."hosts/user_pass".path;
   };
 
@@ -71,23 +70,17 @@
         wantedBy = [ "syncthing.service" ];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
         };
-      "set-cpu-governor" = {
-        description = "Set CPU governor to performance";
-        after = [ "multi-user.target" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
-          Type = "oneshot";
-          ExecStart = [ "${pkgs.bash}/bin/bash -c 'echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor'" ];
-        };
-      };
+    };
+    sleep = {
+      extraConfig = ''
+        HibernateMode=shutdown
+      '';
     };
   };
 
   # List packages installed in system profile. To search, run: $ nix search wget
   environment = {
     systemPackages = with pkgs; [ 
-      clightd
-      clight
       ddcutil
       expect
       i2c-tools
@@ -113,13 +106,8 @@
 
     variables = rec {
       AMD_VULKAN_ICD = "RADV";
-      EDITOR="emacsclient --create-frame --tty";
-    };
-  };
-
-  xdg = {
-    portal = {
-      enable = true;
+      EDITOR = "emacsclient --create-frame --tty";
+      VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
     };
   };
 
@@ -162,32 +150,8 @@
 
     polkit = {
       enable = true;
-      extraConfig =  ''
- /* Allow any user belonging to "clightd" group to call clightd without authentication */
-polkit.addRule(function(action, subject) {
-  if (action.id.indexOf("org.clightd.clightd.") == 0) {
-    if (subject.isInGroup("clightd")) {
-      return polkit.Result.YES;
-  } else {
-     return polkit.Result.NO;
-    }
-  }
-});
-      '';
      };
-
-    sudo = {
-      extraRules = [
-        { users = [ "${vars.username}" ];
-        commands = [
-          { command = "/run/current-system/sw/bin/clightd";
-            options = [ "SETENV" "NOPASSWD" ]; 
-          } 
-        ];
-       }
-      ];
-     };
-   };
+  };
 
   # List services that you want to enable:
 
@@ -238,8 +202,8 @@ polkit.addRule(function(action, subject) {
       enable = true;
     };
 
-    logind = {
-      extraConfig = "IdleAction=lock";
+    dbus = {
+      implementation = "broker";
     };
 
     syncthing = {
@@ -289,10 +253,6 @@ polkit.addRule(function(action, subject) {
       };
     };
 
-    flatpak = {
-      enable = true;
-    };
-
     udev = {
       enable = true;
       packages = with pkgs; [ pkgs-stable.yubikey-manager yubikey-personalization libu2f-host ];
@@ -313,8 +273,6 @@ SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1838", MODE="0666"
 # Logitech C920 HD Pro Webcam Default Settings
 SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTR{index}=="0", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl -d $devnode -c tilt_absolute=20000 -c zoom_absolute=150"
 
-ACTION=="remove", ENV{ID_BUS}=="usb", ENV{ID_MODEL_ID}=="0407", ENV{ID_VENDOR_ID}=="1050", ENV{ID_VENDOR}=="Yubico", RUN+="${pkgs.systemd}/bin/loginctl lock-sessions"
-
 # Backlight control
 KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       '';
@@ -329,11 +287,6 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
   };
 
   programs = {
-    hyprland = {
-      enable = true;
-      package = inputs.hyprland.packages.${pkgs.system}.hyprland;
-    };
-
     gamescope = {
       enable = true;
     };
@@ -342,12 +295,9 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       enable = true;
       enableRenice = true;
       settings = {
-        general = {
-          inhibit_screensaver = 0;
-        };  
         gpu = {
           apply_gpu_optimisations = "accept-responsibility";
-          gpu_device = 0;
+          gpu_device = 1;
           amd_performance_level = "high";
         };
       };
@@ -370,6 +320,10 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
         enable = true;
         enableSSHSupport = true;
       };
+    };
+
+    zsh = {
+      enable = true;
     };
   };
 
@@ -415,6 +369,11 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       enable = true;
     };
 
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+    };
+
     cpu = {
       amd = {
         updateMicrocode = true;
@@ -424,6 +383,15 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
     amdgpu = {
       opencl = {
         enable = true;
+      };
+      initrd = {
+        enable = true;
+      };
+      amdvlk = {
+        enable = true;
+        support32Bit = {
+          enable = true;
+        };
       };
     };
 
