@@ -9,7 +9,7 @@ checkBrightness() {
 }
 
 undimScreen() {
-    for s in 8 9 10; do
+    for s in $(ddcutil detect | grep i2c | awk -F- '{ print $2 }'); do
     BRIGHTNESS=$(checkBrightness "$s")
       while [[ $BRIGHTNESS != "80" ]]
       do

@@ -28,8 +28,8 @@ in
           enable = true;
           settings = {
             general = {
-              ignore_dbus_inhibit = true;
-              lock_cmd = "pidof hyprlock || hyprlock --immediate";
+              lock_cmd = "pidof hyprlock || hyprlock";
+              before_sleep_cmd = "loginctl lock-session";
               after_sleep_cmd = "hyprctl --batch 'sleep 1; dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph'; ${scripts.undim_screen.outPath}/bin/undim_screen;";
             };
 
