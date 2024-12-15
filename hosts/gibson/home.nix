@@ -31,6 +31,7 @@
         jellyfin-mpv-shim
         jq
         keyutils
+        libnotify
         krita
         mpvpaper
         neofetch
@@ -81,7 +82,7 @@
 
   ## END CUSTOM MODULES
 
-  programs = {
+  programs = with pkgs; {
     home-manager = {
       enable = true;
     };
@@ -184,7 +185,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
         volume = 70;
       };
       scripts = [
-        pkgs.mpvScripts.mpris
+        mpvScripts.mpris
       ];
     };
 
@@ -198,7 +199,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
 
     htop = {
       enable = true;
-      package = pkgs.htop-vim;
+      package = htop-vim;
     };
 
     obs-studio = {
@@ -207,7 +208,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
         pkgs.obs-studio-plugins.obs-vaapi
         pkgs.obs-studio-plugins.obs-pipewire-audio-capture
         pkgs.obs-studio-plugins.obs-scale-to-sound
-        #pkgs.obs-studio-plugins.obs-vkcapture
+        pkgs.obs-studio-plugins.obs-vkcapture
       ];
     };
 
