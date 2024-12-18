@@ -9,19 +9,21 @@
     ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
-    kernelModules = [ "kvm-amd" "amdgpu" "amd-zen" "i2c-dev" "i2c-piix4" "k10temp" ];
+    kernelPackages = pkgs.linuxPackages_xanmod_stable;
+    kernelModules = [ "kvm-amd" "amdgpu" "i2c-dev" "i2c-piix4" "k10temp" ];
     kernelParams = [
       "video=DP-1:2560x1440@144"
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-2:1920x1080@60"
       "acpi_enforce_resources=lax"
-      "resume=/dev/disk/by-uuid/698a5b6d-64a8-49b5-956b-e84bfb809bb6"
     ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
       systemd-boot = {
         enable = true;
+      };
+      efi = {
+        canTouchEfiVariables = true;
       };
     };
     initrd = {
@@ -38,6 +40,7 @@
       systemd = {
         enable = true;
       };
+      kernelModules = [ "amdgpu" ];
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "sd_mod" ];
     };
   };
@@ -58,7 +61,7 @@
     };
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/698a5b6d-64a8-49b5-956b-e84bfb809bb6"; }
+    [ { device = "/dev/disk/by-uuid/22e7db71-e91f-4a00-ab2e-43b928409160"; }
     ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
