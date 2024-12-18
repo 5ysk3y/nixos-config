@@ -141,7 +141,7 @@ in
 
           $HYPRLAND_CONFIG_PATH = /home/${vars.username}/.config/hypr
 
-          exec-once = "${scripts.undim_screen.outPath}/bin/undim_screen"
+          exec-once = ${scripts.undim_screen.outPath}/bin/undim_screen
 
           source = ${vars.nixos-config}/hosts/${hostname}/applications/hypr/hyprland.conf
            '';
