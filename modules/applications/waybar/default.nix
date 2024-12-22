@@ -35,7 +35,7 @@ in
 
                 "modules-left" = ["hyprland/workspaces"];
                 "modules-center" = ["hyprland/window"];
-                "modules-right" = [ "group/quickHacks" "cpu" "memory" "temperature" "custom/steelseries" "custom/media" "pulseaudio"  "clock"];
+                "modules-right" = [ "group/quickHacks" "cpu" "memory" "temperature" "custom/steelseries" "custom/media" "wireplumber"  "clock"];
 
                 "hyprland/workspaces" = {
                 "on-click" = "activate";
@@ -118,14 +118,11 @@ in
                     "restart-interval" = 10;
                 };
 
-                "pulseaudio" = {
+                "wireplumber" = {
                     "format" = "{icon} {volume}%";
                     "format-muted" = " Muted";
-                    "ignored-sinks" = ["Starship/Matisse HD Audio Controller Analog Stereo" "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)" "Scarlett Solo USB Headphones / Line 1-2"];
                     "scroll-step" = 10;
-                    "format-icons" = {
-                        "default" = ["" "" ""];
-                    };
+                    "format-icons" = ["" "" ""];
                     "on-click" = "pwvucontrol";
                 };
 
@@ -218,7 +215,7 @@ in
                 #memory,
                 #disk,
                 #temperature,
-                #pulseaudio,
+                #wireplumber,
                 #custom-media,
                 #custom-rbw
                 #mode,
@@ -277,7 +274,7 @@ in
                     background-color: #ff5555;
                 }
 
-                #pulseaudio {
+                #wireplumber {
                     background-color: @green;
                     color: #000000;
                 }
@@ -290,7 +287,7 @@ in
                     margin-right: 3px;
                 }
 
-                #pulseaudio.muted {
+                #wireplumber.muted {
                     background-color: #90b1b1;
                     color: #2a5c45;
                 }
