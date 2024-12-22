@@ -61,19 +61,19 @@ in
                 "idle_inhibitor" = {
                     "format" = "{icon}";
                     "format-icons" = {
-                        "activated" = "";
-                        "deactivated" = "";
+                        "activated" = "󰈈";
+                        "deactivated" = "󰈉";
                     };
                 };
 
                 "cpu" = {
-                    "format" = " {usage}%";
+                    "format" = " {usage}%";
                     "interval" = 10;
                     "tooltip" = false;
                 };
 
                 "memory" = {
-                    "format" = " {used:0.1f}G";
+                    "format" = " {used:0.1f}G";
                 };
 
                 "disk" = {
@@ -85,8 +85,8 @@ in
                 "temperature" = {
                     "hwmon-path" = "/sys/devices/pci0000:00/0000:00:18.3/hwmon/hwmon2/temp3_input";
                     "critical-threshold" = 80;
-                    "format-critical" = "{icon} {temperatureC}°C";
-                    "format" = "{icon} {temperatureC}°C";
+                    "format-critical" = "{icon} {temperatureC}󰔄";
+                    "format" = "{icon} {temperatureC}󰔄";
                     "format-icons" = ["" "" ""];
                 };
 
@@ -94,12 +94,12 @@ in
                     "format" = "  {icon}{} ";
                     "return-type" = "json";
                     "format-icons" = {
-                        "100" =" ";
-                        "75" =" ";
-                        "50" = " ";
-                        "25" = " ";
-                        "0" = " ";
-                        "charging" = "  ";
+                        "100" =" 󰂂";
+                        "75" =" 󰁿";
+                        "50" = " 󰁾";
+                        "25" = " 󰁻";
+                        "0" = " 󰁺";
+                        "charging" = " 󰂄 ";
                         };
                     "exec" = "${scripts.mouse_battery.outPath}/bin/mouse_battery";
                     "restart-interval" = 10;
@@ -120,7 +120,7 @@ in
 
                 "pulseaudio" = {
                     "format" = "{icon} {volume}%";
-                    "format-muted" = " Muted";
+                    "format-muted" = " Muted";
                     "ignored-sinks" = ["Starship/Matisse HD Audio Controller Analog Stereo" "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)" "Scarlett Solo USB Headphones / Line 1-2"];
                     "scroll-step" = 10;
                     "format-icons" = {
@@ -131,7 +131,7 @@ in
 
                 "clock" = {
                     "tooltip-format" = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-                    "format" = " {:%H:%M}";
+                    "format" = " {:%H:%M}";
                 };
               }; # End Main Monitor
             }; # End waybar.settings
