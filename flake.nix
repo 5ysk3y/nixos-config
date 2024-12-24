@@ -61,6 +61,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-xivlauncher-rb = {
+      url = "github:drakon64/nixos-xivlauncher-rb";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Secrets Repo
 
     nix-secrets = {
