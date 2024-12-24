@@ -26,8 +26,9 @@ in
             systemd = {
               enable = true;
             };
-            settings = {
-              mainMonitor = {
+            settings = (mkMerge [
+                (mkIf (hostname == "gibson") {
+                mainBar = {
                 "layer" = "top";
                 "position" = "top";
                 "includes" = [ "${vars.nixos-config}/hosts/${hostname}/applications/waybar/waybar.conf" ];
@@ -130,8 +131,9 @@ in
                     "tooltip-format" = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
                     "format" = " {:%H:%M}";
                 };
-              }; # End Main Monitor
-            }; # End waybar.settings
+              }; # End mainBar
+            })
+            ]); # End waybar.settings
 
             
             style = ''
