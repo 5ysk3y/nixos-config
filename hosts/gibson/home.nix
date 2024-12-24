@@ -28,11 +28,12 @@
         grimblast
         heroic
         hyprpolkitagent
+        (inputs.nixos-xivlauncher-rb.packages.x86_64-linux.default.override { useGameMode = true; })
         jellyfin-mpv-shim
         jq
         keyutils
-        libnotify
         krita
+        libnotify
         mpvpaper
         neofetch
         obs-cmd
