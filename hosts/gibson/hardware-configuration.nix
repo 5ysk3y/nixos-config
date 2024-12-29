@@ -16,6 +16,8 @@
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-2:1920x1080@60"
       "acpi_enforce_resources=lax"
+      "tsc=reliable"
+      "clocksource=tsc"
     ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
