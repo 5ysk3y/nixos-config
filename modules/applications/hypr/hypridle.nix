@@ -30,7 +30,7 @@ in
             general = {
               lock_cmd = "pidof hyprlock || hyprlock";
               before_sleep_cmd = "loginctl lock-session";
-              after_sleep_cmd = "hyprctl --batch 'dispatch exec sleep 1; dispatch dpms on; dispatch exec makoctl mode -s default; dispatch exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph; dispatch workspace name:2-web'; sleep 8 && ${scripts.undim_screen.outPath}/bin/undim_screen;";
+              after_sleep_cmd = "hyprctl --batch 'dispatch exec sleep 1; dispatch dpms on; dispatch exec makoctl mode -s default; dispatch -- exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch -- exec qpwgraph -ma ${config.xdg.configHome}/qpwgraph/default.qpwgraph; dispatch workspace name:2-web'; sleep 8 && ${scripts.undim_screen.outPath}/bin/undim_screen;";
             };
 
             listener = [
@@ -46,7 +46,7 @@ in
               {
                 timeout = 600;
                 on-timeout = "sleep 1 && hyprctl dispatch dpms off";
-                on-resume = "sleep 1 && hyprctl dispatch dpms on";
+                on-resume = "sleep 1 && hyprctl --batch 'dispatch dpms on; dispatch exec sleep 1; dispatch workspace name:2-web'";
               }
               {
                 timeout = 900;
