@@ -148,7 +148,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
       extraConfig = {
         push.autoSetupRemote = "true";
         commit.gpgsign = true;
-        user.signingkey = "286635729E62090A";
+        user.signingkey = "7D73BA8CF10F7F67";
       };
     };
 
@@ -284,7 +284,9 @@ ignore-timeout=1";
 
    gpg-agent = {
      enable = true;
-     extraConfig = "pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses";
+     extraConfig = ''
+      pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses
+      '';
    };
 
    wayland-pipewire-idle-inhibit = {
