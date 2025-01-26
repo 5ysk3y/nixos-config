@@ -130,8 +130,6 @@ vim() {
 }
 
 bindkey -M viins '\e.' insert-last-word
-
-export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
       '';
     };
   # User shell - END #
@@ -145,6 +143,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
     git = {
       enable = true;
       userName = "5ysk3y";
+      userEmail = "62815243+5ysk3y@users.noreply.github.com";
       extraConfig = {
         push.autoSetupRemote = "true";
         commit.gpgsign = true;
@@ -369,9 +368,6 @@ ignore-timeout=1";
       "services/jellyfin/creds" = lib.mkIf config.confSymlinks.configs.jellyfinShim {
         path = "${config.xdg.configHome}/jellyfin-mpv-shim/cred.json";
       };
-
-      ## git
-      "services/git/email" = {};
 
       ## rofi-bitwarden
       "services/rbw/config" = lib.mkIf config.programs.rbw.enable {
