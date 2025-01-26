@@ -21,6 +21,7 @@
     packages = with pkgs; [
         bat
         bitwarden
+        bottles
         cider
         dracula-theme
         fontconfig
@@ -146,6 +147,8 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
       userName = "5ysk3y";
       extraConfig = {
         push.autoSetupRemote = "true";
+        commit.gpgsign = true;
+        user.signingkey = "286635729E62090A";
       };
     };
 
@@ -210,6 +213,7 @@ export EMAIL="$(cat ${config.sops.secrets."services/git/email".path})"
         pkgs.obs-studio-plugins.obs-pipewire-audio-capture
         pkgs.obs-studio-plugins.obs-scale-to-sound
         pkgs.obs-studio-plugins.obs-vkcapture
+        pkgs.obs-studio-plugins.obs-gstreamer
       ];
     };
 
