@@ -66,6 +66,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nix-gaming = {
+      url = "github:fufexan/nix-gaming";
+    };
+
     # Secrets Repo
 
     nix-secrets = {
