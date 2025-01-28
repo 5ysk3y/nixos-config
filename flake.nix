@@ -99,10 +99,14 @@ let
 in
 {
 nixosConfigurations = with inputs; {
-    nixpkgs.overlays = [
-      (import self.inputs.emacs-overlay)
-    ];
-    # Begin Main Machine (Gibson)
+
+    nixpkgs = {
+      overlays = [
+        (import self.inputs.emacs-overlay)
+      ];
+    };
+
+    # Main Machine (Gibson)
     "gibson" = nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs = {
@@ -128,7 +132,7 @@ nixosConfigurations = with inputs; {
             inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
           ];
 
-          home-manager.users.rickie = with specialArgs; {
+          home-manager.users.${vars.username} = with specialArgs; {
             imports = [
               ./hosts/${hostname}/home.nix
             ];
@@ -138,17 +142,17 @@ nixosConfigurations = with inputs; {
       ]; # End modules
     }; # End gibson
 
-    # Begin Testing VM (macbook)
+    # Testing VM (macbook)
     "macbook" = nixpkgs.lib.nixosSystem rec {
         system = "aarch64-linux";
-        specialArgs = {
-        hostname = "macbook";
-        inherit (pkgsFor "${system}") pkgs-stable;
-        inherit inputs system vars;
-      };
+          specialArgs = {
+          hostname = "macbook";
+          inherit (pkgsFor "${system}") pkgs-stable;
+          inherit inputs system vars;
+        };
 
-      modules = with specialArgs; [
-        ./hosts/${hostname}/configuration.nix
+        modules = with specialArgs; [
+          ./hosts/${hostname}/configuration.nix
 
         # Begin Home Manager Setup
         home-manager.nixosModules.home-manager {
@@ -162,12 +166,11 @@ nixosConfigurations = with inputs; {
             inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
           ];
 
-          home-manager.users.rickie = with specialArgs; {
+          home-manager.users.${vars.username} = with specialArgs; {
             imports = [
               ./hosts/${hostname}/home.nix
             ];
           };
-
         } # End Home-Manager
       ]; # End modules
     }; # End macbook
