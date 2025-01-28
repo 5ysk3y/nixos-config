@@ -86,26 +86,28 @@ let
     syncthingPath = "/home/${username}/Sync";
     secretsPath = builtins.toString inputs.nix-secrets;
   };
+    pkgsFor = system: with inputs; {
+      pkgs-stable = import nixpkgs-stable {
+        inherit system;
+        config.allowUnfree = true;
+      };
+      pkgs-old = import nixpkgs-old {
+        inherit system;
+        config.allowUnfree = true;
+      };
+    };
 in
 {
 nixosConfigurations = with inputs; {
     nixpkgs.overlays = [
       (import self.inputs.emacs-overlay)
     ];
-
     # Begin Main Machine (Gibson)
     "gibson" = nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs = {
-          pkgs-stable = import nixpkgs-stable {
-            system = system;
-            config.allowUnfree = true;
-          };
-          pkgs-old = import nixpkgs-old {
-            system = system;
-            config.allowUnfree = true;
-          };
           hostname = "gibson";
+          inherit (pkgsFor "${system}") pkgs-stable pkgs-old;
           inherit system inputs vars;
         };
 
@@ -140,11 +142,8 @@ nixosConfigurations = with inputs; {
     "macbook" = nixpkgs.lib.nixosSystem rec {
         system = "aarch64-linux";
         specialArgs = {
-        pkgs-stable = import nixpkgs-stable {
-          system = system;
-          config.allowUnfree = true;
-        };
         hostname = "macbook";
+        inherit (pkgsFor "${system}") pkgs-stable;
         inherit inputs system vars;
       };
 
