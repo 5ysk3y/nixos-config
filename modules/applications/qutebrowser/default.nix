@@ -79,7 +79,7 @@ in
             ";M" = "hint --rapid links spawn mpv {hint-url}";
             "<Ctrl+Shift+i>:" = "devtools";
             "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${qute-rbw.outPath}/bin/qute-rbw";
-            "xb" = "config-cycle statusbar.hide";
+            "xb" = "config-cycle statusbar.show always never";
             "er" = "spawn -u readability";
           };
 
