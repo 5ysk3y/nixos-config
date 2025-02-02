@@ -125,7 +125,7 @@ in
           }
 
           xwayland {
-                  enabled = true
+                  enabled = false
           }
 
           $WS1 = 1-main
