@@ -28,20 +28,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    hyprlock = {
-      url = "github:hyprwm/Hyprlock";
-    };
-
-    hyprland = {
-      type = "git";
-      url = "https://github.com/hyprwm/Hyprland?ref=v0.44.1";
-      submodules = true;
-    };
-
-    hypridle = {
-      url = "github:hyprwm/Hypridle";
-    };
-
     doomemacs = {
       url = "github:doomemacs/doomemacs";
       flake = false;
