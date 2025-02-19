@@ -90,6 +90,9 @@ nixosConfigurations = with inputs; {
       overlays = [
         (import self.inputs.emacs-overlay)
       ];
+      config = {
+        allowUnfree = true;
+      };
     };
 
     # Main Machine (Gibson)
