@@ -17,9 +17,7 @@
           keyutils
         ];
       };
-    })
 
-    (final: prev: {
       heroic = prev.heroic.override {
         extraPkgs = pkgs: with pkgs; [
           gamescope
