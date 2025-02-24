@@ -68,13 +68,13 @@ in
                 };
 
                 "cpu" = {
-                    "format" = " {usage}%";
+                    "format" = " {usage}%";
                     "interval" = 10;
                     "tooltip" = false;
                 };
 
                 "memory" = {
-                    "format" = " {used:0.1f}G";
+                    "format" = " {used:0.1f}G";
                 };
 
                 "disk" = {
@@ -88,19 +88,19 @@ in
                     "critical-threshold" = 80;
                     "format-critical" = "{icon} {temperatureC}󰔄";
                     "format" = "{icon} {temperatureC}󰔄";
-                    "format-icons" = ["" "" ""];
+                    "format-icons" = ["" "" ""];
                 };
 
                 "custom/steelseries" = {
                     "format" = "  {icon}{} ";
                     "return-type" = "json";
                     "format-icons" = {
-                        "100" =" 󰂂";
-                        "75" =" 󰁿";
-                        "50" = " 󰁾";
-                        "25" = " 󰁻";
-                        "0" = " 󰁺";
-                        "charging" = " 󰂄 ";
+                        "100" =" ";
+                        "75" =" ";
+                        "50" = " ";
+                        "25" = " ";
+                        "0" = " ";
+                        "charging" = "  ";
                         };
                     "exec" = "${scripts.mouse_battery.outPath}/bin/mouse_battery";
                     "restart-interval" = 10;
@@ -108,7 +108,7 @@ in
                 };
 
                 "custom/media" = {
-                    "format" = " {}";
+                    "format" = " {}";
                     "escape" = "true";
                     "max-length" = 33;
                     "on-click" = "playerctl -s play-pause";
@@ -120,10 +120,10 @@ in
                 };
 
                 "wireplumber" = {
-                    "format" = "{icon} {volume}%";
-                    "format-muted" = " Muted";
+                    "format" = "{icon}{volume}%";
+                    "format-muted" = "  Muted";
                     "scroll-step" = 10;
-                    "format-icons" = ["" "" ""];
+                    "format-icons" = [" " " " " "];
                     "on-click" = "pwvucontrol";
                 };
 
@@ -255,25 +255,21 @@ in
                 }
 
                 #custom-steelseries {
-                    background-color: #50fa7b;
-                    color: #000000;
+                    background-color: @selection;
+                    color: #FFFFFF;
                     padding: 5 5 5 0;
                     margin-left: 3px;
                     margin-right: 3px;
                 }
 
                 #cpu {
-                    background-color: @yellow;
+                    background-color: @cyan;
                     color: #000000;
                 }
 
                 #memory {
                     background-color: @purple;
                     color: #FFFFFF;
-                }
-
-                #disk {
-                    background-color: #ff5555;
                 }
 
                 #wireplumber {
@@ -295,17 +291,9 @@ in
                 }
 
                 #custom-media {
-                    background-color: #66cc99;
+                    background-color: @yellow;
                     color: #2a5c45;
                     min-width: 100px;
-                }
-
-                #custom-media.custom-spotify {
-                    background-color: #66cc99;
-                }
-
-                #custom-media.custom-vlc {
-                    background-color: #ffa000;
                 }
 
                 #temperature {
