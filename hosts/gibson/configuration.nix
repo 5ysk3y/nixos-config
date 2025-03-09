@@ -229,9 +229,7 @@
       dataDir = "${vars.syncthingPath}";
       configDir = "/home/${vars.username}/.config/syncthing";
       openDefaultPorts = true;
-
       overrideDevices = true;     # overrides any devices added or deleted through the WebUI
-      overrideFolders = true;     # overrides any folders added or deleted through the WebUI
 
       key = config.sops.secrets."syncthing-key".path;
       cert = config.sops.secrets."syncthing-cert".path;
