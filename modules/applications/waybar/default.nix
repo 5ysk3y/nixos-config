@@ -108,7 +108,7 @@ in
                 };
 
                 "custom/media" = {
-                    "format" = " {}";
+                    "format" = "{}";
                     "escape" = "true";
                     "max-length" = 33;
                     "on-click" = "playerctl -s play-pause";
@@ -154,6 +154,8 @@ in
                     font-family: noto sans mono, FontAwesome6Free, SymbolsNerdFont;
                     font-size: 10px;
                     min-height: 0;
+                    border: none;
+                    border-radius: 0;
                 }
 
                 #window {
@@ -168,12 +170,12 @@ in
                 }
 
                 window#waybar {
-                    background: @background-darker;
-                    color: white;
+                    transition-property: background-color;
+                    transition-duration: 0.5s;
                 }
 
                 window#waybar.hidden {
-                    opacity: 0.2;
+                    opacity: 0.5;
                 }
 
                 /*
@@ -186,24 +188,33 @@ in
                 */
 
                 #workspaces button {
-                    padding: 0 5px;
-                    background-color: transparent;
-                    /* Use box-shadow instead of border so the text isn't offset */
+                    all: initial;
+                    /* Remove GTK theme values (waybar #1351) */
+                    min-width: 0;
+                    /* Fix weird spacing in materia (waybar #450) */
                     box-shadow: inset 0 -3px transparent;
-                    color: white;
+                    /* Use box-shadow instead of border so the text isn't offset */
+                    padding: 6px 8px;
+                    margin: 6px 3px;
+                    border-radius: 4px;
+                    background-color: #1e1e2e;
+                    color: #cdd6f4;
                 }
 
                 #workspaces button:hover {
-                    background: rgba(0, 0, 0, 0.2);
+                    box-shadow: inherit;
+                    text-shadow: inherit;
+                    color: #1e1e2e;
+                    background-color: #cdd6f4;
                 }
 
                 #workspaces button.active {
-                    background-color: #44475a;
-                    box-shadow: inset 0 -3px #ffffff;
+                    color: #1e1e2e;
+                    background-color: #cdd6f4;
                 }
 
                 #workspaces button.urgent {
-                    background-color: #ff5555;
+                    background-color: #f38ba8;
                 }
 
                 #mode {
@@ -229,7 +240,7 @@ in
 
                 #window,
                 #workspaces {
-                    margin: 0 4px;
+                    background-color: transparent;
                 }
 
                 /* If workspaces is the leftmost module, omit left margin */
