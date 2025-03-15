@@ -79,3 +79,21 @@
 (add-to-list 'default-frame-alist '(alpha-background . 90))
 ;;(set-frame-parameter (selected-frame) 'alpha '(95))
 ;;(add-to-list 'default-frame-alist '(alpha . (95)))
+
+(use-package lsp-mode
+  :ensure t)
+
+;; For Without Tree Sitter
+(use-package nix-mode
+  :ensure t
+  :hook
+  (nix-mode . lsp-deferred)) ;; So that envrc mode will work
+
+(use-package nix-mode
+  :after lsp-mode
+  :custom
+  (lsp-disabled-clients '((nix-mode . nix-nil))) ;; Disable nil so that nixd will be used as lsp-server
+  :config
+  (setq lsp-nix-nixd-server-path "nixd"))
+  (setq lsp-lens-enable nil)
+  (setq lsp-modeline-code-actions-enable nil)
