@@ -345,7 +345,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
   nix = {
    nixPath = [ 
      "nixos-config=${vars.nixos-config}/hosts/${hostname}/configuration.nix"
-     "nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels"
+     "nixpkgs=${inputs.nixpkgs}"
    ];
    package = pkgs.nixVersions.latest;
    extraOptions = ''

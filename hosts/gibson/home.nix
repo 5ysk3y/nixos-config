@@ -36,6 +36,8 @@
         krita
         libnotify
         mpvpaper
+        nixfmt-rfc-style
+        nixd
         neofetch
         obs-cmd
         pavucontrol
@@ -353,6 +355,7 @@ ignore-timeout=1";
      automatic = true;
      options = "-d";
     };
+    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
   };
 
   sops = {
