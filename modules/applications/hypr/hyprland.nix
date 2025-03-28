@@ -103,6 +103,7 @@ in
               force_default_wallpaper = 0
               vrr = true
               vfr = true
+              allow_session_lock_restore = 1
           }
 
           group {
@@ -134,10 +135,10 @@ in
           $WS4 = 4-h4x0r
           $WS5 = 5-social
           $WS6 = 6-media
-          $WS7 = 7-ext1
-          $WS8 = 8-ext2
-          $WS9 = 9-ext3
-          $WS0 = 10-ext4
+          $WS7 = 7-passwd
+          $WS8 = 8-ext1
+          $WS9 = 9-ext2
+          $WS0 = 10-ext3
 
           $HYPRLAND_CONFIG_PATH = /home/${vars.username}/.config/hypr
 
