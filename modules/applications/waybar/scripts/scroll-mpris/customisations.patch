@@ -1,0 +1,51 @@
+diff --git a/src/main.rs b/src/main.rs
+index fac1594..aff51e0 100644
+--- a/src/main.rs
++++ b/src/main.rs
+@@ -15,20 +15,12 @@ mod mpris {
+     /// Returns a service-specific icon if a mapping is found.
+     fn get_service_icon(service: &str) -> &'static str {
+         let service = service.to_lowercase();
+-        if service.contains("spotify") {
+-            ""
+-        } else if service.contains("vlc") {
+-            "󰕼"
+-        } else if service.contains("edge") {
+-            "󰇩"
+-        } else if service.contains("firefox") {
+-            "󰈹"
++        if service.contains("cider") {
++            ""
++        } else if service.contains("qutebrowser") {
++            ""
+         } else if service.contains("mpv") {
+             ""
+-        } else if service.contains("chrome") {
+-            ""
+-        } else if service.contains("TelegramDesktop") {
+-            ""
+         } else {
+             DEFAULT_SERVICE_ICON
+         }
+@@ -37,8 +29,8 @@ mod mpris {
+     /// Returns the playback indicator based on the status.
+     fn playback_indicator(status: &str) -> &'static str {
+         match status {
+-            "playing" => "",
+-            "paused"  => "",
++            "playing" => "",
++            "paused"  => " ",
+             _         => "",
+         }
+     }
+@@ -61,8 +53,8 @@ mod mpris {
+                 return (String::new(), String::new(), status);
+             }
+             let icon = format!("{} {}", get_service_icon(&self.service), playback_indicator(&status));
+-            let metadata = match (&self.title, &self.artist) {
+-                (Some(t), Some(a)) => format!("{} - {}", t, a),
++            let metadata = match (&self.artist, &self.title) {
++                (Some(t), Some(a)) => format!("{} - {} | ", t, a),
+                 (Some(t), None)    => t.clone(),
+                 _                  => self.playback_status.clone(),
+             };
