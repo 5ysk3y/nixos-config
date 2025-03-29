@@ -75,25 +75,32 @@
 
 (setq confirm-kill-emacs nil)
 
-(set-frame-parameter nil 'alpha-background 90)
-(add-to-list 'default-frame-alist '(alpha-background . 90))
+(set-frame-parameter nil 'alpha-background 80)
+(add-to-list 'default-frame-alist '(alpha-background . 80))
 ;;(set-frame-parameter (selected-frame) 'alpha '(95))
 ;;(add-to-list 'default-frame-alist '(alpha . (95)))
 
-(use-package lsp-mode
-  :ensure t)
-
-;; For Without Tree Sitter
-(use-package nix-mode
-  :ensure t
-  :hook
-  (nix-mode . lsp-deferred)) ;; So that envrc mode will work
+(with-eval-after-load 'lsp-mode
+  (lsp-register-client
+    (make-lsp-client :new-connection (lsp-stdio-connection "nixd")
+                     :major-modes '(nix-mode)
+                     :priority 0
+                     :server-id 'nixd)))
 
 (use-package nix-mode
-  :after lsp-mode
-  :custom
-  (lsp-disabled-clients '((nix-mode . nix-nil))) ;; Disable nil so that nixd will be used as lsp-server
-  :config
-  (setq lsp-nix-nixd-server-path "nixd"))
-  (setq lsp-lens-enable nil)
-  (setq lsp-modeline-code-actions-enable nil)
+:after lsp-mode
+:ensure t
+:hook
+(nix-mode . lsp-deferred) ;; So that envrc mode will work
+:custom
+(lsp-disabled-clients '((nix-mode . nix-nil))) ;; Disable nil so that nixd will be used as lsp-server
+:config
+(setq lsp-nix-nixd-server-path "nixd"
+      lsp-nix-nixd-formatting-command [ "nixfmt" ]
+      lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
+      lsp-nix-nixd-nixos-options-expr "(builtins.getFlake \"/home/rickie/nixos-config\").nixosConfigurations.gibson.options"
+      lsp-nix-nixd-home-manager-options-expr "(builtins.getFlake \"/home/rickie/nixos-config\").homeConfigurations.\"rickie@gibson\".options"))
+
+(add-hook! 'nix-mode-hook
+         ;; enable autocompletion with company
+         (setq company-idle-delay 0.1))

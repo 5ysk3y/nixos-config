@@ -233,7 +233,7 @@ bindkey -M viins '\e.' insert-last-word
         window_padding_width = 9;
         placement_strategy = "top-left";
         confirm_os_window_close = 3;
-        background_opacity = "0.8";
+        background_opacity = "0.7";
       };
     };
 
