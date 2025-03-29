@@ -3,10 +3,9 @@ let
 
     scripts = rec {
       check_rbw = (import ./scripts/check_rbw.nix {inherit pkgs;});
-      current_song = (import ./scripts/current_song.nix {inherit pkgs;});
       mouse_battery = (import ./scripts/mouse_battery.nix {inherit pkgs;});
       mouse_colour = (import ./scripts/mouse_colour.nix {inherit pkgs;});
-      music_panel = (import ./scripts/music_panel.nix {inherit pkgs current_song;});
+      scroll_mpris = (import ./scripts/scroll-mpris {inherit pkgs;});
     };
 
 in
@@ -108,15 +107,13 @@ in
                 };
 
                 "custom/media" = {
-                    "format" = "{}";
+                    "return-type" = "json";
                     "escape" = "true";
-                    "max-length" = 33;
                     "on-click" = "playerctl -s play-pause";
                     "on-click-right" = "playerctl -s stop";
                     "on-scroll-up" = "playerctl -s next";
                     "on-scroll-down" = "playerctl -s previous";
-                    "exec" = "${scripts.music_panel.outPath}/bin/music_panel";
-                    "restart-interval" = 10;
+                    "exec" = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS -s 50 -w 30";
                 };
 
                 "wireplumber" = {
