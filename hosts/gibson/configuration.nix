@@ -77,6 +77,14 @@
         wantedBy = [ "syncthing.service" ];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
         };
+      "nix-build-permissions" = {
+        enable = true;
+        description = "Set permissions for nix build directory: /nix/tmp";
+        after = [ "local-fs.target" ];
+        serviceConfig.ExecStart = ''
+          ${pkgs.coreutils}/bin/chmod 1777 /nix/tmp
+        '';
+        };
     };
     sleep = {
       extraConfig = ''
@@ -110,6 +118,7 @@
       ADW_DISABLE_PORTAL = "1";
       GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
+      TMPDIR="/nix/tmp";
     };
 
     variables = rec {
@@ -354,7 +363,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
    settings = {
      auto-optimise-store = true;
      download-buffer-size = 1000000000; # Something that'll hopefully never get exceeded
-     max-jobs = 4;
+     max-jobs = "auto";
      cores = 16;
      trusted-users = [
        "@wheel"
