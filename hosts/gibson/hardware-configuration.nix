@@ -32,10 +32,12 @@
       luks = {
         devices = {
           "rootfs" = {
-            device = "/dev/disk/by-uuid/ff1a20da-b20b-4dbb-9d0d-1471a4bb141f";
+            device = "/dev/disk/by-label/ROOT";
           };
           "swap" = {
-            device = "/dev/disk/by-uuid/13479741-2586-406b-9016-048d6937f0b7";
+            device = "/dev/disk/by-label/SWAP";
+            allowDiscards = true;
+            keyFile = null;
           };
         };
       };
@@ -48,23 +50,28 @@
   };
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/8cf36eb1-f7ac-4eb0-9e28-0781d1cebd54";
-      fsType = "ext4";
+    { device = "/dev/disk/by-label/rootfs";
+      fsType = "xfs";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/FF2C-C169";
+    { device = "/dev/disk/by-label/BOOT";
       fsType = "vfat";
     };
 
   fileSystems."/home/${vars.username}/games" =
-    { device = "/dev/disk/by-uuid/a454d05d-903b-4418-916f-6f2c69653e60";
+    { device = "/dev/disk/by-label/GAMES";
       fsType = "ext4";
     };
 
+  fileSystems."/nix/tmp" =
+    { device = "/dev/disk/by-label/nix-build";
+      fsType = "xfs";
+      options = [ "noatime" "discard" ];
+    };
+
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/22e7db71-e91f-4a00-ab2e-43b928409160"; }
-    ];
+    [ { device = "/dev/disk/by-label/swap"; } ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
