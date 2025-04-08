@@ -31,10 +31,6 @@ options = {
                 type = lib.types.bool;
             };
 
-            qpwgraph = lib.mkOption {
-                type = lib.types.bool;
-            };
-
             streamdeckui = lib.mkOption {
                 type = lib.types.bool;
             };
@@ -233,82 +229,6 @@ config = lib.mkIf config.confSymlinks.enable {
         text-color: inherit;
     }
     '';
-  };
-
-  ## QPWGraph
-
-  home.file."${config.xdg.configHome}/qpwgraph/default.qpwgraph" = lib.mkIf config.confSymlinks.configs.qpwgraph {
-      text = ''
-<!DOCTYPE patchbay>
-<patchbay name="default" version="0.6.2">
- <items>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium-2" port="Chromium:output_FR"/>
-   <input node="Stream Audio - Music" port="Stream Audio - Music:playback_FR"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="World of Warcraft" port="World of Warcraft:output_FR"/>
-   <input node="Stream Audio - Game" port="Stream Audio - Game:playback_FR"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium" port="Chromium:output_FL"/>
-   <input node="Stream Audio - Music" port="Stream Audio - Music:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium" port="Chromium:output_FL"/>
-   <input node="Stream Audio" port="Stream Audio:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="HDMI/External" port="HDMI/External:monitor_FR"/>
-   <input node="Starship/Matisse HD Audio Controller Analog Stereo" port="ALC892 Analog:playback_FR"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="mpv" port="mpv:output_FL"/>
-   <input node="HDMI/External" port="HDMI/External:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium-2" port="Chromium:output_FL"/>
-   <input node="Stream Audio - Music" port="Stream Audio - Music:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="World of Warcraft" port="World of Warcraft:output_FL"/>
-   <input node="Stream Audio - Game" port="Stream Audio - Game:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium" port="Chromium:output_FR"/>
-   <input node="Stream Audio" port="Stream Audio:playback_FR"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="mpv" port="mpv:output_FR"/>
-   <input node="HDMI/External" port="HDMI/External:playback_FR"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="HDMI/External" port="HDMI/External:monitor_FL"/>
-   <input node="Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)" port="BenQ EX2780Q:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="HDMI/External" port="HDMI/External:monitor_FL"/>
-   <input node="Starship/Matisse HD Audio Controller Analog Stereo" port="ALC892 Analog:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium" port="Chromium:output_FR"/>
-   <input node="Stream Audio - Music" port="Stream Audio - Music:playback_FR"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium" port="Chromium:output_FL"/>
-   <input node="Stream Audio/Sink sink" port="Stream Audio/Sink sink:playback_FL"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="Chromium" port="Chromium:output_FR"/>
-   <input node="Stream Audio/Sink sink" port="Stream Audio/Sink sink:playback_FR"/>
-  </item>
-  <item node-type="pipewire" port-type="pipewire-audio">
-   <output node="HDMI/External" port="HDMI/External:monitor_FR"/>
-   <input node="Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)" port="BenQ EX2780Q:playback_FR"/>
-  </item>
- </items>
-</patchbay>
-  '';
   };
 
   ## OpenRGB
@@ -1630,8 +1550,8 @@ home.file."${config.xdg.configHome}/jellyfin-mpv-shim/conf.json" = lib.mkIf conf
     "always_transcode": false,
     "audio_output": "hdmi",
     "auto_play": true,
-    "check_updates": true,
-    "client_uuid": "b90d46ea-bbf6-41dc-93d6-5663d76fe12a",
+    "check_updates": false,
+    "client_uuid": "00d7ccf2-e615-46a2-8163-7224f7db6edb",
     "connect_retry_mins": 0,
     "direct_paths": false,
     "discord_presence": false,
@@ -1680,7 +1600,7 @@ home.file."${config.xdg.configHome}/jellyfin-mpv-shim/conf.json" = lib.mkIf conf
     "mpv_ext_path": null,
     "mpv_ext_start": true,
     "mpv_log_level": "info",
-    "notify_updates": true,
+    "notify_updates": false,
     "play_cmd": null,
     "playback_timeout": 30,
     "player_name": "gibson",
@@ -1703,8 +1623,10 @@ home.file."${config.xdg.configHome}/jellyfin-mpv-shim/conf.json" = lib.mkIf conf
     "shader_pack_profile": null,
     "shader_pack_remember": true,
     "shader_pack_subtype": "lq",
+    "skip_credits_always": false,
+    "skip_credits_prompt": true,
     "skip_intro_always": false,
-    "skip_intro_prompt": false,
+    "skip_intro_prompt": true,
     "stop_cmd": null,
     "stop_idle": false,
     "subtitle_color": "#FFFFFFFF",
@@ -1722,11 +1644,13 @@ home.file."${config.xdg.configHome}/jellyfin-mpv-shim/conf.json" = lib.mkIf conf
     "sync_speed_attempts": 3,
     "sync_speed_time": 1000,
     "thumbnail_enable": true,
-    "thumbnail_jellyscrub": false,
     "thumbnail_osc_builtin": true,
     "thumbnail_preferred_size": 320,
+    "transcode_4k": false,
+    "transcode_av1": false,
     "transcode_dolby_vision": true,
     "transcode_hdr": false,
+    "transcode_hevc": false,
     "transcode_hi10p": false,
     "transcode_warning": true,
     "use_web_seek": false,

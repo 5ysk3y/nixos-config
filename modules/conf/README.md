@@ -8,7 +8,6 @@ The purpose of this module is to setup configuration files for applications that
 | GNUPG             | symlink  | gnupg        | true    |
 | Jellyfin MPV Shim | embedded | jellyfinShim | false   |
 | OpenRGB           | embedded | openrgb      | false   |
-| QPWGraph          | embedded | qpwgraph     | false   |
 | Rofi              | embedded | n/a          | n/a     |
 | SSH               | symlink  | ssh          | true    |
 | StreamdeckUI      | embedded | streamdeckui | false   |
