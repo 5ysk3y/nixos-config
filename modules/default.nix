@@ -31,7 +31,6 @@
       gnupg = mkDefault true;
       jellyfinShim = mkDefault false;
       openrgb = mkDefault false;
-      qpwgraph = mkDefault false;
       ssh = mkDefault true;
       streamdeckui = mkDefault false;
       wallpapers = mkDefault true;
