@@ -22,12 +22,12 @@
         bat
         bitwarden
         bottles
-        cider
+        cider-2
         dracula-theme
         fontconfig
         glib
         grimblast
-        heroic
+        heroic-unwrapped
         hyprpolkitagent
         (inputs.nixos-xivlauncher-rb.packages.x86_64-linux.default.override { useGameMode = true; })
         jellyfin-mpv-shim
@@ -45,7 +45,6 @@
         playerctl
         protonup-qt
         pwvucontrol
-        qpwgraph
         restic
         rivalcfg
         rofi-rbw-wayland
@@ -67,7 +66,6 @@
     configs = {
       jellyfinShim = true;
       openrgb = true;
-      qpwgraph = true;
       streamdeckui = true;
       webcord = true;
     };
@@ -200,6 +198,9 @@ bindkey -M viins '\e.' insert-last-word
 
     yt-dlp = {
       enable = true;
+      settings = {
+        cookies-from-browser = "chromium:'~/.local/share/qutebrowser'";
+      };
     };
 
     htop = {
