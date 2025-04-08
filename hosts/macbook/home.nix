@@ -43,7 +43,6 @@ in
         pavucontrol
         pinentry-curses
         pwvucontrol
-        qpwgraph
         sops
         spice-gtk
         swww
@@ -63,7 +62,6 @@ in
       cider = false;
       jellyfinShim = false;
       openrgb = false;
-      qpwgraph = false;
       streamdeckui = false;
       webcord = false;
       ssh = true;

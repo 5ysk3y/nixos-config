@@ -86,6 +86,28 @@
         '';
         };
     };
+
+    user = {
+      services = {
+        "create-pw-links" = {
+          enable = true;
+          description = "Create audio links after session start";
+          wantedBy = [ "default.target" ];
+          after = [ "wireplumber.service" "pipewire.service" ];
+          serviceConfig = {
+            ExecStart = [
+              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FL alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FL"
+              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FR alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FR"
+              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FL alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FL"
+              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FR alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FR"
+            ];
+            ExecStartPre = "${pkgs.coreutils}/bin/sleep 15";
+            Type = "oneshot";
+          };
+        };
+      };
+    };
+
     sleep = {
       extraConfig = ''
         HibernateMode=shutdown
@@ -126,6 +148,10 @@
       EDITOR = "emacsclient --create-frame --tty";
       VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
     };
+
+    pathsToLink = [
+      "/share/xdg-desktop-portal" "/share/applications"
+    ];
   };
 
   # Security Ruleset
@@ -173,15 +199,6 @@
   # List services that you want to enable:
 
   services = {
-    journald = {
-      extraConfig = ''
-        Storage=volatile
-        RateLimitInterval=30s
-        RateLimitBurst=10000
-        RuntimeMaxUse=16M
-        SystemMaxUse=16M
-      '';
-    };
     pipewire = {
       enable = true;
       alsa.enable = true;
@@ -197,32 +214,37 @@
 
       wireplumber = {
         enable = true;
-      };
-
-      extraConfig = {
-        pipewire = {
-          "10-combined-audio" = {
-            "context.objects" = [
-                {
+        extraConfig = {
+          "10-audio-customization" = {
+            context.objects = [
+              {
+                factory = "policy-node";
+                args = {
+                  "priority.session" = 1000;
+                  "target.object" = "alsa_card.pci-0000_0a_00.1";
+                  "target.profile" = "output:hdmi-stereo-extra4";
+                };
+              }
+              {
                 factory = "adapter";
-                  args = {
-                    "factory.name"     = "support.null-audio-sink";
-                    "node.name"        = "HDMI/External";
-                    "media.class"      = "Audio/Sink";
-                    "audio.position"   = [ "FL" "FR" ];
-                    "monitor.channel-volumes" = "true";
-                    adapter.auto-port-config = {
-                      "mode" = "dsp";
-                      "monitor" = "true";
-                      "position" = "preserve";
-                    };
+                args = {
+                  "factory.name" = "support.null-audio-sink";
+                  "node.name" = "HDMI/External";
+                  "media.class" = "Audio/Sink";
+                  "audio.position" = [ "FL" "FR" ];
+                  "monitor.channel-volumes" = true;
+                  adapter.auto-port-config = {
+                    mode = "dsp";
+                    monitor = true;
+                    position = "preserve";
                   };
-                }
-              ];
-            };
-         };
-       };
-     };
+                };
+              }
+            ];
+          };
+        };
+      };
+  };
    
     pcscd = {
       enable = true;
@@ -230,6 +252,10 @@
 
     dbus = {
       implementation = "broker";
+    };
+
+    logind = {
+      hibernateKey = "ignore";
     };
 
     syncthing = {

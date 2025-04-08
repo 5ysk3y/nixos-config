@@ -16,8 +16,7 @@
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-2:1920x1080@60"
       "acpi_enforce_resources=lax"
-      "tsc=reliable"
-      "clocksource=tsc"
+      "systemd.log_level=debug"
     ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
@@ -36,6 +35,7 @@
           };
           "swap" = {
             device = "/dev/disk/by-label/SWAP";
+            preLVM = true;
             allowDiscards = true;
             keyFile = null;
           };
@@ -47,6 +47,7 @@
       kernelModules = [ "amdgpu" ];
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "sd_mod" ];
     };
+    resumeDevice = "/dev/disk/by-label/swap";
   };
 
   fileSystems."/" =
