@@ -9,19 +9,25 @@
     ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_xanmod_stable;
+    kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [ "kvm-amd" "amdgpu" "i2c-dev" "i2c-piix4" "k10temp" ];
+    blacklistedKernelModules = [ "ath12k_pci" "ath12k" ];
     kernelParams = [
+      "video=amd"
       "video=DP-1:2560x1440@144"
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-2:1920x1080@60"
       "acpi_enforce_resources=lax"
       "systemd.log_level=debug"
+      "mem_sleep_default=deep"
+      "amdgpu.dpm=1"
+      "pcie_aspm=off"
     ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
       systemd-boot = {
         enable = true;
+        configurationLimit = 5;
       };
       efi = {
         canTouchEfiVariables = true;
@@ -69,6 +75,12 @@
     { device = "/dev/disk/by-label/nix-build";
       fsType = "xfs";
       options = [ "noatime" "discard" ];
+    };
+
+  fileSystems."/tmp/nix-build" =
+    { device = "/nix/tmp";
+      fsType = "none";
+      options = [ "bind" ];
     };
 
   swapDevices =
