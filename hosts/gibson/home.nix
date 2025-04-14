@@ -48,7 +48,7 @@
         restic
         rivalcfg
         rofi-rbw-wayland
-        signal-desktop
+        signal-desktop-bin
         sops
         spice-gtk
         vlc
