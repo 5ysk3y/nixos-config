@@ -76,7 +76,7 @@
         path = with pkgs; [ jq curl gawk ];
         wantedBy = [ "syncthing.service" ];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
-        };
+       };
       "nix-build-permissions" = {
         enable = true;
         description = "Set permissions for nix build directory: /nix/tmp";
@@ -84,7 +84,15 @@
         serviceConfig.ExecStart = ''
           ${pkgs.coreutils}/bin/chmod 1777 /nix/tmp
         '';
-        };
+       };
+      "nix-daemon" = {
+	environment = {
+	  TMPDIR = "/tmp/nix-build";
+	};
+	restartTriggers = [
+	  config.environment.etc."nix/nix.conf".source	
+	];
+       };
     };
 
     user = {
@@ -123,6 +131,7 @@
       i2c-tools
       inputs.nix-gaming.packages.${pkgs.system}.wine-tkg
       libmodule
+      linux-firmware
       lm_sensors
       nix-prefetch-github
       openssl
@@ -140,7 +149,7 @@
       ADW_DISABLE_PORTAL = "1";
       GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
-      TMPDIR="/nix/tmp";
+      TMPDIR="/tmp/nix-build";
     };
 
     variables = rec {
@@ -378,42 +387,43 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
   };
 
   nix = {
-   nixPath = [ 
-     "nixos-config=${vars.nixos-config}/hosts/${hostname}/configuration.nix"
-     "nixpkgs=${inputs.nixpkgs}"
-   ];
-   package = pkgs.nixVersions.latest;
-   extraOptions = ''
-     experimental-features = nix-command flakes
-   '';
-   settings = {
-     auto-optimise-store = true;
-     download-buffer-size = 1000000000; # Something that'll hopefully never get exceeded
-     max-jobs = "auto";
-     cores = 16;
-     trusted-users = [
-       "@wheel"
-       "${vars.username}"
-     ];
-     substituters = [
-       "https://hyprland.cachix.org"
-       "https://cache.nixos.org"
-       "https://nix-community.cachix.org"
-       "https://nix-gaming.cachix.org"
-     ];
-     trusted-public-keys = [
-       "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
-       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-       "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
-     ];
-   };
-   gc = {
-     automatic = true;
-     dates = "weekly";
-     persistent = true;
-     options = "--delete-older-than 7d";
-   };
+    nixPath = [ 
+      "nixos-config=${vars.nixos-config}/hosts/${hostname}/configuration.nix"
+      "nixpkgs=${inputs.nixpkgs}"
+    ];
+    package = pkgs.nixVersions.latest;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+      build-dir = /tmp/nix-build
+    '';
+    settings = {
+      auto-optimise-store = true;
+      download-buffer-size = 1000000000; # Something that'll hopefully never get exceeded
+      max-jobs = "auto";
+      cores = 16;
+      trusted-users = [
+        "@wheel"
+        "${vars.username}"
+      ];
+      substituters = [
+        "https://hyprland.cachix.org"
+        "https://cache.nixos.org"
+        "https://nix-community.cachix.org"
+        "https://nix-gaming.cachix.org"
+      ];
+      trusted-public-keys = [
+        "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+        "nix-gaming.cachix.org-1:nbjlureqMbRAxR1gJ/f3hxemL9svXaZF/Ees8vCUUs4="
+      ];
+    };
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      persistent = true;
+      options = "--delete-older-than 7d";
+    };
   };
 
   # Allow unfree packages
