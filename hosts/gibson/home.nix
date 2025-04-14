@@ -27,7 +27,7 @@
         fontconfig
         glib
         grimblast
-        heroic-unwrapped
+        heroic
         hyprpolkitagent
         (inputs.nixos-xivlauncher-rb.packages.x86_64-linux.default.override { useGameMode = true; })
         jellyfin-mpv-shim
