@@ -64,9 +64,9 @@ build_image() {
   custom_packages=$(tr '\n' ' ' < "$CUSTOM_PACKAGES_FILE")
 
   pushd "$builder_dir" > /dev/null
-  make image PROFILE="$PROFILE" PACKAGES="$custom_packages"
+  make image PROFILE="$PROFILE" PACKAGES="-wpad-basic-mbedtls -kmod-mwifiex-sdio -mwifiex-sdio-firmware -kmod-btmrvl $custom_packages"
   popd > /dev/null
-  OUTFILE=$(find imagebuilder/openwrt-imagebuilder-24.10.1-mvebu-cortexa9.Linux-x86_64/bin/targets/mvebu/cortexa9 -name *sysupgrade*  2>/dev/null | head -n1 )
+  OUTFILE=$(find imagebuilder/openwrt-imagebuilder-"$version"-mvebu-cortexa9.Linux-x86_64/bin/targets/"$TARGET" -name *sysupgrade*  2>/dev/null | head -n1 )
   cp "$OUTFILE" ~/Downloads
 
   echo "✅ Build complete. Check your downloads folder!"
