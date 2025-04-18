@@ -5,7 +5,7 @@ ROUTER_HOST="openwrt.local"
 TARGET="mvebu/cortexa9"
 PROFILE="linksys_wrt3200acm"
 BASE_URL="https://downloads.openwrt.org/releases"
-CUSTOM_PACKAGES_FILE="/home/rickie/Sync/Private/Notes/wrt3200acm_pkgs.txt"
+CUSTOM_PACKAGES_FILE=""
 
 fetch_latest_version() {
   curl -s "$BASE_URL/" |
@@ -16,8 +16,7 @@ fetch_latest_version() {
 }
 
 get_installed_version() {
-  echo "🔍 Checking installed version on ${ROUTER_HOST}..."
-  if VERSION=$(ssh "$ROUTER_HOST" "[ -f /etc/os-release ]"); then
+  if VERSION=$(ssh "$ROUTER_HOST" ". /etc/os-release && echo \$VERSION"); then
     echo $VERSION
   else
     echo "Latest installed version unknown."
@@ -73,7 +72,9 @@ build_image() {
 }
 
 main() {
+  echo "🔍 Checking latest available version from OpenWRT}..."
   latest_version=$(fetch_latest_version)
+  echo "🔍 Checking installed version on ${ROUTER_HOST}..."
   installed_version=$(get_installed_version)
 
   echo "🆕 Latest version:    ${latest_version}"
