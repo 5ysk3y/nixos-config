@@ -56,6 +56,10 @@
       url = "github:fufexan/nix-gaming";
     };
 
+    hyprddm = {
+      url = "github:maotseantonio/hyprddm";
+    };
+
     # Secrets Repo
 
     nix-secrets = {
@@ -84,8 +88,8 @@ let
     };
 in
 {
+inherit vars;
 nixosConfigurations = with inputs; {
-
     nixpkgs = {
       overlays = [
         (import self.inputs.emacs-overlay)
