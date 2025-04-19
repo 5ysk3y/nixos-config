@@ -31,11 +31,11 @@ in
                 "layer" = "top";
                 "position" = "top";
                 "includes" = [ "${vars.nixos-config}/hosts/${hostname}/applications/waybar/waybar.conf" ];
-                "height" = 30;
+                "height" = 40;
 
                 "modules-left" = ["hyprland/workspaces"];
                 "modules-center" = ["hyprland/window"];
-                "modules-right" = [ "group/quickHacks" "cpu" "memory" "temperature" "custom/steelseries" "custom/media" "wireplumber"  "clock"];
+                "modules-right" = [ "group/quickHacks" "cpu" "memory" "temperature" "custom/steelseries" "custom/media" "pulseaudio"  "clock"];
 
                 "hyprland/workspaces" = {
                 "on-click" = "activate";
@@ -116,7 +116,7 @@ in
                     "exec" = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS -s 50 -w 30";
                 };
 
-                "wireplumber" = {
+                "pulseaudio" = {
                     "format" = "{icon}{volume}%";
                     "format-muted" = "  Muted";
                     "scroll-step" = 10;
@@ -225,7 +225,7 @@ in
                 #memory,
                 #disk,
                 #temperature,
-                #wireplumber,
+                #pulseaudio,
                 #custom-media,
                 #custom-rbw
                 #mode,
@@ -265,7 +265,7 @@ in
                 #custom-steelseries {
                     background-color: @selection;
                     color: #FFFFFF;
-                    padding: 5 5 5 0;
+                    padding: 5px 5px 5px 0px;
                     margin-left: 3px;
                     margin-right: 3px;
                 }
@@ -280,7 +280,7 @@ in
                     color: #FFFFFF;
                 }
 
-                #wireplumber {
+                #pulseaudio {
                     background-color: @green;
                     color: #000000;
                 }
@@ -288,12 +288,12 @@ in
                 #custom-volume {
                     background-color: @background;
                     color: white;
-                    padding: 5 6 5 6;
+                    padding: 5px 6px 5px 6px;
                     margin-left: 3px;
                     margin-right: 3px;
                 }
 
-                #wireplumber.muted {
+                #pulseaudio.muted {
                     background-color: #90b1b1;
                     color: #2a5c45;
                 }
