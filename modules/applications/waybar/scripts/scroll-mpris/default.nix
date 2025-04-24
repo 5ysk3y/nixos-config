@@ -11,7 +11,7 @@ rustPlatform.buildRustPackage {
     owner = "BEST8OY";
     repo = "ScrollMPRIS";
     rev = "7549ba2b879aa4f3c0bfcbcc525cab23ec635453"; 
-    sha256 = "sha256-RGE/x/1sTYL3zV/t0vHog7t4X6pP1g3jJPIZqRRxjJM="; 
+    sha256 = "sha256-9nVCQeQcfwgq8y/gkLyWuVw9B4O9QYY9ZPxe0+9yUY4=";
   };
   useFetchCargoVendor = true;
   cargoHash = "sha256-GIrwUJxe/ktHnZ2NW9car1t0WHHL1Wxlc7448lmzk/c="; 
