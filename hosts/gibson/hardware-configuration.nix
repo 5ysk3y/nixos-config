@@ -13,6 +13,8 @@
     kernelModules = [ "kvm-amd" "amdgpu" "i2c-dev" "i2c-piix4" "k10temp" ];
     blacklistedKernelModules = [ "ath12k_pci" "ath12k" ];
     kernelParams = [
+      "quiet"
+      "splash"
       "video=amd"
       "video=DP-1:2560x1440@144"
       "video=DP-2:1920x1080@144"
@@ -22,9 +24,13 @@
       "mem_sleep_default=deep"
       "amdgpu.dpm=1"
       "pcie_aspm=off"
+      "boot.shell_on_fail"
+      "udev.log_priority=3"
+      "rd.systemd.show_status=auto"
     ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
+      timeout = 0;
       systemd-boot = {
         enable = true;
         configurationLimit = 5;
@@ -52,8 +58,20 @@
       };
       kernelModules = [ "amdgpu" ];
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "sd_mod" ];
+      verbose = false;
     };
     resumeDevice = "/dev/disk/by-label/swap";
+    plymouth = {
+      enable = true;
+      theme = "tech_b";
+      themePackages = with pkgs; [
+        (adi1090x-plymouth-themes.override {
+          selected_themes = [ "tech_b" ];
+        })
+      ];
+    };
+    consoleLogLevel = 3;
+
   };
 
   fileSystems."/" =

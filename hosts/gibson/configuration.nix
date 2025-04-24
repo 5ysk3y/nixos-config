@@ -2,6 +2,12 @@
 
 { config, lib, pkgs, pkgs-stable, inputs, hostname, vars, ... }:
 
+let
+
+  sddmTheme = inputs.hyprddm.packages.${pkgs.system}.default.override { theme = "cyberpunk"; };
+
+in
+
 { imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
@@ -60,6 +66,7 @@
     tamzen
     font-awesome
     material-design-icons
+    (builtins.toString sddmTheme + "/share/fonts")
 
     (google-fonts.override {
       fonts = [
@@ -86,12 +93,12 @@
         '';
        };
       "nix-daemon" = {
-	environment = {
-	  TMPDIR = "/tmp/nix-build";
-	};
-	restartTriggers = [
-	  config.environment.etc."nix/nix.conf".source	
-	];
+        environment = {
+          TMPDIR = "/tmp/nix-build";
+        };
+        restartTriggers = [
+          config.environment.etc."nix/nix.conf".source
+        ];
        };
     };
 
@@ -100,17 +107,23 @@
         "create-pw-links" = {
           enable = true;
           description = "Create audio links after session start";
-          wantedBy = [ "default.target" ];
+          wantedBy = [ "default.target" "sleep.target" ];
           after = [ "wireplumber.service" "pipewire.service" ];
           serviceConfig = {
-            ExecStart = [
-              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FL alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FL"
-              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FR alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FR"
-              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FL alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FL"
-              "${pkgs.pipewire}/bin/pw-link HDMI/External:monitor_FR alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FR"
-            ];
+            ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 2; f() { if ! ${pkgs.pipewire}/bin/pw-link -l | grep -q \"$1 → $2\"; then ${pkgs.pipewire}/bin/pw-link \"$1\" \"$2\"; fi }; f \"HDMI/External:monitor_FL\" \"alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FL\"; f \"HDMI/External:monitor_FR\" \"alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FR\"; f \"HDMI/External:monitor_FL\" \"alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FL\"; f \"HDMI/External:monitor_FR\" \"alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FR\"'";
             ExecStartPre = "${pkgs.coreutils}/bin/sleep 15";
             Type = "oneshot";
+          };
+        };
+      };
+
+      timers = {
+        "create-pw-links" = {
+          enable = true;
+          wantedBy = [ "timers.target" ];
+          timerConfig = {
+            OnBootSec = "30s";
+            Unit = "create-pw-links.service";
           };
         };
       };
@@ -130,6 +143,7 @@
       expect
       i2c-tools
       inputs.nix-gaming.packages.${pkgs.system}.wine-tkg
+      sddmTheme
       libmodule
       linux-firmware
       lm_sensors
@@ -187,6 +201,16 @@
 
           hyprlock = {
             u2fAuth = true;
+          };
+
+          sddm = {
+            text = ''
+              auth     sufficient    pam_u2f.so  cue
+              auth     include       login
+              account  include       login
+              password include       login
+              session  include       login
+            '';
           };
       };
 
@@ -343,9 +367,30 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
         motherboard = "amd";
       };
     };
+
+    displayManager = {
+      defaultSession = "hyprland";
+      sddm = {
+        enable = true;
+        package = pkgs.kdePackages.sddm;
+        extraPackages = with pkgs; [ kdePackages.qtmultimedia ];
+        theme = "sddm-astronaut-theme";
+        wayland = {
+          enable = true;
+        };
+      };
+    };
   };
 
+  # End Services
+
+  # Start Programs
+
   programs = {
+    hyprland = {
+      enable = true;
+    };
+
     gamescope = {
       enable = true;
     };

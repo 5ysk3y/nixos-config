@@ -29,7 +29,7 @@
         grimblast
         heroic
         hyprpolkitagent
-        (inputs.nixos-xivlauncher-rb.packages.x86_64-linux.default.override { useGameMode = true; })
+        (inputs.nixos-xivlauncher-rb.packages.${pkgs.system}.default.override { useGameMode = true; })
         jellyfin-mpv-shim
         jq
         keyutils
@@ -126,7 +126,7 @@
       };
       initExtra = ''
 vim() {
-  emacsclient --create-frame --tty "$@"
+  emacsclient -c --no-wait "$@"
 }
 
 bindkey -M viins '\e.' insert-last-word
