@@ -104,3 +104,14 @@
 (add-hook! 'nix-mode-hook
          ;; enable autocompletion with company
          (setq company-idle-delay 0.1))
+
+(remove-hook 'markdown-mode-hook #'pretty-symbols-mode)
+(set-fontset-font t 'unicode "Noto Color Emoji" nil 'append)
+(set-fontset-font t 'emoji (font-spec :family "Noto Color Emoji") nil 'prepend)
+
+(remove-hook 'company-mode-hook #'company-box-mode)
+
+(setq-default line-spacing 0.2)
+(set-language-environment "UTF-8")
+(set-default-coding-systems 'utf-8)
+(prefer-coding-system 'utf-8)
