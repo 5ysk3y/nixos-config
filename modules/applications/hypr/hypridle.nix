@@ -29,7 +29,7 @@ in
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock";
-              after_sleep_cmd = "hyprctl --batch 'dispatch exec sleep 1; dispatch dpms on; dispatch -- exec systemctl --user restart waybar; dispatch exec makoctl mode -s default; dispatch -- exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch workspace name:2-web'; sleep 8 && ${scripts.undim_screen.outPath}/bin/undim_screen;";
+              after_sleep_cmd = "hyprctl --batch 'dispatch exec sleep 1; dispatch dpms on; dispatch exec makoctl mode -s default; dispatch -- exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch workspace name:2-web'; sleep 8 && ${scripts.undim_screen.outPath}/bin/undim_screen; dispatch -- exec systemctl --user restart waybar create-pw-links;";
             };
 
             listener = [
