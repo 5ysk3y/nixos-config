@@ -2,7 +2,6 @@
 # and may be overwritten by future invocations.  Please make changes
 # to /etc/nixos/configuration.nix instead.
 { config, lib, pkgs, modulesPath, system, vars, ... }:
-
 {
   imports =
     [ (modulesPath + "/installer/scan/not-detected.nix")
