@@ -486,6 +486,9 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
     graphics = {
       enable = true;
       enable32Bit = true;
+      extraPackages = with pkgs; [
+        amdvlk
+      ];
     };
 
     cpu = {

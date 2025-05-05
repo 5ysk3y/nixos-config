@@ -1,5 +1,4 @@
 { config, lib, pkgs, pkgs-stable, pkgs-old, inputs, doomemacs, vars, hostname, ... }:
-
 {
   home = {
     username = "${vars.username}";
@@ -124,7 +123,7 @@
       history = {
         path = "${config.xdg.dataHome}/zsh/zsh_history";
       };
-      initExtra = ''
+      initContent = ''
 vim() {
   emacsclient -c --no-wait "$@"
 }

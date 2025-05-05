@@ -27,9 +27,6 @@
     })
 
     (self: super: {
-      cider-2 = super.cider-2.overrideAttrs (old: {
-        src = "${vars.syncthingPath}/Files/nix/Cider/cider-linux-x64.AppImage";
-      });
     })
   ];
 }
