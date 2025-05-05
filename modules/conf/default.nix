@@ -1,7 +1,6 @@
-{ config, lib, pkgs, home-manager, inputs, ... }:
+{ config, lib, pkgs, home-manager, inputs, vars, ... }:
 
 let
-    syncDir = "${config.home.homeDirectory}/Sync";
     draculaPath = builtins.toString inputs.qute-dracula.outPath;
 in
 {
@@ -42,42 +41,42 @@ options = {
     };
 };
 
-config = lib.mkIf config.confSymlinks.enable {
+config = with lib; mkIf config.confSymlinks.enable {
 
   ## Symlinks
-  home.file."${config.home.homeDirectory}/.gnupg/pubring.kbx" = lib.mkIf config.confSymlinks.configs.gnupg {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/gnupg/pubring.kbx";
+  home.file."${config.home.homeDirectory}/.gnupg/pubring.kbx" = mkIf config.confSymlinks.configs.gnupg {
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/gnupg/pubring.kbx";
   };
 
   home.file."${config.xdg.configHome}/OpenRGB/MainBlue.orp" =  lib.mkIf config.confSymlinks.configs.openrgb {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/OpenRGB/MainBlue.orp";
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/OpenRGB/MainBlue.orp";
   };
 
-  home.file."${config.xdg.configHome}/mako/notification.wav" = lib.mkIf config.services.mako.enable {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/mako/notification.wav";
+  home.file."${config.xdg.configHome}/mako/notification.wav" = mkIf config.services.mako.enable {
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/mako/notification.wav";
   };
 
-  home.file."${config.xdg.configHome}/Wallpapers" = lib.mkIf config.confSymlinks.configs.wallpapers {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/Wallpapers";
+  home.file."${config.xdg.configHome}/Wallpapers" = mkIf config.confSymlinks.configs.wallpapers {
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/Wallpapers";
     recursive = true;
   };
 
-  home.file."${config.xdg.configHome}/obs-studio" = lib.mkIf config.programs.obs-studio.enable {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/obs-studio";
+  home.file."${config.xdg.configHome}/obs-studio" = mkIf config.programs.obs-studio.enable {
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/obs-studio";
     recursive = true;
   };
 
-  home.file."${config.xdg.configHome}/WebCord" = lib.mkIf config.confSymlinks.configs.webcord {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Files/nix/WebCord";
+  home.file."${config.xdg.configHome}/WebCord" = mkIf config.confSymlinks.configs.webcord {
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/WebCord";
     recursive = true;
   };
 
-  home.file."${config.home.homeDirectory}/.ssh" = lib.mkIf config.confSymlinks.configs.ssh {
-    source = config.lib.file.mkOutOfStoreSymlink "${syncDir}/Private/Keys";
+  home.file."${config.home.homeDirectory}/.ssh" = mkIf config.confSymlinks.configs.ssh {
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Private/Keys";
     recursive = true;
   };
 
-  home.file."${config.xdg.configHome}/qutebrowser/dracula" = lib.mkIf config.applications.qutebrowser {
+  home.file."${config.xdg.configHome}/qutebrowser/dracula" = mkIf config.applications.qutebrowser {
     source = draculaPath;
     recursive = true;
   };
@@ -86,7 +85,7 @@ config = lib.mkIf config.confSymlinks.enable {
   
   ## Rofi-Wayland; for rofi-rbw qutebrowser script
   home.file."${config.xdg.configHome}/rofi/config.rasi" = {
-      enable = lib.mkIf config.applications.qutebrowser true;
+      enable = mkIf config.applications.qutebrowser true;
       text = ''
     * {
         /* Dracula theme colour palette */
@@ -233,7 +232,7 @@ config = lib.mkIf config.confSymlinks.enable {
 
   ## OpenRGB
 
-home.file."${config.xdg.configHome}/OpenRGB/OpenRGB.json" = lib.mkIf config.confSymlinks.configs.openrgb {
+home.file."${config.xdg.configHome}/OpenRGB/OpenRGB.json" = mkIf config.confSymlinks.configs.openrgb {
       text = ''
 {
     "AutoStart": {
@@ -1543,7 +1542,7 @@ home.file."${config.xdg.configHome}/OpenRGB/OpenRGB.json" = lib.mkIf config.conf
 
   ## jellyfin-mpv-shim
 
-home.file."${config.xdg.configHome}/jellyfin-mpv-shim/conf.json" = lib.mkIf config.confSymlinks.configs.jellyfinShim {
+home.file."${config.xdg.configHome}/jellyfin-mpv-shim/conf.json" = mkIf config.confSymlinks.configs.jellyfinShim {
     text = ''
 {
     "allow_transcode_to_h265": false,
@@ -1662,13 +1661,13 @@ home.file."${config.xdg.configHome}/jellyfin-mpv-shim/conf.json" = lib.mkIf conf
   '';
 };
 
-home.file."${config.xdg.configHome}/jellyfin-mpv-shim/input.json" = lib.mkIf config.confSymlinks.configs.jellyfinShim {
+home.file."${config.xdg.configHome}/jellyfin-mpv-shim/input.json" = mkIf config.confSymlinks.configs.jellyfinShim {
     text = ''
 q run "/bin/sh" "-c" "hyprctl --batch 'dispatch killactive; dispatch workspace m-1'"
   '';
 };
 
-home.file."${config.xdg.configHome}/jellyfin-mpv-shim/mpv.json" = lib.mkIf config.confSymlinks.configs.jellyfinShim {
+home.file."${config.xdg.configHome}/jellyfin-mpv-shim/mpv.json" = mkIf config.confSymlinks.configs.jellyfinShim {
     text = ''
 ao=%8%pipewire
 cache=%3%yes
@@ -1689,7 +1688,7 @@ ytdl-format=%19%bestvideo+bestaudio
 
   ## Streamdeck
 
-home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.json" = lib.mkIf config.confSymlinks.configs.streamdeckui {
+home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.json" = mkIf config.confSymlinks.configs.streamdeckui {
     text = ''
 {
     "state": {
@@ -2105,7 +2104,7 @@ home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.json" = lib.mkIf
   '';
 };
 
-home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.conf" = lib.mkIf config.confSymlinks.configs.jellyfinShim {
+home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.conf" = mkIf config.confSymlinks.configs.jellyfinShim {
     text = ''
 [General]
 geometry=@ByteArray(\x1\xd9\xd0\xcb\0\x3\0\0\0\0\xf\x80\0\0\0\xa0\0\0\x13\x8e\0\0\x4\xa3\0\0\0\0\0\0\0\xc8\0\0\x3\x88\0\0\x2\xf9\0\0\0\x2\x2\0\0\0\a\x80\0\0\xf\x80\0\0\0\xa0\0\0\x13\x8e\0\0\x4\xa3)
