@@ -38,7 +38,7 @@ in
     LC_NAME = "en_GB.UTF-8"; 
     LC_NUMERIC = "en_GB.UTF-8"; 
     LC_PAPER = "en_GB.UTF-8"; 
-    LC_TELEPHONE = "en_GB.UTF-8"; 
+    LC_TELEPHONE = "en_GB.UTF-8";
     LC_TIME = "en_GB.UTF-8";
   };
 
@@ -143,13 +143,14 @@ in
       expect
       i2c-tools
       inputs.nix-gaming.packages.${pkgs.system}.wine-tkg
-      sddmTheme
       libmodule
       linux-firmware
       lm_sensors
+      lutris
       nix-prefetch-github
       openssl
       pulseaudio
+      sddmTheme
       v4l-utils
       vim 
       wineWowPackages.stagingFull
@@ -167,9 +168,8 @@ in
     };
 
     variables = rec {
-      AMD_VULKAN_ICD = "RADV";
       EDITOR = "emacsclient --create-frame --tty";
-      VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/radeon_icd.x86_64.json";
+      AMD_VULKAN_ICD = "RADV";
     };
 
     pathsToLink = [
@@ -284,6 +284,7 @@ in
     };
 
     dbus = {
+      enable = true;
       implementation = "broker";
     };
 
@@ -488,6 +489,13 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       enable32Bit = true;
       extraPackages = with pkgs; [
         amdvlk
+        vulkan-loader
+        vulkan-validation-layers
+        vulkan-extension-layer
+        rocmPackages.clr.icd
+      ];
+      extraPackages32 = with pkgs; [
+        driversi686Linux.amdvlk
       ];
     };
 
