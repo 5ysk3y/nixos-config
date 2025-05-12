@@ -17,16 +17,15 @@
           keyutils
         ];
       };
-
-      heroic = prev.heroic.override {
-        extraPkgs = pkgs: with pkgs; [
-          gamescope
-          gamemode
-        ];
-      };
     })
 
     (self: super: {
+      cider-2 = super.cider-2.overrideAttrs (old: {
+        src = pkgs.fetchurl {
+          url = "file://${vars.syncthingPath}/Files/nix/Cider/cider-linux-x64.AppImage";
+          sha256 = "0qjhsssccxiq92zs04zhi53bkaf2qwfq7ryic1w9sha59ffyxqbf";
+        };
+      });
     })
   ];
 }

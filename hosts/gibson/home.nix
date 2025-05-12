@@ -252,35 +252,39 @@ bindkey -M viins '\e.' insert-last-word
 
     mako = {
       enable = true;
-      output = "DP-1";
-      backgroundColor = "#282A36";
-      textColor = "#FFFFFF";
-      padding = "10";
-      font = "Tamzen 12";
-      layer = "overlay";
-      anchor = "top-right";
-      margin = "11";
-      defaultTimeout = 20000;
-      borderSize = 1;
-      borderRadius = 5;
-      width = 400;
-      height = 170;
-      maxIconSize = 32;
-      extraConfig =
-"[urgency=low]
-border-color=#BD93F9
-
-[urgency=normal]
-border-color=#BD93F9
-on-notify=exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav
-
-[urgency=high]
-border-color=#FF5555
-on-notify=exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav
-
-[mode=idle]
-default-timeout=0
-ignore-timeout=1";
+      criteria = {
+        "urgency=low" = {
+          border-color = "#BD93F9";
+        };
+        "urgency=normal" = {
+          border-color = "#BD93F9";
+          on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
+        };
+        "urgency=high" = {
+          border-color = "#FF5555";
+          on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
+        };
+        "mode=idle" = {
+          default-timeout = 0;
+          ignore-timeout = 1;
+        };
+      };
+      settings = {
+        output = "DP-1";
+        backgroundColor = "#282A36";
+        textColor = "#FFFFFF";
+        padding = "10";
+        font = "Tamzen 12";
+        layer = "overlay";
+        anchor = "top-right";
+        margin = "11";
+        defaultTimeout = 20000;
+        borderSize = 1;
+        borderRadius = 5;
+        width = 400;
+        height = 170;
+        maxIconSize = 32;
+      };
     };
 
    gpg-agent = {
