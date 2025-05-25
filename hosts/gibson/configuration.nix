@@ -102,33 +102,6 @@ in
        };
     };
 
-    user = {
-      services = {
-        "create-pw-links" = {
-          enable = true;
-          description = "Create audio links after session start";
-          wantedBy = [ "default.target" "sleep.target" ];
-          after = [ "wireplumber.service" "pipewire.service" ];
-          serviceConfig = {
-            ExecStart = "${pkgs.bash}/bin/bash -c 'sleep 2; f() { if ! ${pkgs.pipewire}/bin/pw-link -l | grep -q \"$1 → $2\"; then ${pkgs.pipewire}/bin/pw-link \"$1\" \"$2\"; fi }; f \"HDMI/External:monitor_FL\" \"alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FL\"; f \"HDMI/External:monitor_FR\" \"alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4:playback_FR\"; f \"HDMI/External:monitor_FL\" \"alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FL\"; f \"HDMI/External:monitor_FR\" \"alsa_output.pci-0000_0c_00.4.analog-stereo:playback_FR\"'";
-            ExecStartPre = "${pkgs.coreutils}/bin/sleep 15";
-            Type = "oneshot";
-          };
-        };
-      };
-
-      timers = {
-        "create-pw-links" = {
-          enable = true;
-          wantedBy = [ "timers.target" ];
-          timerConfig = {
-            OnBootSec = "30s";
-            Unit = "create-pw-links.service";
-          };
-        };
-      };
-    };
-
     sleep = {
       extraConfig = ''
         HibernateMode=shutdown
@@ -248,7 +221,7 @@ in
       wireplumber = {
         enable = true;
         extraConfig = {
-          "10-audio-customization" = {
+          "00-profile-enforcement" = {
             context.objects = [
               {
                 factory = "policy-node";
@@ -258,19 +231,31 @@ in
                   "target.profile" = "output:hdmi-stereo-extra4";
                 };
               }
+            ];
+          };
+          "01-default-sink" = {
+            default-nodes = {
+              "audio.sink" = "HDMI/External";
+            };
+          };
+        };
+      };
+
+      extraConfig = {
+        pipewire = {
+          "00-combined-sink" = {
+            "context.modules" = [
               {
-                factory = "adapter";
+                name = "libpipewire-module-combine-stream";
                 args = {
-                  "factory.name" = "support.null-audio-sink";
                   "node.name" = "HDMI/External";
-                  "media.class" = "Audio/Sink";
-                  "audio.position" = [ "FL" "FR" ];
-                  "monitor.channel-volumes" = true;
-                  adapter.auto-port-config = {
-                    mode = "dsp";
-                    monitor = true;
-                    position = "preserve";
-                  };
+                  "node.description" = "HDMI/External";
+                  audio.channels = 2;
+                  audio.position = [ "FL" "FR" ];
+                  slaves = [
+                    "alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4"
+                    "alsa_output.pci-0000_0c_00.4.analog-stereo"
+                  ];
                 };
               }
             ];
