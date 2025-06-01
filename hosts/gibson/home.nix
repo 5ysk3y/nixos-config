@@ -15,12 +15,14 @@
       SOPS_AGE_KEY_FILE = "${vars.syncthingPath}/Private/Keys/sops-nix";
       NIXOS_OZONE_WL = 1;
       QT_SCALE_FACTOR_ROUNDING_POLICY = "RoundPreferFloor";
+      OPENAI_API_KEY = "$(cat ${config.sops.secrets."services/chatgpt/api_key".path})";
     };
 
     packages = with pkgs; [
         bat
         bitwarden
         bottles
+        chatgpt-cli
         cider-2
         dracula-theme
         fontconfig
@@ -394,6 +396,9 @@ bindkey -M viins '\e.' insert-last-word
         sopsFile = "${vars.secretsPath}/secrets/gnupg/main.enc.gpg";
         path = "${config.home.homeDirectory}/.local/share/pass/main.gpg";
       };
+
+      # chatgpt
+      "services/chatgpt/api_key" = {};
     };
   };
 
