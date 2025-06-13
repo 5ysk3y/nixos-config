@@ -14,19 +14,18 @@
     kernelParams = [
       "quiet"
       "splash"
-      "video=amd"
       "video=DP-1:2560x1440@144"
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-2:1920x1080@60"
       "acpi_enforce_resources=lax"
       "systemd.log_level=debug"
       "mem_sleep_default=deep"
-      "amdgpu.dpm=1"
       "pcie_aspm=off"
+      "amdgpu.dpm=1"
       "boot.shell_on_fail"
       "udev.log_priority=3"
       "rd.systemd.show_status=auto"
-    ];
+      ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
       timeout = 0;
@@ -102,6 +101,10 @@
 
   swapDevices =
     [ { device = "/dev/disk/by-label/swap"; } ];
+
+  hardware = {
+    enableAllFirmware = true;
+  };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

@@ -31,6 +31,7 @@
         heroic
         hyprpolkitagent
         (inputs.nixos-xivlauncher-rb.packages.${pkgs.system}.default.override { useGameMode = true; })
+        (import ../../modules/applications/dim-screen {inherit pkgs;})
         jellyfin-mpv-shim
         jq
         keyutils
