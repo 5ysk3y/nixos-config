@@ -29,14 +29,13 @@ in
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock";
-              after_sleep_cmd = "hyprctl --batch 'dispatch exec sleep 1; dispatch dpms on; dispatch exec makoctl mode -s default; dispatch -- exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch -- exec sleep 8 && ${scripts.undim_screen.outPath}/bin/undim_screen; ";
+              after_sleep_cmd = "hyprctl --batch 'dispatch exec sleep 1; dispatch dpms on; dispatch exec makoctl mode -s default; dispatch -- exec openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp;";
             };
 
             listener = [
               {
                 timeout = 300;
-                on-timeout = "${scripts.dim_screen.outPath}/bin/dim_screen";
-                on-resume = "${scripts.undim_screen.outPath}/bin/undim_screen";
+                on-timeout = "dim -d 0";
               }
               {
                 timeout = 360;
