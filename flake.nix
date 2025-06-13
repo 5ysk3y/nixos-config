@@ -70,26 +70,31 @@
 
   outputs = { self, ... } @inputs:
 let
+
   vars = rec {
     username = "rickie";
     nixos-config = "/home/${username}/nixos-config";
     syncthingPath = "/home/${username}/Sync";
     secretsPath = builtins.toString inputs.nix-secrets;
   };
-    pkgsFor = system: with inputs; {
-      pkgs-stable = import nixpkgs-stable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      pkgs-old = import nixpkgs-old {
-        inherit system;
-        config.allowUnfree = true;
-      };
+
+  pkgsFor = system: with inputs; {
+    pkgs-stable = import nixpkgs-stable {
+      inherit system;
+      config.allowUnfree = true;
     };
+    pkgs-old = import nixpkgs-old {
+      inherit system;
+      config.allowUnfree = true;
+    };
+  };
+
 in
+
 {
-inherit vars;
-nixosConfigurations = with inputs; {
+
+  inherit vars;
+  nixosConfigurations = with inputs; {
     nixpkgs = {
       overlays = [
         (import self.inputs.emacs-overlay)
