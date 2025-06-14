@@ -95,7 +95,16 @@
     zsh = {
       enable = true;
       dotDir = ".config/zsh";
-      loginExtra = "Hyprland && exit";
+      loginExtra = ''
+        CIDER_SOURCE="${vars.syncthingPath}/Files/nix/Cider/cider-linux-x64.AppImage"
+        CIDER_TARGET="${vars.nixos-config}/nonfree/cider-linux-x64.AppImage"
+
+        if [ -e "$CIDER_SOURCE" ] && [ ! -L "$CIDER_TARGET" ]; then
+          ln -sf "$CIDER_SOURCE" "$CIDER_TARGET"
+        fi
+
+        Hyprland && exit
+      '';
       autosuggestion = {
         enable = true;
       };

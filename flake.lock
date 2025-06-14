@@ -1,5 +1,17 @@
 {
   "nodes": {
+    "cider-2-image": {
+      "flake": false,
+      "locked": {
+        "path": "./nonfree/cider-linux-x64.AppImage",
+        "type": "path"
+      },
+      "original": {
+        "path": "./nonfree/cider-linux-x64.AppImage",
+        "type": "path"
+      },
+      "parent": []
+    },
     "doomemacs": {
       "flake": false,
       "locked": {
@@ -340,6 +352,7 @@
     },
     "root": {
       "inputs": {
+        "cider-2-image": "cider-2-image",
         "doomemacs": "doomemacs",
         "emacs-overlay": "emacs-overlay",
         "home-manager": "home-manager",

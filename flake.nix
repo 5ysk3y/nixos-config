@@ -61,9 +61,14 @@
     };
 
     # Secrets Repo
-
     nix-secrets = {
       url="git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main&shallow=1";
+      flake = false;
+    };
+
+    # Non-free
+    cider-2-image = {
+      url = "path:./nonfree/cider-linux-x64.AppImage";
       flake = false;
     };
   };

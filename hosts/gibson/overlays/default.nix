@@ -1,4 +1,4 @@
-{ config, pkgs, lib, vars, ... }:
+{ config, pkgs, lib, vars, inputs, ... }:
 {
   nixpkgs.overlays = [
     (final: prev: {
@@ -18,13 +18,19 @@
       };
     })
 
-    (self: super: {
-      cider-2 = super.cider-2.overrideAttrs (_: {
-        src = pkgs.requireFile {
-          name = "cider-linux-x64.AppImage";
-          url = "https://cidercollective.itch.io/cider";
-          sha256 = "5d506132048d240613469c79186ae8b5e78ec7400f233b8709b7fe908353d9e5";
-        };
+    (self: super:
+      let
+        ciderAppImage = inputs.cider-2-image;
+      in
+    {
+      cider-2 = super.cider-2.overrideAttrs (old: {
+        src = ciderAppImage;
+        preConfigure = ''
+          if [ ! -e ${toString ciderAppImage} ]; then
+            echo "Missing Cider AppImage at: ${toString ciderAppImage}"
+            exit 1
+          fi
+        '' + (old.preConfigure or "");
       });
     })
   ];
