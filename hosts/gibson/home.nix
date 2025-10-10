@@ -22,8 +22,6 @@
         bat
         bitwarden
         bottles
-        chatgpt-cli
-        cider-2
         dracula-theme
         fontconfig
         glib
@@ -93,7 +91,7 @@
   #User shell - START #
     zsh = {
       enable = true;
-      dotDir = ".config/zsh";
+      dotDir = "${config.xdg.configHome}/zsh";
       loginExtra = ''
         CIDER_SOURCE="${vars.syncthingPath}/Files/nix/Cider/cider-linux-x64.AppImage"
         CIDER_TARGET="${vars.nixos-config}/nonfree/cider-linux-x64.AppImage"

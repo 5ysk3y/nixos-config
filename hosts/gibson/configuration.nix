@@ -14,12 +14,6 @@ in
     ];
 
   networking.hostName = "${hostname}"; # Define your hostname.
-  
-  # networking.wireless.enable = true; # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary 
-  # networking.proxy.default = "http://user:password@proxy:port/"; 
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -76,6 +70,11 @@ in
   ];
 
   systemd = {
+    tmpfiles = {
+      rules = [
+        "d /nix/tmp 0755 root root - -"
+      ];
+    };
     services = {
       "configureSyncthing" = {
         enable = true;
@@ -84,21 +83,19 @@ in
         wantedBy = [ "syncthing.service" ];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
        };
-      "nix-build-permissions" = {
-        enable = true;
-        description = "Set permissions for nix build directory: /nix/tmp";
-        after = [ "local-fs.target" ];
-        serviceConfig.ExecStart = ''
-          ${pkgs.coreutils}/bin/chmod 1777 /nix/tmp
-        '';
-       };
       "nix-daemon" = {
         environment = {
-          TMPDIR = "/tmp/nix-build";
+          TMPDIR = "/nix/tmp";
+        };
+        serviceConfig = {
+          RequiresMountsFor = [
+             "/nix/tmp"
+          ];
         };
         restartTriggers = [
           config.environment.etc."nix/nix.conf".source
         ];
+        after = [ "local-fs.target" ];
        };
     };
 
@@ -111,7 +108,8 @@ in
 
   # List packages installed in system profile. To search, run: $ nix search wget
   environment = {
-    systemPackages = with pkgs; [ 
+    systemPackages = with pkgs; [
+      cider-2
       ddcutil
       expect
       i2c-tools
@@ -137,7 +135,6 @@ in
       ADW_DISABLE_PORTAL = "1";
       GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
-      TMPDIR="/tmp/nix-build";
     };
 
     variables = rec {
@@ -274,7 +271,11 @@ in
     };
 
     logind = {
-      hibernateKey = "ignore";
+      settings = {
+        Login = {
+          HandleHibernateKey = "ignore";
+        };
+      };
     };
 
     syncthing = {
@@ -425,7 +426,6 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
     package = pkgs.nixVersions.latest;
     extraOptions = ''
       experimental-features = nix-command flakes
-      build-dir = /tmp/nix-build
     '';
     settings = {
       auto-optimise-store = true;
@@ -473,14 +473,12 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       enable = true;
       enable32Bit = true;
       extraPackages = with pkgs; [
-        amdvlk
         vulkan-loader
         vulkan-validation-layers
         vulkan-extension-layer
         rocmPackages.clr.icd
       ];
       extraPackages32 = with pkgs; [
-        driversi686Linux.amdvlk
       ];
     };
 
@@ -496,12 +494,6 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       };
       initrd = {
         enable = true;
-      };
-      amdvlk = {
-        enable = true;
-        support32Bit = {
-          enable = true;
-        };
       };
     };
 
