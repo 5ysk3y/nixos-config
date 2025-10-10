@@ -57,18 +57,12 @@
     };
 
     hyprddm = {
-      url = "github:maotseantonio/hyprddm";
+      url = "path:./flakes/sddm-themes";
     };
 
     # Secrets Repo
     nix-secrets = {
       url="git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main&shallow=1";
-      flake = false;
-    };
-
-    # Non-free
-    cider-2-image = {
-      url = "path:./nonfree/cider-linux-x64.AppImage";
       flake = false;
     };
   };
@@ -100,15 +94,6 @@ in
 
   inherit vars;
   nixosConfigurations = with inputs; {
-    nixpkgs = {
-      overlays = [
-        (import self.inputs.emacs-overlay)
-      ];
-      config = {
-        allowUnfree = true;
-      };
-    };
-
     # Main Machine (Gibson)
     "gibson" = nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
