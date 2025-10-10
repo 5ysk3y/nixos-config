@@ -93,10 +93,6 @@ in
               new_on_top = true
           }
 
-          gestures {
-              workspace_swipe = no
-          }
-
           misc {
               mouse_move_enables_dpms = true
               key_press_enables_dpms = true
