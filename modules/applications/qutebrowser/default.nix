@@ -113,7 +113,7 @@ in
 
       rofi = {
         enable = true;
-        package = pkgs.rofi-wayland;
+        package = pkgs.rofi;
       }; # End Rofi
 
     }; # End programs
