@@ -93,11 +93,11 @@
       options = [ "noatime" "discard" ];
     };
 
-  fileSystems."/tmp/nix-build" =
-    { device = "/nix/tmp";
-      fsType = "none";
-      options = [ "bind" ];
-    };
+#  fileSystems."/tmp/nix-build" =
+#    { device = "/nix/tmp";
+#      fsType = "none";
+#      options = [ "bind" ];
+#    };
 
   swapDevices =
     [ { device = "/dev/disk/by-label/swap"; } ];
