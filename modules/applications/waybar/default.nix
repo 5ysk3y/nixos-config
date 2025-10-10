@@ -91,7 +91,7 @@ in
                 };
 
                 "custom/steelseries" = {
-                    "format" = "  {icon}{} ";
+                    "format" = "  {icon}{text} ";
                     "return-type" = "json";
                     "format-icons" = {
                         "100" =" ";
@@ -122,6 +122,7 @@ in
                     "scroll-step" = 10;
                     "format-icons" = [" " " " " "];
                     "on-click" = "pwvucontrol";
+                    "ignored-sinks" = ["Starship/Matisse HD Audio Controller Analog Stereo" "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)"];
                 };
 
                 "clock" = {
