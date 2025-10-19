@@ -11,7 +11,7 @@
   in
     with nixpkgs.lib; {
       packages.${system} = rec {
-        sddm-astronaut-theme = pkgs.callPackage ./nix {
+        sddm-astronaut-theme = pkgs.callPackage ./default.nix {
           theme = "cybermonk";
         };
         default = sddm-astronaut-theme;
