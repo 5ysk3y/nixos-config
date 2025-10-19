@@ -113,7 +113,6 @@ in
       ddcutil
       expect
       i2c-tools
-      inputs.nix-gaming.packages.${pkgs.system}.wine-tkg
       libmodule
       linux-firmware
       lm_sensors
