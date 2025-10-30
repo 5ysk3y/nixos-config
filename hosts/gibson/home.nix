@@ -20,7 +20,7 @@
 
     packages = with pkgs; [
         bat
-        bitwarden
+        bitwarden-desktop
         bottles
         dracula-theme
         fontconfig
@@ -150,9 +150,11 @@ bindkey -M viins '\e.' insert-last-word
 
     git = {
       enable = true;
-      userName = "5ysk3y";
-      userEmail = "62815243+5ysk3y@users.noreply.github.com";
-      extraConfig = {
+      settings = {
+        user = {
+          name = "5ysk3y";
+          email = "62815243+5ysk3y@users.noreply.github.com";
+        };
         push.autoSetupRemote = "true";
         commit.gpgsign = true;
         user.signingkey = "7D73BA8CF10F7F67";
