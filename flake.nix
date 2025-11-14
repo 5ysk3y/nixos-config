@@ -18,7 +18,6 @@
     };
 
     # Other Stuff
-
     emacs-overlay = {
       url = "github:nix-community/emacs-overlay/master";
     };
