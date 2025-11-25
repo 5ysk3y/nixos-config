@@ -40,7 +40,12 @@ in
 
 
   # Configure keymap in X11
-  services.xserver = { xkb.layout = "us"; xkb.variant = "";
+  services = {
+    xserver = {
+      xkb.layout = "us";
+      xkb.variant = "";
+      videoDrivers = [ "nvidia" ];
+    };
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -100,12 +105,6 @@ in
         after = [ "local-fs.target" ];
        };
     };
-
-    sleep = {
-      extraConfig = ''
-        HibernateMode=shutdown
-      '';
-    };
   };
 
   # List packages installed in system profile. To search, run: $ nix search wget
@@ -136,11 +135,14 @@ in
       ADW_DISABLE_PORTAL = "1";
       GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
+      LIBVA_DRIVER_NAME = "nvidia";
+      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+      WLR_NO_HARDWARE_CURSORS = "1";
+      __GL_MaxFramesAllowed = "1";
     };
 
     variables = rec {
       EDITOR = "emacsclient --create-frame --tty";
-      AMD_VULKAN_ICD = "RADV";
     };
 
     pathsToLink = [
@@ -225,8 +227,8 @@ in
                 factory = "policy-node";
                 args = {
                   "priority.session" = 1000;
-                  "target.object" = "alsa_card.pci-0000_0a_00.1";
-                  "target.profile" = "output:hdmi-stereo-extra4";
+                  "target.object" = "alsa_card.pci-0000_08_00.1";
+                  "target.profile" = "output:hdmi-stereo-extra1";
                 };
               }
             ];
@@ -251,8 +253,8 @@ in
                   audio.channels = 2;
                   audio.position = [ "FL" "FR" ];
                   slaves = [
-                    "alsa_output.pci-0000_0a_00.1.hdmi-stereo-extra4"
-                    "alsa_output.pci-0000_0c_00.4.analog-stereo"
+                    "alsa_output.pci-0000_0a_00.4.analog-stereo"
+                    "alsa_output.pci-0000_08_00.1.hdmi-stereo-extra1"
                   ];
                 };
               }
@@ -366,6 +368,11 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
         wayland = {
           enable = true;
         };
+        settings = {
+          General = {
+            PrimaryOutput = "DP-1";
+          }; 
+        };
       };
     };
   };
@@ -470,32 +477,24 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       enable = true;
     };
 
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-      extraPackages = with pkgs; [
-        vulkan-loader
-        vulkan-validation-layers
-        vulkan-extension-layer
-        rocmPackages.clr.icd
-      ];
-      extraPackages32 = with pkgs; [
-      ];
-    };
-
     cpu = {
       amd = {
         updateMicrocode = true;
       };
     };
 
-    amdgpu = {
-      opencl = {
-        enable = true;
-      };
-      initrd = {
-        enable = true;
-      };
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+      # extraPackages = with pkgs; [ ... ] # For additional packages if needed
+    };
+
+    nvidia = {
+      modesetting.enable = true;
+      open = true;
+      powerManagement.enable = true;
+      nvidiaSettings = true;
+      package = config.boot.kernelPackages.nvidiaPackages.latest;
     };
 
     bluetooth = {

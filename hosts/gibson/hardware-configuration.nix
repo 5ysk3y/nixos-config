@@ -8,23 +8,16 @@
     ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
-    kernelModules = [ "kvm-amd" "amdgpu" "i2c-dev" "i2c-piix4" "k10temp" ];
+    kernelPackages = pkgs.linuxPackages_xanmod;
+    kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
     blacklistedKernelModules = [ "ath12k_pci" "ath12k" ];
     kernelParams = [
       "quiet"
       "splash"
+      "acpi_enforce_resources=lax"
       "video=DP-1:2560x1440@144"
       "video=DP-2:1920x1080@144"
-      "video=HDMI-A-2:1920x1080@60"
-      "acpi_enforce_resources=lax"
-      "systemd.log_level=debug"
-      "mem_sleep_default=deep"
-      "pcie_aspm=off"
-      "amdgpu.dpm=1"
-      "boot.shell_on_fail"
-      "udev.log_priority=3"
-      "rd.systemd.show_status=auto"
+      "video=HDMI-A-1:1920x1080@60" 
       ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
@@ -54,7 +47,6 @@
       systemd = {
         enable = true;
       };
-      kernelModules = [ "amdgpu" ];
       availableKernelModules = [ "nvme" "xhci_pci" "ahci" "usbhid" "sd_mod" ];
       verbose = false;
     };
@@ -92,12 +84,6 @@
       fsType = "xfs";
       options = [ "noatime" "discard" ];
     };
-
-#  fileSystems."/tmp/nix-build" =
-#    { device = "/nix/tmp";
-#      fsType = "none";
-#      options = [ "bind" ];
-#    };
 
   swapDevices =
     [ { device = "/dev/disk/by-label/swap"; } ];
