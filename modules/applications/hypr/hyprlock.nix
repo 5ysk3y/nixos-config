@@ -20,7 +20,6 @@
           enable = true;
           settings = {
             general = {
-              grace = 30;
               hide_cursor = true;
               ignore_empty_input = true;
             };
@@ -59,7 +58,7 @@
                 vibrancy_darkness = 0.0;
               }
               {
-                monitor = "HDMI-A-2";
+                monitor = "HDMI-A-1";
                 path = "${config.xdg.configHome}/Wallpapers/3monitor/hackers_right.png";
                 color = "rgba(0, 0, 0, 1)";
                 blur_size = 0;

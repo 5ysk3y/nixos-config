@@ -83,7 +83,8 @@ in
                 };
                 
                 "temperature" = {
-                    "hwmon-path" = "/sys/class/hwmon/hwmon3/temp3_input";
+                    "hwmon-path-abs" = "/sys/devices/pci0000:00/0000:00:18.3/hwmon/";
+                    "input-filename" = "temp1_input";
                     "critical-threshold" = 80;
                     "format-critical" = "{icon} {temperatureC}󰔄";
                     "format" = "{icon} {temperatureC}󰔄";
@@ -113,7 +114,7 @@ in
                     "on-click-right" = "playerctl -s stop";
                     "on-scroll-up" = "playerctl -s next";
                     "on-scroll-down" = "playerctl -s previous";
-                    "exec" = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS -s 50 -w 30";
+                    "exec" = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze --format '{title} - {artist}'";
                 };
 
                 "pulseaudio" = {
