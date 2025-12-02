@@ -1,133 +1,33 @@
-diff --git a/src/main.rs b/src/main.rs
-index 20b54fc..9990e27 100644
---- a/src/main.rs
-+++ b/src/main.rs
-@@ -9,23 +9,17 @@ mod mpris {
-     use std::time::Duration;
-     use serde::{Serialize, Deserialize};
+diff --git a/src/mpris/metadata.rs b/src/mpris/metadata.rs
+index 6560361..74e824d 100644
+--- a/src/mpris/metadata.rs
++++ b/src/mpris/metadata.rs
+@@ -14,17 +14,25 @@ pub struct TrackMetadata {
  
--    const DEFAULT_ICON: &str = "";
-+    const DEFAULT_ICON: &str = "";
-     const TIMEOUT: Duration = Duration::from_millis(500);
- 
-     fn icon_for(service: &str) -> &'static str {
-         let service = service.to_lowercase();
--        if service.contains("spotify") {
--            ""
--        } else if service.contains("vlc") {
--            "󰕼"
--        } else if service.contains("edge") {
--            "󰇩"
--        } else if service.contains("firefox") {
--            "󰈹"
-+        if service.contains("cider") {
-+            ""
-+        } else if service.contains("chromium") {
-+            ""
-         } else if service.contains("mpv") {
-             ""
--        } else if service.contains("chrome") {
--            ""
-         } else {
-             DEFAULT_ICON
-         }
-@@ -33,8 +27,8 @@ mod mpris {
- 
-     fn status_indicator(status: &str) -> &'static str {
-         match status {
--            "playing" => "",
--            "paused"  => "",
-+            "playing" => "",
-+            "paused"  => " ",
-             _         => "",
-         }
-     }
-@@ -51,10 +45,10 @@ mod mpris {
-         pub fn display_parts(&self) -> (String, String, String) {
-             let status = self.playback_status.to_lowercase();
-             if status == "stopped" {
--                return (String::new(), String::new(), status);
-+                return (String::from(DEFAULT_ICON), String::from("No player active"), status);
+ /// Helper to extract a string that might be a single value or the first in an array.
+ /// The MPRIS spec says artist/album are arrays of strings, but some players send a single string.
+-fn extract_optional_string(variant: &dbus::arg::Variant<Box<dyn dbus::arg::RefArg + 'static>>) -> Option<String> {
++fn extract_optional_string(
++    variant: &dbus::arg::Variant<Box<dyn dbus::arg::RefArg + 'static>>
++) -> Option<String> {
+     use dbus::arg::ArgType;
++
+     match variant.0.arg_type() {
+         ArgType::Array => {
+             if let Some(mut iter) = variant.0.as_iter() {
+-                iter.next().and_then(|v| v.as_str()).map(str::to_string)
++                iter.next()
++                    .and_then(|v| v.as_str())
++                    .map(|s| s.replace("&", "+"))
+             } else {
+                 None
              }
-             let icon = format!("{} {}", icon_for(&self.service), status_indicator(&status));
--            let metadata = match (&self.title, &self.artist) {
-+            let metadata = match (&self.artist, &self.title) {
-                 (Some(t), Some(a)) => format!("{} - {}", t, a),
-                 (Some(t), None)    => t.clone(),
-                 _                  => self.playback_status.clone(),
-@@ -70,12 +64,14 @@ mod mpris {
-     fn extract_metadata(map: &HashMap<String, dbus::arg::Variant<Box<dyn dbus::arg::RefArg>>>) -> (Option<String>, Option<String>) {
-         let title = map.get("xesam:title")
-             .and_then(|v| v.0.as_str())
-+            .map(|t| t.replace("&", "+"))
-             .map(String::from);
-         let artist = map.get("xesam:artist")
-             .and_then(|v| {
-                 v.0.as_iter()
-                     .and_then(|mut iter| iter.next())
-                     .and_then(|val| val.as_str())
-+                    .map(|t| t.replace("&", "+"))
-                     .map(String::from)
-             });
-         (title, artist)
-@@ -102,7 +98,7 @@ mod mpris {
- }
- 
- mod scroll {
--    pub const WRAP_SPACER: &str = "   ";
-+    pub const WRAP_SPACER: &str = " | ";
-     pub const RESET_HOLD: usize = 2;
- 
-     /// Returns a substring of the padded text using modulo arithmetic.
-@@ -119,11 +115,12 @@ mod scroll {
-     pub struct ResetState {
-         pub offset: usize,
-         pub hold: usize,
-+        pub last_meta: Option<String>,
-     }
- 
-     impl ResetState {
-         pub fn new() -> Self {
--            Self { offset: 0, hold: 0 }
-+            Self { offset: 0, hold: 0, last_meta: None }
          }
+-        ArgType::String => variant.0.as_str().map(str::to_string),
++        ArgType::String => variant
++            .0
++            .as_str()
++            .map(|s| s.replace("&", "+")),
+         _ => None,
      }
- 
-@@ -215,7 +212,28 @@ fn update_status(config: &Config, reset_state: &mut scroll::ResetState, wrap_off
-     }) {
-         let (icon, meta, norm) = player.display_parts();
-         let class = if norm == "stopped" { "stopped" } else { norm.as_str() };
--        let display_text = if meta.chars().count() > config.width {
-+
-+        // === Begin: Reset scroll state on track change ===
-+        // For both modes, check if the metadata has changed.
-+        if reset_state.last_meta.as_ref().map(|m| m != &meta).unwrap_or(true) {
-+            // Reset for the reset mode.
-+            reset_state.offset = 0;
-+            reset_state.hold = 0;
-+            // And reset the wrapping offset as well.
-+            *wrap_offset = 0;
-+            reset_state.last_meta = Some(meta.clone());
-+        }
-+        // === End: Reset scroll state on track change ===
-+
-+        let display_text = if norm == "paused" {
-+            // When paused, display static text (truncate if too long).
-+            let static_text = if meta.chars().count() > config.width {
-+                meta.chars().take(config.width).collect::<String>()
-+            } else {
-+                meta
-+            };
-+            format!("{} {}", icon, static_text)
-+        } else if meta.chars().count() > config.width {
-             match config.scroll_mode {
-                 ScrollMode::Wrapping => {
-                     let text = scroll::wrapping(&meta, *wrap_offset, config.width);
-@@ -230,6 +248,7 @@ fn update_status(config: &Config, reset_state: &mut scroll::ResetState, wrap_off
-         } else {
-             format!("{} {}", icon, meta)
-         };
-+
-         println!("{}", json!({"text": display_text, "class": class}));
-     } else {
-         println!("{}", json!({"text": "", "class": "none"}));
+ }
