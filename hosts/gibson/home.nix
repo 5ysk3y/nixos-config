@@ -55,6 +55,7 @@
         vulkan-tools
         webcord
         wl-clipboard
+        wtype
     ];
   };
 
