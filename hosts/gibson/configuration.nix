@@ -139,6 +139,8 @@ in
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       WLR_NO_HARDWARE_CURSORS = "1";
       __GL_MaxFramesAllowed = "1";
+      __GL_GSYNC_ALLOWED = "1";
+      __GL_VRR_ALLOWED  = "0";
     };
 
     variables = rec {
@@ -235,28 +237,19 @@ in
           };
           "01-default-sink" = {
             default-nodes = {
-              "audio.sink" = "HDMI/External";
+              "audio.sink" = "HDMI_External";
             };
           };
         };
       };
 
       extraConfig = {
-        pipewire = {
+        pipewire-pulse = {
           "00-combined-sink" = {
-            "context.modules" = [
+            "pulse.cmd" = [
               {
-                name = "libpipewire-module-combine-stream";
-                args = {
-                  "node.name" = "HDMI/External";
-                  "node.description" = "HDMI/External";
-                  audio.channels = 2;
-                  audio.position = [ "FL" "FR" ];
-                  slaves = [
-                    "alsa_output.pci-0000_0a_00.4.analog-stereo"
-                    "alsa_output.pci-0000_08_00.1.hdmi-stereo-extra1"
-                  ];
-                };
+                cmd  = "load-module";
+                args = "module-combine-sink sink_name=HDMI_External sink_properties='device.description=\"HDMI / External\"' slaves=alsa_output.pci-0000_0a_00.4.analog-stereo,alsa_output.pci-0000_08_00.1.hdmi-stereo-extra1";
               }
             ];
           };

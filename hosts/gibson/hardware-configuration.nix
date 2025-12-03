@@ -8,7 +8,7 @@
     ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_xanmod;
+    kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
     blacklistedKernelModules = [ "ath12k_pci" "ath12k" ];
     kernelParams = [
@@ -79,11 +79,12 @@
       fsType = "ext4";
     };
 
-  fileSystems."/nix/tmp" =
-    { device = "/dev/disk/by-label/nix-build";
-      fsType = "xfs";
-      options = [ "noatime" "discard" ];
-    };
+#  fileSystems."/nix/tmp" =
+#    { device = "/dev/disk/by-label/nix-build";
+#      fsType = "xfs";
+#      options = [ "noatime" "discard" "nofail" ];
+#      neededForBoot = false;
+#    };
 
   swapDevices =
     [ { device = "/dev/disk/by-label/swap"; } ];
