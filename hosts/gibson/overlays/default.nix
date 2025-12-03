@@ -17,9 +17,9 @@
           ];
         };
 
-        webcord = prev.webcord.override {
-          electron_36 = prev.electron_37;
-        };
+#        webcord = prev.webcord.override {
+#          electron_36 = prev.electron_37;
+#        };
       })
   ];
 }
