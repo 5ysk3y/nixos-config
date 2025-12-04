@@ -16,10 +16,6 @@
             keyutils
           ];
         };
-
-#        webcord = prev.webcord.override {
-#          electron_36 = prev.electron_37;
-#        };
       })
   ];
 }
