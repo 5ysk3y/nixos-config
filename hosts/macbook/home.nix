@@ -59,7 +59,6 @@ in
   confSymlinks = {
     enable = true;
     configs = {
-      cider = false;
       jellyfinShim = false;
       openrgb = false;
       streamdeckui = false;
@@ -70,9 +69,6 @@ in
 
   scripts = {
     enable = true;
-    waybar = {
-      enable = false;
-    };
   };
 
   applications = {
@@ -92,7 +88,7 @@ in
   #User shell - START #
     zsh = {
       enable = true;
-      dotDir = ".config/zsh";
+      dotDir = "${config.xdg.configHome}/zsh";
       loginExtra = "Hyprland && exit";
       autosuggestion = {
         enable = true;
@@ -124,7 +120,7 @@ in
       history = {
         path = "${config.xdg.dataHome}/zsh/zsh_history";
       };
-      initExtra = ''
+      initContent = ''
 vim() {
   emacsclient --create-frame --tty "$@"
 }
@@ -142,9 +138,14 @@ bindkey -M viins '\e.' insert-last-word
 
     git = {
       enable = true;
-      userName = "5ysk3y";
-      extraConfig = {
+      settings = {
+        user = {
+          name = "5ysk3y";
+          email = "62815243+5ysk3y@users.noreply.github.com";
+        };
         push.autoSetupRemote = "true";
+        commit.gpgsign = true;
+        user.signingkey = "7D73BA8CF10F7F67";
       };
     };
 
@@ -166,7 +167,7 @@ bindkey -M viins '\e.' insert-last-word
 
     kitty = {
       enable = true;
-      theme = "Dracula";
+      themeFile = "Dracula";
       font = {
         name = "Noto Sans Mono";
         size = 10.0;
@@ -194,34 +195,38 @@ bindkey -M viins '\e.' insert-last-word
   services = {
     mako = {
       enable = true;
-      backgroundColor = "#282A36";
-      textColor = "#FFFFFF";
-      padding = "10";
-      font = "Tamzen 12";
-      layer = "overlay";
-      anchor = "top-right";
-      margin = "11";
-      defaultTimeout = 20000;
-      borderSize = 1;
-      borderRadius = 5;
-      width = 400;
-      height = 170;
-      maxIconSize = 32;
-      extraConfig =
-"[urgency=low]
-border-color=#BD93F9
+      settings = {
+        output = "DP-1";
+        background-color = "#282A36";
+        text-color = "#FFFFFF";
+        padding = "10";
+        font = "Tamzen 12";
+        layer = "overlay";
+        anchor = "top-right";
+        margin = "11";
+        default-timeout = 20000;
+        border-size = 1;
+        border-radius = 5;
+        width = 400;
+        height = 170;
+        max-icon-size = 32;
 
-[urgency=normal]
-border-color=#BD93F9
-on-notify=exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav
-
-[urgency=high]
-border-color=#FF5555
-on-notify=exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav
-
-[mode=idle]
-default-timeout=0
-ignore-timeout=1";
+        "urgency=low" = {
+          border-color = "#BD93F9";
+        };
+        "urgency=normal" = {
+          border-color = "#BD93F9";
+          on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
+        };
+        "urgency=high" = {
+          border-color = "#FF5555";
+          on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
+        };
+        "mode=idle" = {
+          default-timeout = 0;
+          ignore-timeout = 1;
+        };
+      };
     };
 
    gpg-agent = {
