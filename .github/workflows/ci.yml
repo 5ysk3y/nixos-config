@@ -1,0 +1,34 @@
+name: NixOS CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-gibson:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repo with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.NIXOS_CONFIG_PAT }}
+
+      - name: Install Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Prepare age key path
+        run: |
+          sudo mkdir -p /home/rickie/Sync/Private/Keys
+          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /home/rickie/Sync/Private/Keys/sops-nix > /dev/null
+          sudo chmod 600 /home/rickie/Sync/Private/Keys/sops-nix
+          sudo chown -R $USER:$USER /home/rickie
+
+      - name: Build gibson system
+        run: |
+          nix build .#nixosConfigurations.gibson.config.system.build.toplevel
