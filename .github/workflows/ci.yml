@@ -13,14 +13,21 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repo with submodules
+      - name: Checkout main repo 
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.NIXOS_CONFIG_PAT }}
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Start ssh-agent and add deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
+
+      - name: Add GitHub to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - name: Prepare age key path
         run: |
@@ -28,7 +35,3 @@ jobs:
           echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /home/rickie/Sync/Private/Keys/sops-nix > /dev/null
           sudo chmod 600 /home/rickie/Sync/Private/Keys/sops-nix
           sudo chown -R $USER:$USER /home/rickie
-
-      - name: Build gibson system
-        run: |
-          nix build .#nixosConfigurations.gibson.config.system.build.toplevel
