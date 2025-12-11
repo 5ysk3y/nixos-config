@@ -325,7 +325,5 @@ ignore-timeout=1";
 
   imports = [
     ../../modules
-    inputs.hyprlock.homeManagerModules.hyprlock
-    inputs.hypridle.homeManagerModules.hypridle
   ];
 }
