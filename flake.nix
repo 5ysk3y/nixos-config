@@ -43,7 +43,6 @@
 
     wayland-pipewire-idle-inhibit = {
       url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixos-xivlauncher-rb = {
