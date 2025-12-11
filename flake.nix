@@ -90,7 +90,6 @@ in
 
 {
 
-  inherit vars;
   nixosConfigurations = with inputs; {
     # Main Machine (Gibson)
     "gibson" = nixpkgs.lib.nixosSystem rec {
