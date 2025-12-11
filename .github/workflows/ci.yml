@@ -13,7 +13,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout main repo 
+      - name: Checkout repo (no need for submodules for Nix itself)
         uses: actions/checkout@v4
 
       - name: Install Nix
@@ -35,3 +35,7 @@ jobs:
           echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /home/rickie/Sync/Private/Keys/sops-nix > /dev/null
           sudo chmod 600 /home/rickie/Sync/Private/Keys/sops-nix
           sudo chown -R $USER:$USER /home/rickie
+
+      - name: Build gibson system
+        run: |
+          nix build .#nixosConfigurations.gibson.config.system.build.toplevel
