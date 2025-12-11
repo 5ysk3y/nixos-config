@@ -114,7 +114,7 @@ in
                     "on-click-right" = "playerctl -s stop";
                     "on-scroll-up" = "playerctl -s next";
                     "on-scroll-down" = "playerctl -s previous";
-                    "exec" = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze --format '{title} - {artist}'";
+                    "exec" = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze -b vlc --format '{title} - {artist}'";
                 };
 
                 "pulseaudio" = {
