@@ -15,10 +15,13 @@ in
       ./hardware-configuration.nix
     ];
 
-  networking.hostName = "${hostname}"; # Define your hostname.
-
-  # Enable networking
-  networking.networkmanager.enable = true;
+  networking = {
+    hostName = "${hostname}"; # Define your hostname.
+    timeServers = [ "192.168.1.1" ] ;
+    networkmanager = {
+      enable = true;
+    };
+  };
 
   # Set your time zone.
   time.timeZone = "Europe/London";
@@ -487,7 +490,17 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       open = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.latest;
+      package = config.boot.kernelPackages.nvidiaPackages.stable // {
+        open = config.boot.kernelPackages.nvidiaPackages.stable.open.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [
+            (pkgs.fetchpatch {
+              name = "get_dev_pagemap.patch";
+              url = "https://github.com/NVIDIA/open-gpu-kernel-modules/commit/3e230516034d29e84ca023fe95e284af5cd5a065.patch";
+              hash = "sha256-BhL4mtuY5W+eLofwhHVnZnVf0msDj7XBxskZi8e6/k8=";
+            })
+          ];
+        });
+      };
     };
 
     bluetooth = {
