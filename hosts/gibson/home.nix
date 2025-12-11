@@ -314,7 +314,7 @@ bindkey -M viins '\e.' insert-last-word
         idle_inhibitor = "wayland";
 
         sink_whitelist = [
-          { name = "HDMI/External"; }
+          { name = "HDMI / External"; }
         ];
       };
    };
