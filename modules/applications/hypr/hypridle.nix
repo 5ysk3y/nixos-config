@@ -29,7 +29,7 @@ in
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock";
-              after_sleep_cmd = "hyprctl --batch 'dispatch exec makoctl mode -s default; dispatch exec -- openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; dispatch exec sleep 1; dispatch dpms on'; wtype -k escape";
+              after_sleep_cmd = "hyprctl --batch 'dispatch exec makoctl mode -s default; dispatch exec sleep 1; dispatch dpms on'; wtype -k escape; openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp;";
             };
 
             listener = [
