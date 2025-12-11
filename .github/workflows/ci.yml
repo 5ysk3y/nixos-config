@@ -13,7 +13,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repo (no need for submodules for Nix itself)
+      - name: Checkout repo 
         uses: actions/checkout@v4
 
       - name: Install Nix
@@ -45,6 +45,6 @@ jobs:
           sudo chmod 600 /home/rickie/Sync/Private/Keys/sops-nix
           sudo chown -R $USER:$USER /home/rickie
 
-      - name: Build gibson system
+      - name: Check Flake
         run: |
-          nix build .#nixosConfigurations.gibson.config.system.build.toplevel
+          nix flake check
