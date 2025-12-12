@@ -13,12 +13,12 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repo 
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@v3
-        
+
       - name: Free up disk space
         run: |
           df -h
@@ -38,13 +38,17 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Prepare age key path
+      - name: Prepare age key
+        if: ${{ secrets.SOPS_AGE_KEY != '' }}
         run: |
-          sudo mkdir -p /home/rickie/Sync/Private/Keys
-          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /home/rickie/Sync/Private/Keys/sops-nix > /dev/null
-          sudo chmod 600 /home/rickie/Sync/Private/Keys/sops-nix
-          sudo chown -R $USER:$USER /home/rickie
+          sudo mkdir -p /var/lib/age
+          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/age/keys.txt > /dev/null
+          sudo chmod 0640 /var/lib/age/keys.txt
+          sudo chown root:root /var/lib/age/keys.txt
+          sudo chmod 0755 /var/lib/age || true
 
-      - name: Check Flake
+      - name: Check Flake /w override nix-secrets
         run: |
-          nix flake check
+          nix flake check \
+            --no-write-lock-file \
+            --override-input nix-secrets "git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main&shallow=1"
