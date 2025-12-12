@@ -1,59 +1,174 @@
-# Menu
+# NixOS Configuration
 
-- [Introduction](#nixos-config)
-- [Applications](#applications)
-- [Installation](#installation)
-- [Screenshot](#screenshot)
+## Contents
+- [Introduction](#-introduction)
+- [Philosophy](#-philosophy)
+- [Secrets](#-secrets)
+- [What’s in This Repo](#-whats-in-this-repo)
+- [Installation](#-installation-)
+- [Local Development & Rebuilds](#-local-development--rebuilds)
+- [CI Integration](#-ci-integration)
+- [Structure & Ongoing Work](#-structure--ongoing-work)
+- [For Readers New to This Repo](#-for-readers-new-to-this-repo)
+- [Final Notes](#-final-notes)
 
-# NixOS Config
-**TL/DR**
+---
 
-*This is a work-in-progress NixOS system repo! The nix-based reproducability aspect of it is unlikely to work for most other people without diving into/adjusting the code itself.*
+## Introduction
 
-Hi there, thanks for checking out my Nix config. I'm pretty new to the OS (circa beginning of 2024), so there's probably a lot that will change or move around in this repo. There are also a tonne of improvements I can make, with time, so to any Nix aficionados out there: "Be Nice" if you scrutinise my setup :D
+This repository is the **home of my personal NixOS configuration** — a declarative, reproducible setup driven by Nix flakes and enhanced with automated secrets provisioning.
 
-My configurations namely revolve around applications using vim-style keybindings, and I tend to use Dracula theme/colour-scheme. This is (mostly) all defined declaratively using Nix. In the cases where files may contain sensitive information (e.g. gnupg private keys), I use [sops-nix](https://github.com/Mic92/sops-nix) to encrypt the data. These secrets are stored in a private repository, despite their state of encryption, as an added security layer.
+This is *not* a generic “copy‑paste and it works for everybody” configuration. It is tuned for my hardware, preferences, and workflows. That said, this repo may be a useful reference if you’re exploring advanced NixOS patterns.
 
-Note: this code is mainly available online to allow for version control (and inherent backup), and it may also be useful as a reference to others who use NixOS. Outside of that, though, the system will build around things I've obviously tailored to my liking and the hardware setup I have so please bear that in mind before you attempt to just switch to this configuration. I can't offer support on things you can't get working so please do not ask. NixOS has an incredible online community across a myriad of different platforms that can be leveraged/utilised for assistance if you require it.
-
-Thanks for looking!
-
-### Applications
-
-Here are a list of the current applications I use (other config files may be also added to this repo over time):
-
-- *Compositor:* [Hyprland](https://github.com/hyprwm/hyprland) / [Wayland](https://gitlab.freedesktop.org/wayland/wayland)
-- *Notifications:* [mako](https://github.com/emersion/mako)
-- *Bar:* [Waybar](https://github.com/Alexays/Waybar)
-- *Menu:* [Fuzzel](https://codeberg.org/dnkl/fuzzel)
-- *Player:* [Cider](https://github.com/ciderapp/Cider)
-- *Passwords:* [Pass](https://www.passwordstore.org/) / [Bitwarden](https://github.com/bitwarden/clients)
-- *Shell:* [Kitty](https://github.com/kovidgoyal/kitty) 
-- *Browser:* [Qutebrowser](https://github.com/qutebrowser/qutebrowser)
-- *Screenshots*: [Grimblast](https://github.com/hyprwm/contrib/tree/main/grimblast)
-
-Other well know software such as Discord/Signal and Wine/Mesa packages are included (as I run AMD hardware). Most other things should also be included declaratively.
-
-### Installation
-
-**WIP - NEEDS TESTING**
-
-As stated, this code repo is designed for deployment of my main NixOS system. It is based around flakes and, therefore, should theoretically be reproducable using the following:
-
-``` sh
-MOUNT="/dev/sdX"
-
-sudo nix \
-    --extra-experimental-features 'flakes nix-command' \
-    install \
-    --flake "github:5ysk3y/dotfiles#gibson" \
-    --write-efi-boot-entries \
-    --disk main /dev/sdX
-```
-> Spoilers - this probably wont work but I'll leave it here anyway :D
-
-***
-
-### Screenshot
+> ⚠️ **Status:** This repository is under **active, ongoing development**. Some modules are highly refined, others are still host‑specific or in the process of being generalised. Expect rough edges — and evolution.
 
 ![Alt text](screenshot.jpeg)
+
+---
+
+## 🧠 Philosophy
+
+This config aims to combine:
+
+- **Declarative system configuration** via Nix flakes
+- **Secure secret management** using age + sops + a private secrets repo
+- **Reproducible deployment**, including fresh installs via a bootstrap script
+- **CI compatibility**, with secrets decoupled from public evaluation
+
+Reproducibility doesn’t mean “works everywhere without editing”. It means the system *you define here* can be rebuilt reliably across machines or reinstall scenarios.
+
+---
+
+## 🧱 Secrets 
+
+Secrets (passwords, keys, tokens) are **never stored in this public repo** in plaintext.
+
+Instead, this setup uses:
+
+- A private `nix-secrets` repository (encrypted with `sops`)
+- The encryption scheme `age` for secure key management
+- A bootstrap script that:
+  - decrypts a minimal age identity using a *single long passphrase*
+  - uses a deploy SSH key to clone the private `nix-secrets` repo
+  - installs decrypted secrets into `/etc/nixos/nix-secrets` on a fresh system
+
+This bootstrap process allows a fresh install to succeed without embedding secrets in the public flake. Strong key rotation and cryptographic hygiene are enforced.
+
+> Secrets are encrypted at rest, stored in a private repo, and only ever decrypted on target machines. CI workflows override the secrets input and never evaluate real secret material.
+
+---
+
+## 🧰 What’s in This Repo
+
+This repo contains:
+
+- `flake.nix` — the flake entrypoint with system definitions
+- Host‑specific folders (e.g. `hosts/gibson/`) containing NixOS modules
+- Home Manager configurations
+- Custom scripts (including bootstrap helpers)
+- Supporting tooling and documentation
+
+It does *not* contain:
+
+- Unencrypted private keys
+- Decryption passphrases
+- Plaintext secrets of any kind
+
+---
+
+## 🚀 Installation 
+
+> **IMPORTANT:** Secrets are required to install or rebuild this configuration.
+
+To install on a fresh machine:
+
+1. Clone this repo locally:
+   ```sh
+   git clone https://github.com/5ysk3y/nixos-config.git
+   cd nixos-config
+   ```
+
+2. Run the **bootstrap script** with your long passphrase:
+   ```sh
+   sudo ./bootstrap/install.sh --target /mnt --user rickie --host gibson
+   ```
+
+   The bootstrap process:
+   - Decrypts the age identity
+   - Decrypts the deploy SSH key
+   - Pulls the private `nix-secrets` repo
+   - Deploys secrets to `/etc/nixos/nix-secrets`
+   - Installs the age key at `/var/lib/age/keys.txt` for `sops-nix`
+
+3. Install NixOS using the flake:
+   ```sh
+   sudo nixos-install --flake "/mnt/home/rickie/nixos-config#gibson"
+   ```
+
+Once this completes, the system can be rebuilt normally with secrets available.
+
+---
+
+## 🧪 Local Development & Rebuilds
+
+After bootstrapping, future rebuilds work as usual:
+
+```sh
+sudo nixos-rebuild switch --flake /home/<user>/nixos-config#gibson
+```
+
+Secrets are decrypted automatically at activation time via `sops-nix`.
+
+---
+
+## 🛠 CI Integration
+
+GitHub Actions runs `nix flake check` without access to real secrets.
+
+CI achieves this by:
+
+- Using an SSH deploy key (stored in GitHub Secrets) to fetch the private secrets repo
+- Overriding the `nix-secrets` flake input during CI evaluation
+- Avoiding any reliance on `/etc/nixos/nix-secrets` existing on runners
+
+This keeps CI **green, safe, and reproducible**, while maintaining strong isolation between public evaluation and private secret material.
+
+---
+
+## 🧩 Structure & Ongoing Work
+
+Some parts of this repository — particularly newer bootstrap and secrets tooling — are relatively polished and opinionated.
+
+Other areas:
+
+- still contain host‑specific assumptions
+- have grown organically over time
+- may not yet align with strict Nix “best practices”
+
+Cleaning up, modularising, and generalising those parts is **ongoing work**. This repo reflects a living system, not a finished template.
+
+---
+
+## 🧭 For Readers New to This Repo
+
+If you’re new to NixOS or flakes:
+
+- This configuration uses advanced patterns
+- Some familiarity with Nix expressions is assumed
+- Secrets handling is intentionally non‑trivial for security reasons
+
+Useful references:
+
+- `sops-nix`: https://github.com/Mic92/sops-nix
+- NixOS Discourse discussions on secrets management
+
+---
+
+## ❤️ Final Notes
+
+This repository exists primarily for my own systems, but it’s public in the spirit of learning, sharing, and curiosity.
+
+If something here inspires you, feel free to adapt it — just don’t expect it to drop cleanly into your environment without modification.
+
+Expect change. Expect iteration. That’s the point.
+
