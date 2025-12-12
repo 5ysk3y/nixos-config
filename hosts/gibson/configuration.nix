@@ -52,14 +52,19 @@ in
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users."${vars.username}" = {
-    isNormalUser = true; 
-    description = "${vars.username}";
-    extraGroups = [ "networkmanager" "wheel" "audio" "i2c" "libvirtd" "gamemode" ];
-#   packages = with pkgs; [    ];
-#   USER PKGS MANAGED IN HOME.NIX    
-    shell = pkgs.zsh;
-    hashedPasswordFile = config.sops.secrets."hosts/user_pass".path;
+  users = {
+    users."${vars.username}" = {
+      isNormalUser = true; 
+      description = "${vars.username}";
+      extraGroups = [ "networkmanager" "wheel" "audio" "i2c" "libvirtd" "gamemode" "sops" ];
+  #   packages = with pkgs; [    ];
+  #   USER PKGS MANAGED IN HOME.NIX    
+      shell = pkgs.zsh;
+      hashedPasswordFile = config.sops.secrets."hosts/user_pass".path;
+    };
+    groups = {
+      sops = {};
+    };
   };
 
   fonts.packages = with pkgs; [
@@ -83,6 +88,8 @@ in
     tmpfiles = {
       rules = [
         "d /nix/tmp 0755 root root - -"
+        "d /var/lib/age 0750 root sops - -"
+        "f /var/lib/age/keys.txt 0640 root sops - -"
       ];
     };
     services = {
@@ -424,7 +431,6 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
 
   nix = {
     nixPath = [ 
-      "nixos-config=${vars.nixos-config}/hosts/${hostname}/configuration.nix"
       "nixpkgs=${inputs.nixpkgs}"
     ];
     package = pkgs.nixVersions.latest;
@@ -516,7 +522,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
   };
 
   sops = {
-    age.keyFile = "${vars.syncthingPath}/Private/Keys/sops-nix";
+    age.keyFile = "/var/lib/age/keys.txt";
     defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
 

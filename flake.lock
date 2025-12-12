@@ -128,19 +128,14 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1761822304,
-        "narHash": "sha256-IahACJbLBwJeHhU3kmSTB5utIsIAE/mKXSFJKPPnSio=",
-        "ref": "main",
-        "rev": "b91986aee6ebf5db78b52740c1465803b31906f0",
-        "shallow": true,
-        "type": "git",
-        "url": "ssh://git@github.com/5ysk3y/nix-secrets.git"
+        "lastModified": 1765566557,
+        "narHash": "sha256-RrcDgs881EF4JgiOFndQM7+6B2bE5GOek03TM/6otso=",
+        "path": "/etc/nixos/nix-secrets",
+        "type": "path"
       },
       "original": {
-        "ref": "main",
-        "shallow": true,
-        "type": "git",
-        "url": "ssh://git@github.com/5ysk3y/nix-secrets.git"
+        "path": "/etc/nixos/nix-secrets",
+        "type": "path"
       }
     },
     "nixos-xivlauncher-rb": {

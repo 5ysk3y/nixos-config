@@ -58,9 +58,9 @@
       url = "path:./flakes/sddm-themes";
     };
 
-    # Secrets Repo
+    # Secrets
     nix-secrets = {
-      url="git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main&shallow=1";
+      url = "path:/etc/nixos/nix-secrets";
       flake = false;
     };
   };
@@ -71,8 +71,8 @@ let
   vars = rec {
     username = "rickie";
     nixos-config = "/home/${username}/nixos-config";
-    syncthingPath = "/home/${username}/Sync";
     secretsPath = builtins.toString inputs.nix-secrets;
+    syncthingPath = "/home/${username}/Sync";
   };
 
   pkgsFor = system: with inputs; {

@@ -21,8 +21,11 @@
     })
 
     (mkIf (config.scripts.nix) {
-      home.packages = with pkgs; [
-        (import ./nix {inherit pkgs vars;})
+      home.packages = with pkgs; let
+        nixScripts = import ./nix { inherit pkgs vars; };
+      in [
+        nixScripts.nix-build-system
+        nixScripts.nix-secrets
       ];
     })
   ]);

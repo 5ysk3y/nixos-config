@@ -94,13 +94,6 @@
       enable = true;
       dotDir = "${config.xdg.configHome}/zsh";
       loginExtra = ''
-        CIDER_SOURCE="${vars.syncthingPath}/Files/nix/Cider/cider-linux-x64.AppImage"
-        CIDER_TARGET="${vars.nixos-config}/nonfree/cider-linux-x64.AppImage"
-
-        if [ -e "$CIDER_SOURCE" ] && [ ! -L "$CIDER_TARGET" ]; then
-          ln -sf "$CIDER_SOURCE" "$CIDER_TARGET"
-        fi
-
         Hyprland && exit
       '';
       autosuggestion = {
@@ -116,8 +109,8 @@
         build-nix = "nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'";
         cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
         mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
-	shred = "shred -zfu";
-  nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode=block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ${vars.nixos-config} $@ --option eval-cache false --show-trace";
+        shred = "shred -zfu";
+        nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode=block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ${vars.nixos-config} $@ --option eval-cache false --show-trace";
         spicy = "spicy --spice-ca-file=/etc/pki/libvirt-spice/ca-cert.pem --uri 'spice://127.0.0.1' -p 5900 -s 5901 --title 'th3h4x0r' -f > /dev/null 2>&1 &|";
         pass = "pass -c main";
       };
@@ -374,7 +367,7 @@ bindkey -M viins '\e.' insert-last-word
   };
 
   sops = {
-    age.keyFile = "${vars.syncthingPath}/Private/Keys/sops-nix";
+    age.keyFile = "/var/lib/age/keys.txt";
     defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
 
