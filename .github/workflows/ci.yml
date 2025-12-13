@@ -31,15 +31,16 @@ jobs:
       - uses: DeterminateSystems/determinate-nix-action@v3
       - name: Nix format check
         run: |
-         set -euo pipefail
-         nix run nixpkgs#alejandra -- -c . || {
-         echo ""
-         echo "Formatting required."
-         echo "Run this locally to fix:"
-         echo "  nix run nixpkgs#alejandra -- ."
-         echo ""
-         exit 1
-        }
+          set -euo pipefail
+          nix run nixpkgs#alejandra -- -c . || {
+            echo ""
+            echo "Formatting required."
+            echo "Run this locally to fix:"
+            echo "  nix run nixpkgs#alejandra -- ."
+            echo ""
+            exit 1
+          }
+
   eval-check:
     runs-on: ubuntu-latest
     permissions:
@@ -59,11 +60,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/determinate-nix-action@v3
-
       - name: Free up disk space
         run: |
           df -h
-          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet \
+                      /opt/ghc \
+                      /opt/hostedtoolcache \
+                      /usr/local/lib/android
           df -h
 
       - name: Start ssh-agent and add deploy key
@@ -87,4 +90,5 @@ jobs:
         run: |
           nix flake check \
             --no-write-lock-file \
-            --override-input nix-secrets "git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main&shallow=1"
+            --override-input nix-secrets \
+              "git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main&shallow=1"
