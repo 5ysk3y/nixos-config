@@ -4,7 +4,8 @@
   lib,
   vars,
   ...
-}: {
+}:
+{
   imports = [
     ./hyprland.nix
     ./hypridle.nix

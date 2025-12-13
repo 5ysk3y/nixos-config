@@ -6,11 +6,13 @@
   vars,
   hostname,
   ...
-}: let
+}:
+let
   scripts = rec {
-    undim_screen = import ./scripts/undim_screen.nix {inherit pkgs;};
+    undim_screen = import ./scripts/undim_screen.nix { inherit pkgs; };
   };
-in {
+in
+{
   options = with lib; {
     applications = {
       hypr = {
@@ -22,7 +24,8 @@ in {
     };
   };
 
-  config = with lib;
+  config =
+    with lib;
     mkIf config.applications.hypr.enable {
       # Shared hyprland configuration
 

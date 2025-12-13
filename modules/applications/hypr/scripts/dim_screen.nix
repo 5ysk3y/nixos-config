@@ -1,7 +1,13 @@
-{pkgs}:
+{ pkgs }:
 pkgs.writeShellApplication {
   name = "dim_screen";
-  runtimeInputs = with pkgs; [ddcutil hyprland gnused gnugrep gawk];
+  runtimeInputs = with pkgs; [
+    ddcutil
+    hyprland
+    gnused
+    gnugrep
+    gawk
+  ];
   text = ''
     checkBrightness() {
         ddcutil --bus="$1" getvcp 10 | awk '{print $9}' | sed 's/,//g'

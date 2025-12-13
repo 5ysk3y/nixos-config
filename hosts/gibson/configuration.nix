@@ -8,11 +8,13 @@
   hostname,
   vars,
   ...
-}: let
+}:
+let
   sddmTheme = inputs.hyprddm.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
     theme = "cyberpunk";
   };
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -20,7 +22,7 @@ in {
 
   networking = {
     hostName = "${hostname}"; # Define your hostname.
-    timeServers = ["192.168.1.1"];
+    timeServers = [ "192.168.1.1" ];
     networkmanager = {
       enable = true;
     };
@@ -49,7 +51,7 @@ in {
     xserver = {
       xkb.layout = "us";
       xkb.variant = "";
-      videoDrivers = ["nvidia"];
+      videoDrivers = [ "nvidia" ];
     };
   };
 
@@ -58,14 +60,22 @@ in {
     users."${vars.username}" = {
       isNormalUser = true;
       description = "${vars.username}";
-      extraGroups = ["networkmanager" "wheel" "audio" "i2c" "libvirtd" "gamemode" "sops"];
+      extraGroups = [
+        "networkmanager"
+        "wheel"
+        "audio"
+        "i2c"
+        "libvirtd"
+        "gamemode"
+        "sops"
+      ];
       #   packages = with pkgs; [    ];
       #   USER PKGS MANAGED IN HOME.NIX
       shell = pkgs.zsh;
       hashedPasswordFile = config.sops.secrets."hosts/user_pass".path;
     };
     groups = {
-      sops = {};
+      sops = { };
     };
   };
 
@@ -98,8 +108,12 @@ in {
       "configureSyncthing" = {
         enable = true;
         description = "Sets up syncthing for new installs";
-        path = with pkgs; [jq curl gawk];
-        wantedBy = ["syncthing.service"];
+        path = with pkgs; [
+          jq
+          curl
+          gawk
+        ];
+        wantedBy = [ "syncthing.service" ];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
       };
       "nix-daemon" = {
@@ -114,7 +128,7 @@ in {
         restartTriggers = [
           config.environment.etc."nix/nix.conf".source
         ];
-        after = ["local-fs.target"];
+        after = [ "local-fs.target" ];
       };
     };
   };
@@ -323,7 +337,7 @@ in {
         folders = {
           "${vars.syncthingPath}" = {
             path = "${vars.syncthingPath}";
-            devices = ["SyncMaster"];
+            devices = [ "SyncMaster" ];
             id = "sync";
             label = "Sync";
             type = "receiveonly";
@@ -334,7 +348,11 @@ in {
 
     udev = {
       enable = true;
-      packages = with pkgs; [pkgs-stable.yubikey-manager yubikey-personalization libu2f-host];
+      packages = with pkgs; [
+        pkgs-stable.yubikey-manager
+        yubikey-personalization
+        libu2f-host
+      ];
       extraRules = ''
         # SteelSeries Aerox 3
         SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1836", MODE="0666"
@@ -368,7 +386,7 @@ in {
       sddm = {
         enable = true;
         package = pkgs.kdePackages.sddm;
-        extraPackages = with pkgs; [kdePackages.qtmultimedia];
+        extraPackages = with pkgs; [ kdePackages.qtmultimedia ];
         theme = "sddm-astronaut-theme";
         wayland = {
           enable = true;
@@ -498,21 +516,17 @@ in {
       open = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      package =
-        config.boot.kernelPackages.nvidiaPackages.stable
-        // {
-          open = config.boot.kernelPackages.nvidiaPackages.stable.open.overrideAttrs (old: {
-            patches =
-              (old.patches or [])
-              ++ [
-                (pkgs.fetchpatch {
-                  name = "get_dev_pagemap.patch";
-                  url = "https://github.com/NVIDIA/open-gpu-kernel-modules/commit/3e230516034d29e84ca023fe95e284af5cd5a065.patch";
-                  hash = "sha256-BhL4mtuY5W+eLofwhHVnZnVf0msDj7XBxskZi8e6/k8=";
-                })
-              ];
-          });
-        };
+      package = config.boot.kernelPackages.nvidiaPackages.stable // {
+        open = config.boot.kernelPackages.nvidiaPackages.stable.open.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [
+            (pkgs.fetchpatch {
+              name = "get_dev_pagemap.patch";
+              url = "https://github.com/NVIDIA/open-gpu-kernel-modules/commit/3e230516034d29e84ca023fe95e284af5cd5a065.patch";
+              hash = "sha256-BhL4mtuY5W+eLofwhHVnZnVf0msDj7XBxskZi8e6/k8=";
+            })
+          ];
+        });
+      };
     };
 
     bluetooth = {
@@ -534,9 +548,9 @@ in {
 
     secrets = {
       ## syncthing
-      "services/syncthing/user" = {};
-      "services/syncthing/pass" = {};
-      "services/syncthing/token" = {};
+      "services/syncthing/user" = { };
+      "services/syncthing/pass" = { };
+      "services/syncthing/token" = { };
 
       syncthing-cert = {
         format = "binary";

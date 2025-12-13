@@ -1,7 +1,13 @@
-{pkgs}:
+{ pkgs }:
 pkgs.writeShellApplication {
   name = "mouse_battery";
-  runtimeInputs = with pkgs; [bluez gawk gnugrep rivalcfg coreutils];
+  runtimeInputs = with pkgs; [
+    bluez
+    gawk
+    gnugrep
+    rivalcfg
+    coreutils
+  ];
   text = ''
     # override writeShellApplication’s default safety flags
     set +e +u +o pipefail

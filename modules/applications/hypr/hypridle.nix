@@ -5,12 +5,14 @@
   inputs,
   hostname,
   ...
-}: let
+}:
+let
   scripts = rec {
-    dim_screen = import ./scripts/dim_screen.nix {inherit pkgs;};
-    undim_screen = import ./scripts/undim_screen.nix {inherit pkgs;};
+    dim_screen = import ./scripts/dim_screen.nix { inherit pkgs; };
+    undim_screen = import ./scripts/undim_screen.nix { inherit pkgs; };
   };
-in {
+in
+{
   options = with lib; {
     applications = {
       hypr = {
@@ -21,7 +23,8 @@ in {
     };
   };
 
-  config = with lib;
+  config =
+    with lib;
     mkIf config.applications.hypr.enable (mkMerge [
       (mkIf (config.applications.hypr.apps.hypridle && hostname == "gibson") {
         services = {

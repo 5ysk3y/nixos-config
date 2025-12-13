@@ -29,14 +29,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/determinate-nix-action@v3
-      - name: Nix format check
+      - name: Nix format check (nixfmt-tree)
         run: |
           set -euo pipefail
-          nix run nixpkgs#alejandra -- -c . || {
+          nix run nixpkgs#nixfmt-tree -- .
+          git diff --exit-code || {
             echo ""
             echo "Formatting required."
             echo "Run this locally to fix:"
-            echo "  nix run nixpkgs#alejandra -- ."
+            echo "  nix run nixpkgs#nixfmt-tree -- ."
             echo ""
             exit 1
           }

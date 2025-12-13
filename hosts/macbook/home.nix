@@ -9,15 +9,17 @@
   doomemacs,
   vars,
   ...
-}: let
+}:
+let
   secretsPath = builtins.toString inputs.nix-secrets;
-in {
+in
+{
   home = {
     username = "${vars.username}";
     homeDirectory = "/home/${vars.username}";
 
     activation = {
-      setupEtc = config.lib.dag.entryAfter ["writeBoundary"] ''
+      setupEtc = config.lib.dag.entryAfter [ "writeBoundary" ] ''
         /run/current-system/sw/bin/systemctl start --user sops-nix
       '';
     };
@@ -141,7 +143,7 @@ in {
     zoxide = {
       enable = true;
       enableZshIntegration = true;
-      options = ["--cmd cd"];
+      options = [ "--cmd cd" ];
     };
 
     git = {
@@ -299,7 +301,7 @@ in {
       };
 
       ## git
-      "services/git/email" = {};
+      "services/git/email" = { };
 
       ## rofi-bitwarden
       "services/rbw/config" = lib.mkIf config.programs.rbw.enable {

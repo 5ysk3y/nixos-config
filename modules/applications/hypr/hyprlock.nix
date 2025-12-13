@@ -5,7 +5,8 @@
   inputs,
   hostname,
   ...
-}: {
+}:
+{
   options = with lib; {
     applications = {
       hypr = {
@@ -16,7 +17,8 @@
     };
   };
 
-  config = with lib;
+  config =
+    with lib;
     mkIf config.applications.hypr.enable (mkMerge [
       (mkIf (config.applications.hypr.apps.hyprlock) {
         programs = {

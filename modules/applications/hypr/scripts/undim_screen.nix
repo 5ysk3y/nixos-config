@@ -1,7 +1,12 @@
-{pkgs}:
+{ pkgs }:
 pkgs.writeShellApplication {
   name = "undim_screen";
-  runtimeInputs = with pkgs; [ddcutil hyprland gnused gawk];
+  runtimeInputs = with pkgs; [
+    ddcutil
+    hyprland
+    gnused
+    gawk
+  ];
   text = ''
     checkBrightness() {
         ddcutil --bus="$1" getvcp 10 | awk '{print $9}' | sed 's/,//g'

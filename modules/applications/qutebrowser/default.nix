@@ -5,7 +5,8 @@
   inputs,
   vars,
   ...
-}: let
+}:
+let
   qute-rbw = pkgs.writeShellScriptBin "qute-rbw" ''
     ${pkgs.rbw}/bin/rbw unlocked > /dev/null 2>&1
     RC="$?"
@@ -16,14 +17,16 @@
         ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
     fi
   '';
-in {
+in
+{
   options = with lib; {
     applications = {
       qutebrowser = mkEnableOption "Enable qutebrowser with custom configs";
     };
   };
 
-  config = with lib;
+  config =
+    with lib;
     mkIf config.applications.qutebrowser {
       programs = {
         qutebrowser = {

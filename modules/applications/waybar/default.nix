@@ -5,21 +5,24 @@
   hostname,
   vars,
   ...
-}: let
+}:
+let
   scripts = rec {
-    check_rbw = import ./scripts/check_rbw.nix {inherit pkgs;};
-    mouse_battery = import ./scripts/mouse_battery.nix {inherit pkgs;};
-    mouse_colour = import ./scripts/mouse_colour.nix {inherit pkgs;};
-    scroll_mpris = import ./scripts/scroll-mpris {inherit pkgs;};
+    check_rbw = import ./scripts/check_rbw.nix { inherit pkgs; };
+    mouse_battery = import ./scripts/mouse_battery.nix { inherit pkgs; };
+    mouse_colour = import ./scripts/mouse_colour.nix { inherit pkgs; };
+    scroll_mpris = import ./scripts/scroll-mpris { inherit pkgs; };
   };
-in {
+in
+{
   options = with lib; {
     applications = {
       waybar = mkEnableOption "Enable the Waybar application with custom config";
     };
   };
 
-  config = with lib;
+  config =
+    with lib;
     mkIf config.applications.waybar {
       programs = {
         waybar = {
@@ -32,12 +35,21 @@ in {
               mainBar = {
                 "layer" = "top";
                 "position" = "top";
-                "includes" = ["${vars.nixos-config}/hosts/${hostname}/applications/waybar/waybar.conf"];
+                "includes" = [ "${vars.nixos-config}/hosts/${hostname}/applications/waybar/waybar.conf" ];
                 "height" = 40;
 
-                "modules-left" = ["hyprland/workspaces"];
-                "modules-center" = ["hyprland/window"];
-                "modules-right" = ["group/quickHacks" "cpu" "memory" "temperature" "custom/steelseries" "custom/media" "pulseaudio" "clock"];
+                "modules-left" = [ "hyprland/workspaces" ];
+                "modules-center" = [ "hyprland/window" ];
+                "modules-right" = [
+                  "group/quickHacks"
+                  "cpu"
+                  "memory"
+                  "temperature"
+                  "custom/steelseries"
+                  "custom/media"
+                  "pulseaudio"
+                  "clock"
+                ];
 
                 "hyprland/workspaces" = {
                   "on-click" = "activate";
@@ -51,7 +63,10 @@ in {
                   "drawer" = {
                     "children-class" = "sub-icons";
                   };
-                  "modules" = ["custom/rbw" "idle_inhibitor"];
+                  "modules" = [
+                    "custom/rbw"
+                    "idle_inhibitor"
+                  ];
                 };
 
                 "custom/rbw" = {
@@ -90,7 +105,11 @@ in {
                   "critical-threshold" = 80;
                   "format-critical" = "{icon} {temperatureC}󰔄";
                   "format" = "{icon} {temperatureC}󰔄";
-                  "format-icons" = ["" "" ""];
+                  "format-icons" = [
+                    ""
+                    ""
+                    ""
+                  ];
                 };
 
                 "custom/steelseries" = {
@@ -116,16 +135,24 @@ in {
                   "on-click-right" = "playerctl -s stop";
                   "on-scroll-up" = "playerctl -s next";
                   "on-scroll-down" = "playerctl -s previous";
-                  "exec" = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze -b vlc --format '{title} - {artist}'";
+                  "exec" =
+                    "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze -b vlc --format '{title} - {artist}'";
                 };
 
                 "pulseaudio" = {
                   "format" = "{icon}{volume}%";
                   "format-muted" = "  Muted";
                   "scroll-step" = 10;
-                  "format-icons" = [" " " " " "];
+                  "format-icons" = [
+                    " "
+                    " "
+                    " "
+                  ];
                   "on-click" = "pwvucontrol";
-                  "ignored-sinks" = ["Starship/Matisse HD Audio Controller Analog Stereo" "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)"];
+                  "ignored-sinks" = [
+                    "Starship/Matisse HD Audio Controller Analog Stereo"
+                    "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)"
+                  ];
                 };
 
                 "clock" = {
