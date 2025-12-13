@@ -1,5 +1,15 @@
-{ config, lib, pkgs, pkgs-stable, pkgs-old, inputs, doomemacs, vars, hostname, ... }:
 {
+  config,
+  lib,
+  pkgs,
+  pkgs-stable,
+  pkgs-old,
+  inputs,
+  doomemacs,
+  vars,
+  hostname,
+  ...
+}: {
   home = {
     username = "${vars.username}";
     homeDirectory = "/home/${vars.username}";
@@ -19,43 +29,43 @@
     };
 
     packages = with pkgs; [
-        bat
-        bitwarden-desktop
-        bottles
-        dracula-theme
-        fontconfig
-        glib
-        grimblast
-        heroic
-        hyprpolkitagent
-        (inputs.nixos-xivlauncher-rb.packages.${pkgs.stdenv.hostPlatform.system}.default.override { useGameMode = true; })
-        (import ../../modules/applications/dim-screen {inherit pkgs;})
-        jellyfin-mpv-shim
-        jq
-        keyutils
-        krita
-        libnotify
-        mpvpaper
-        nixfmt-rfc-style
-        nixd
-        neofetch
-        obs-cmd
-        pavucontrol
-        pinentry-curses
-        playerctl
-        protonup-qt
-        pwvucontrol
-        restic
-        rivalcfg
-        rofi-rbw-wayland
-        signal-desktop-bin
-        sops
-        spice-gtk
-        vlc
-        vulkan-tools
-        webcord
-        wl-clipboard
-        wtype
+      bat
+      bitwarden-desktop
+      bottles
+      dracula-theme
+      fontconfig
+      glib
+      grimblast
+      heroic
+      hyprpolkitagent
+      (inputs.nixos-xivlauncher-rb.packages.${pkgs.stdenv.hostPlatform.system}.default.override {useGameMode = true;})
+      (import ../../modules/applications/dim-screen {inherit pkgs;})
+      jellyfin-mpv-shim
+      jq
+      keyutils
+      krita
+      libnotify
+      mpvpaper
+      nixfmt-rfc-style
+      nixd
+      neofetch
+      obs-cmd
+      pavucontrol
+      pinentry-curses
+      playerctl
+      protonup-qt
+      pwvucontrol
+      restic
+      rivalcfg
+      rofi-rbw-wayland
+      signal-desktop-bin
+      sops
+      spice-gtk
+      vlc
+      vulkan-tools
+      webcord
+      wl-clipboard
+      wtype
     ];
   };
 
@@ -89,7 +99,7 @@
       enable = true;
     };
 
-  #User shell - START #
+    #User shell - START #
     zsh = {
       enable = true;
       dotDir = "${config.xdg.configHome}/zsh";
@@ -127,19 +137,19 @@
         path = "${config.xdg.dataHome}/zsh/zsh_history";
       };
       initContent = ''
-vim() {
-  emacsclient -c --no-wait "$@"
-}
+        vim() {
+          emacsclient -c --no-wait "$@"
+        }
 
-bindkey -M viins '\e.' insert-last-word
+        bindkey -M viins '\e.' insert-last-word
       '';
     };
-  # User shell - END #
+    # User shell - END #
 
     zoxide = {
       enable = true;
       enableZshIntegration = true;
-      options = [ "--cmd cd" ];
+      options = ["--cmd cd"];
     };
 
     git = {
@@ -242,10 +252,10 @@ bindkey -M viins '\e.' insert-last-word
       };
     };
 
-   gpg = {
-     enable = true;
-   };
- };
+    gpg = {
+      enable = true;
+    };
+  };
 
   ## END PROGAMS
 
@@ -291,31 +301,31 @@ bindkey -M viins '\e.' insert-last-word
       };
     };
 
-   gpg-agent = {
-     enable = true;
-     extraConfig = ''
-      pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses
+    gpg-agent = {
+      enable = true;
+      extraConfig = ''
+        pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses
       '';
-   };
+    };
 
-   wayland-pipewire-idle-inhibit = {
-     enable = true;
-     systemdTarget = "graphical-session.target";
-       settings = {
+    wayland-pipewire-idle-inhibit = {
+      enable = true;
+      systemdTarget = "graphical-session.target";
+      settings = {
         verbosity = "INFO";
         media_minimum_duration = 10;
         idle_inhibitor = "wayland";
 
         sink_whitelist = [
-          { name = "HDMI / External"; }
+          {name = "HDMI / External";}
         ];
       };
-   };
- };
+    };
+  };
 
   ## END SERVICES ##
 
- # XDG Spec Handling
+  # XDG Spec Handling
   xdg = {
     enable = true;
     portal = {
@@ -331,11 +341,11 @@ bindkey -M viins '\e.' insert-last-word
         xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk # Added as per https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
       ];
-      configPackages = [ pkgs.hyprland ];
+      configPackages = [pkgs.hyprland];
     };
   };
 
- # GTK bits.. Cos GNOME.
+  # GTK bits.. Cos GNOME.
 
   gtk = {
     enable = true;
@@ -353,17 +363,17 @@ bindkey -M viins '\e.' insert-last-word
     };
     gtk3 = {
       extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
+        gtk-application-prefer-dark-theme = 1;
       };
     };
   };
 
   nix = {
     gc = {
-     automatic = true;
-     options = "-d";
+      automatic = true;
+      options = "-d";
     };
-    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
+    nixPath = ["nixpkgs=${inputs.nixpkgs}"];
   };
 
   sops = {
@@ -382,8 +392,8 @@ bindkey -M viins '\e.' insert-last-word
 
       ## rofi-bitwarden
       "services/rbw/config" = lib.mkIf config.programs.rbw.enable {
-         mode = "0644";
-         path = "${config.xdg.configHome}/rbw/config.json";
+        mode = "0644";
+        path = "${config.xdg.configHome}/rbw/config.json";
       };
 
       # gnupg

@@ -1,9 +1,16 @@
-{ config, pkgs, lib, vars, inputs, ... }:
 {
+  config,
+  pkgs,
+  lib,
+  vars,
+  inputs,
+  ...
+}: {
   nixpkgs.overlays = [
     (final: prev: {
-        steam = prev.steam.override {
-          extraPkgs = pkgs: with pkgs; [
+      steam = prev.steam.override {
+        extraPkgs = pkgs:
+          with pkgs; [
             xorg.libXcursor
             xorg.libXi
             xorg.libXinerama
@@ -15,7 +22,7 @@
             libkrb5
             keyutils
           ];
-        };
-      })
+      };
+    })
   ];
 }

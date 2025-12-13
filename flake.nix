@@ -2,7 +2,6 @@
   description = "Gibson - NixOS Flake";
 
   inputs = {
-
     # Official NixOS package source, using nixos-unstable branch here
     nixpkgs = {
       url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -65,34 +64,29 @@
     };
   };
 
-  outputs = { self, ... } @inputs:
-let
-
-  vars = rec {
-    username = "rickie";
-    nixos-config = "/home/${username}/nixos-config";
-    secretsPath = builtins.toString inputs.nix-secrets;
-    syncthingPath = "/home/${username}/Sync";
-  };
-
-  pkgsFor = system: with inputs; {
-    pkgs-stable = import nixpkgs-stable {
-      inherit system;
-      config.allowUnfree = true;
+  outputs = {self, ...} @ inputs: let
+    vars = rec {
+      username = "rickie";
+      nixos-config = "/home/${username}/nixos-config";
+      secretsPath = builtins.toString inputs.nix-secrets;
+      syncthingPath = "/home/${username}/Sync";
     };
-    pkgs-old = import nixpkgs-old {
-      inherit system;
-      config.allowUnfree = true;
-    };
-  };
 
-in
-
-{
-
-  nixosConfigurations = with inputs; {
-    # Main Machine (Gibson)
-    "gibson" = nixpkgs.lib.nixosSystem rec {
+    pkgsFor = system:
+      with inputs; {
+        pkgs-stable = import nixpkgs-stable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+        pkgs-old = import nixpkgs-old {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      };
+  in {
+    nixosConfigurations = with inputs; {
+      # Main Machine (Gibson)
+      "gibson" = nixpkgs.lib.nixosSystem rec {
         system = "x86_64-linux";
         specialArgs = {
           hostname = "gibson";
@@ -100,37 +94,37 @@ in
           inherit system inputs vars;
         };
 
-      modules = with specialArgs; [
-        ./hosts/${hostname}/configuration.nix
-        (import ./hosts/${hostname}/overlays)
-        sops-nix.nixosModules.sops # System-wide sops-nix
+        modules = with specialArgs; [
+          ./hosts/${hostname}/configuration.nix
+          (import ./hosts/${hostname}/overlays)
+          sops-nix.nixosModules.sops # System-wide sops-nix
 
-        # Begin Home Manager Setup
-        home-manager.nixosModules.home-manager rec {
-          home-manager.extraSpecialArgs = {
-            inherit inputs vars doomemacs hostname pkgs-stable pkgs-old;
-          };
+          # Begin Home Manager Setup
+          home-manager.nixosModules.home-manager
+          rec {
+            home-manager.extraSpecialArgs = {
+              inherit inputs vars doomemacs hostname pkgs-stable pkgs-old;
+            };
 
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.sharedModules = [
-            inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
-          ];
-
-          home-manager.users.${vars.username} = with specialArgs; {
-            imports = [
-              ./hosts/${hostname}/home.nix
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.sharedModules = [
+              inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
             ];
-          };
 
-        } # End Home-Manager
-      ]; # End modules
-    }; # End gibson
+            home-manager.users.${vars.username} = with specialArgs; {
+              imports = [
+                ./hosts/${hostname}/home.nix
+              ];
+            };
+          } # End Home-Manager
+        ]; # End modules
+      }; # End gibson
 
-    # Testing VM (macbook)
-    "macbook" = nixpkgs.lib.nixosSystem rec {
+      # Testing VM (macbook)
+      "macbook" = nixpkgs.lib.nixosSystem rec {
         system = "aarch64-linux";
-          specialArgs = {
+        specialArgs = {
           hostname = "macbook";
           inherit (pkgsFor "${system}") pkgs-stable;
           inherit inputs system vars;
@@ -139,27 +133,27 @@ in
         modules = with specialArgs; [
           ./hosts/${hostname}/configuration.nix
 
-        # Begin Home Manager Setup
-        home-manager.nixosModules.home-manager {
-          home-manager.extraSpecialArgs = {
-            inherit inputs vars doomemacs hostname pkgs-stable;
-          };
+          # Begin Home Manager Setup
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.extraSpecialArgs = {
+              inherit inputs vars doomemacs hostname pkgs-stable;
+            };
 
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.sharedModules = [
-            inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
-          ];
-
-          home-manager.users.${vars.username} = with specialArgs; {
-            imports = [
-              ./hosts/${hostname}/home.nix
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.sharedModules = [
+              inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
             ];
-          };
-        } # End Home-Manager
-      ]; # End modules
-    }; # End macbook
-  };
-};
-}
 
+            home-manager.users.${vars.username} = with specialArgs; {
+              imports = [
+                ./hosts/${hostname}/home.nix
+              ];
+            };
+          } # End Home-Manager
+        ]; # End modules
+      }; # End macbook
+    };
+  };
+}

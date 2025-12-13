@@ -6,9 +6,15 @@
 #  1. Official: <https://www.gnu.org/software/emacs/tour/index.html>
 #  2. Doom Emacs: <https://github.com/doomemacs/doomemacs/blob/master/docs/index.org>
 #
-{ config, lib, pkgs, vars, doomemacs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  vars,
+  doomemacs,
+  ...
+}:
 with lib; let
-
   envExtra = ''
     export PATH="${config.xdg.configHome}/emacs/bin:$PATH"
   '';
@@ -17,9 +23,7 @@ with lib; let
     epkgs.nix-mode
     epkgs.lsp-mode
   ]));
-
 in {
-
   options.applications = {
     doomemacs = mkEnableOption "Doom Emacs Editor";
   };
@@ -58,9 +62,10 @@ in {
         recursive = true;
       };
 
-      home.activation.installDoomEmacs = with vars; lib.hm.dag.entryAfter ["writeBoundary"] ''
-         ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
-      '';
+      home.activation.installDoomEmacs = with vars;
+        lib.hm.dag.entryAfter ["writeBoundary"] ''
+          ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
+        '';
     }
 
     (mkIf pkgs.stdenv.isLinux (

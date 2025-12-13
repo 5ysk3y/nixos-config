@@ -1,15 +1,23 @@
-{ config, lib, pkgs, pkgs-stable, hyprlock, hypridle, inputs, doomemacs, vars, ... }:
-
-let
-  secretsPath = builtins.toString inputs.nix-secrets;
-in
 {
+  config,
+  lib,
+  pkgs,
+  pkgs-stable,
+  hyprlock,
+  hypridle,
+  inputs,
+  doomemacs,
+  vars,
+  ...
+}: let
+  secretsPath = builtins.toString inputs.nix-secrets;
+in {
   home = {
     username = "${vars.username}";
     homeDirectory = "/home/${vars.username}";
 
     activation = {
-      setupEtc = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+      setupEtc = config.lib.dag.entryAfter ["writeBoundary"] ''
         /run/current-system/sw/bin/systemctl start --user sops-nix
       '';
     };
@@ -27,30 +35,30 @@ in
     };
 
     packages = with pkgs; [
-        bat
-        bc
-        # https://community.bitwarden.com/t/unlock-with-pin-setting-cannot-be-set/64959
-        # Pin configuration bug preventing use of pin numbers.
-        clipboard-jh
-        dracula-theme
-        fontconfig
-        glib
-        grimblast
-        hydra-check
-        jq
-        keyutils
-        mpvpaper
-        pavucontrol
-        pinentry-curses
-        pwvucontrol
-        sops
-        spice-gtk
-        swww
-        vlc
-        vulkan-tools
-        wayvnc
-        webcord
-        wl-clipboard
+      bat
+      bc
+      # https://community.bitwarden.com/t/unlock-with-pin-setting-cannot-be-set/64959
+      # Pin configuration bug preventing use of pin numbers.
+      clipboard-jh
+      dracula-theme
+      fontconfig
+      glib
+      grimblast
+      hydra-check
+      jq
+      keyutils
+      mpvpaper
+      pavucontrol
+      pinentry-curses
+      pwvucontrol
+      sops
+      spice-gtk
+      swww
+      vlc
+      vulkan-tools
+      wayvnc
+      webcord
+      wl-clipboard
     ];
   };
 
@@ -85,7 +93,7 @@ in
       enable = true;
     };
 
-  #User shell - START #
+    #User shell - START #
     zsh = {
       enable = true;
       dotDir = "${config.xdg.configHome}/zsh";
@@ -103,8 +111,8 @@ in
         build-nix = "nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'";
         cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
         mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
-	shred = "shred -zfu";
-  nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ${vars.nixos-config} $@ --option eval-cache false --show-trace";
+        shred = "shred -zfu";
+        nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild --flake ${vars.nixos-config} $@ --option eval-cache false --show-trace";
         spicy = "spicy --spice-ca-file=/etc/pki/libvirt-spice/ca-cert.pem --uri 'spice://127.0.0.1' -p 5900 -s 5901 --title 'th3h4x0r' -f > /dev/null 2>&1 &|";
         pass = "pass -c main";
       };
@@ -121,19 +129,19 @@ in
         path = "${config.xdg.dataHome}/zsh/zsh_history";
       };
       initContent = ''
-vim() {
-  emacsclient --create-frame --tty "$@"
-}
+        vim() {
+          emacsclient --create-frame --tty "$@"
+        }
 
-bindkey -M viins '\e.' insert-last-word
+        bindkey -M viins '\e.' insert-last-word
       '';
     };
-  # User shell - END #
+    # User shell - END #
 
     zoxide = {
       enable = true;
       enableZshIntegration = true;
-      options = [ "--cmd cd" ];
+      options = ["--cmd cd"];
     };
 
     git = {
@@ -184,10 +192,10 @@ bindkey -M viins '\e.' insert-last-word
       };
     };
 
-   gpg = {
-     enable = true;
-   };
- };
+    gpg = {
+      enable = true;
+    };
+  };
 
   ## END PROGAMS
 
@@ -229,24 +237,24 @@ bindkey -M viins '\e.' insert-last-word
       };
     };
 
-   gpg-agent = {
-     enable = true;
-     extraConfig = "pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses";
-   };
+    gpg-agent = {
+      enable = true;
+      extraConfig = "pinentry-program ${pkgs.pinentry-curses}/bin/pinentry-curses";
+    };
 
-   gnome-keyring = {
-     enable = true;
-   };
- };
+    gnome-keyring = {
+      enable = true;
+    };
+  };
 
   ## END SERVICES ##
 
- # XDG Spec Handling
+  # XDG Spec Handling
   xdg = {
     enable = true;
   };
 
- # GTK bits.. Cos GNOME.
+  # GTK bits.. Cos GNOME.
 
   gtk = {
     enable = true;
@@ -264,15 +272,15 @@ bindkey -M viins '\e.' insert-last-word
     };
     gtk3 = {
       extraConfig = {
-      gtk-application-prefer-dark-theme = 1;
+        gtk-application-prefer-dark-theme = 1;
       };
     };
   };
 
   nix = {
     gc = {
-     automatic = true;
-     options = "-d";
+      automatic = true;
+      options = "-d";
     };
   };
 
@@ -295,8 +303,8 @@ bindkey -M viins '\e.' insert-last-word
 
       ## rofi-bitwarden
       "services/rbw/config" = lib.mkIf config.programs.rbw.enable {
-         mode = "0644";
-         path = "${config.xdg.configHome}/rbw/config.json";
+        mode = "0644";
+        path = "${config.xdg.configHome}/rbw/config.json";
       };
 
       # gnupg
