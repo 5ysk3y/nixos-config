@@ -9,7 +9,8 @@
   vars,
   hostname,
   ...
-}: {
+}:
+{
   home = {
     username = "${vars.username}";
     homeDirectory = "/home/${vars.username}";
@@ -38,8 +39,10 @@
       grimblast
       heroic
       hyprpolkitagent
-      (inputs.nixos-xivlauncher-rb.packages.${pkgs.stdenv.hostPlatform.system}.default.override {useGameMode = true;})
-      (import ../../modules/applications/dim-screen {inherit pkgs;})
+      (inputs.nixos-xivlauncher-rb.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+        useGameMode = true;
+      })
+      (import ../../modules/applications/dim-screen { inherit pkgs; })
       jellyfin-mpv-shim
       jq
       keyutils
@@ -149,7 +152,7 @@
     zoxide = {
       enable = true;
       enableZshIntegration = true;
-      options = ["--cmd cd"];
+      options = [ "--cmd cd" ];
     };
 
     git = {
@@ -317,7 +320,7 @@
         idle_inhibitor = "wayland";
 
         sink_whitelist = [
-          {name = "HDMI / External";}
+          { name = "HDMI / External"; }
         ];
       };
     };
@@ -341,7 +344,7 @@
         xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk # Added as per https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
       ];
-      configPackages = [pkgs.hyprland];
+      configPackages = [ pkgs.hyprland ];
     };
   };
 
@@ -373,7 +376,7 @@
       automatic = true;
       options = "-d";
     };
-    nixPath = ["nixpkgs=${inputs.nixpkgs}"];
+    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
   };
 
   sops = {
@@ -411,7 +414,7 @@
       };
 
       # chatgpt
-      "services/chatgpt/api_key" = {};
+      "services/chatgpt/api_key" = { };
     };
   };
 

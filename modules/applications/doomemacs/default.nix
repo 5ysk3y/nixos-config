@@ -14,16 +14,20 @@
   doomemacs,
   ...
 }:
-with lib; let
+with lib;
+let
   envExtra = ''
     export PATH="${config.xdg.configHome}/emacs/bin:$PATH"
   '';
 
-  myEmacsPackagesFor = emacs: ((pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
-    epkgs.nix-mode
-    epkgs.lsp-mode
-  ]));
-in {
+  myEmacsPackagesFor =
+    emacs:
+    ((pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
+      epkgs.nix-mode
+      epkgs.lsp-mode
+    ]));
+in
+{
   options.applications = {
     doomemacs = mkEnableOption "Doom Emacs Editor";
   };
@@ -33,7 +37,7 @@ in {
       home.packages = with pkgs; [
         ## Doom dependencies
         git
-        (ripgrep.override {withPCRE2 = true;})
+        (ripgrep.override { withPCRE2 = true; })
         gnutls # for TLS connectivity
 
         ## Optional dependencies
@@ -62,8 +66,9 @@ in {
         recursive = true;
       };
 
-      home.activation.installDoomEmacs = with vars;
-        lib.hm.dag.entryAfter ["writeBoundary"] ''
+      home.activation.installDoomEmacs =
+        with vars;
+        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
           ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
         '';
     }
@@ -74,14 +79,15 @@ in {
         # pgtk (pure gtk) build add native support for wayland.
         # https://www.gnu.org/savannah-checkouts/gnu/emacs/emacs.html#Releases
         emacsPkg = myEmacsPackagesFor pkgs.emacs-pgtk;
-      in {
-        home.packages = [emacsPkg];
+      in
+      {
+        home.packages = [ emacsPkg ];
         services.emacs = {
           enable = true;
           package = emacsPkg;
           client = {
             enable = true;
-            arguments = [" --create-frame --tty"];
+            arguments = [ " --create-frame --tty" ];
           };
           startWithUserSession = true;
         };

@@ -8,28 +8,39 @@
   modulesPath,
   system,
   ...
-}: {
+}:
+{
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
   ];
 
   boot.loader.systemd-boot.enable = true;
-  boot.initrd.availableKernelModules = ["xhci_pci" "virtio_pci" "usbhid" "usb_storage" "sr_mod"];
-  boot.initrd.kernelModules = [];
-  boot.kernelModules = [];
-  boot.extraModulePackages = [];
+  boot.initrd.availableKernelModules = [
+    "xhci_pci"
+    "virtio_pci"
+    "usbhid"
+    "usb_storage"
+    "sr_mod"
+  ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ ];
+  boot.extraModulePackages = [ ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/7f5ff1b6-207d-4026-8fab-a47d53210c26";
     fsType = "ext4";
   };
 
-  boot.initrd.luks.devices."luks-9ffc3aec-6ad4-4f56-bb44-cc7ca850f04b".device = "/dev/disk/by-uuid/9ffc3aec-6ad4-4f56-bb44-cc7ca850f04b";
+  boot.initrd.luks.devices."luks-9ffc3aec-6ad4-4f56-bb44-cc7ca850f04b".device =
+    "/dev/disk/by-uuid/9ffc3aec-6ad4-4f56-bb44-cc7ca850f04b";
 
   fileSystems."/boot" = {
     device = "/dev/disk/by-uuid/3CCC-D581";
     fsType = "vfat";
-    options = ["fmask=0022" "dmask=0022"];
+    options = [
+      "fmask=0022"
+      "dmask=0022"
+    ];
   };
 
   fileSystems."/home/rickie/Sync" = {
@@ -37,7 +48,7 @@
     fsType = "9p";
   };
 
-  swapDevices = [];
+  swapDevices = [ ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's

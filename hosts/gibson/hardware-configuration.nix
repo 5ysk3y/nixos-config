@@ -9,15 +9,24 @@
   system,
   vars,
   ...
-}: {
+}:
+{
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
   boot = {
     kernelPackages = pkgs.linuxPackages_zen;
-    kernelModules = ["nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm"];
-    blacklistedKernelModules = ["ath12k_pci" "ath12k"];
+    kernelModules = [
+      "nvidia"
+      "nvidia_modeset"
+      "nvidia_uvm"
+      "nvidia_drm"
+    ];
+    blacklistedKernelModules = [
+      "ath12k_pci"
+      "ath12k"
+    ];
     kernelParams = [
       "quiet"
       "splash"
@@ -26,7 +35,7 @@
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-1:1920x1080@60"
     ];
-    extraModulePackages = with config.boot.kernelPackages; [];
+    extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
       timeout = 0;
       systemd-boot = {
@@ -54,7 +63,13 @@
       systemd = {
         enable = true;
       };
-      availableKernelModules = ["nvme" "xhci_pci" "ahci" "usbhid" "sd_mod"];
+      availableKernelModules = [
+        "nvme"
+        "xhci_pci"
+        "ahci"
+        "usbhid"
+        "sd_mod"
+      ];
       verbose = false;
     };
     resumeDevice = "/dev/disk/by-label/swap";
@@ -63,7 +78,7 @@
       theme = "tech_b";
       themePackages = with pkgs; [
         (adi1090x-plymouth-themes.override {
-          selected_themes = ["tech_b"];
+          selected_themes = [ "tech_b" ];
         })
       ];
     };
@@ -92,7 +107,7 @@
   #      neededForBoot = false;
   #    };
 
-  swapDevices = [{device = "/dev/disk/by-label/swap";}];
+  swapDevices = [ { device = "/dev/disk/by-label/swap"; } ];
 
   hardware = {
     enableAllFirmware = true;

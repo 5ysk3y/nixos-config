@@ -1,10 +1,15 @@
 {
   pkgs,
   vars,
-}: {
+}:
+{
   nix-build-system = pkgs.writeShellApplication {
     name = "nix-build-system";
-    runtimeInputs = with pkgs; [nvd gawk gnused];
+    runtimeInputs = with pkgs; [
+      nvd
+      gawk
+      gnused
+    ];
     text = ''
       CONFIG="${vars.nixos-config}"
       HOME="/home/${vars.username}"
@@ -47,7 +52,10 @@
 
   nix-secrets = pkgs.writeShellApplication {
     name = "nix-secrets";
-    runtimeInputs = with pkgs; [git coreutils];
+    runtimeInputs = with pkgs; [
+      git
+      coreutils
+    ];
     text = ''
           set -euo pipefail
 

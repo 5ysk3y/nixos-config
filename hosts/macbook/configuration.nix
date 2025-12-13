@@ -6,7 +6,8 @@
   lib,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -22,9 +23,12 @@
   time.timeZone = "Europe/London";
 
   nix.settings = {
-    substituters = ["https://hyprland.cachix.org"];
-    trusted-public-keys = ["hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc="];
-    experimental-features = ["nix-command" "flakes"];
+    substituters = [ "https://hyprland.cachix.org" ];
+    trusted-public-keys = [ "hyprland.cachix.org-1:a7pgxzMz7+chwVL3/pzj6jIBMioiJM7ypFP8PwtkuGc=" ];
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
   };
 
   # Enable CUPS to print documents.
@@ -40,7 +44,11 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.rickie = {
     isNormalUser = true;
-    extraGroups = ["wheel" "networkmanager" "users"]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "users"
+    ]; # Enable ‘sudo’ for the user.
     home = "/home/rickie";
     uid = 1000;
     #   packages = with pkgs; [

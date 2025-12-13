@@ -4,14 +4,16 @@
   lib,
   inputs,
   ...
-}: {
+}:
+{
   options = with lib; {
     applications = {
       fuzzel = mkEnableOption "Enables fuzzel with custom configs";
     };
   };
 
-  config = with lib;
+  config =
+    with lib;
     mkIf config.applications.fuzzel {
       programs = {
         fuzzel = {
