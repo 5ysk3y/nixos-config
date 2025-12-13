@@ -166,6 +166,16 @@
         commit.gpgsign = true;
         user.signingkey = "7D73BA8CF10F7F67";
       };
+      includes = [
+        {
+          condition = "gitdir:~/nixos-config/**";
+          contents = {
+            core = {
+              hooksPath = ".githooks";
+            };
+          };
+        }
+      ];
     };
 
     imv = {
