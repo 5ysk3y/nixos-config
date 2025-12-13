@@ -71,7 +71,7 @@ jobs:
           df -h
 
       - name: Start ssh-agent and add deploy key
-        uses: webfactory/ssh-agent@v0.9.0
+        uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
 
