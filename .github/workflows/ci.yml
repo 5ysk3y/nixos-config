@@ -20,27 +20,50 @@ on:
       - "**/*.jpeg"
       - "**/*.jpg"
       - "**/*.svg"
-jobs:
-  flake-check:
-    runs-on: ubuntu-latest
 
+jobs:
+  fmt-check:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - name: Nix format check
+        run: |
+         set -euo pipefail
+         nix run nixpkgs#alejandra -- -c . || {
+         echo ""
+         echo "Formatting required."
+         echo "Run this locally to fix:"
+         echo "  nix run nixpkgs#alejandra -- ."
+         echo ""
+         exit 1
+        }
+  eval-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - name: Basic flake shape checks, no secrets
+        run: |
+          nix flake show --no-write-lock-file
+          nix eval .#nixosConfigurations.gibson.pkgs.stdenv.hostPlatform.system --no-write-lock-file
 
-      - name: Install Nix
-        uses: DeterminateSystems/determinate-nix-action@v3
+  flake-secrets-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/determinate-nix-action@v3
 
       - name: Free up disk space
         run: |
           df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache
-          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
           df -h
 
       - name: Start ssh-agent and add deploy key
@@ -53,15 +76,14 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan github.com >> ~/.ssh/known_hosts
 
-      - name: Prepare age key
+      - name: Prepare age key in runner temp
         run: |
-          sudo mkdir -p /var/lib/age
-          echo "${{ secrets.SOPS_AGE_KEY }}" | sudo tee /var/lib/age/keys.txt > /dev/null
-          sudo chmod 0640 /var/lib/age/keys.txt
-          sudo chown root:root /var/lib/age/keys.txt
-          sudo chmod 0755 /var/lib/age || true
+          mkdir -p "$RUNNER_TEMP/age"
+          printf "%s" "${{ secrets.SOPS_AGE_KEY }}" > "$RUNNER_TEMP/age/keys.txt"
+          chmod 0600 "$RUNNER_TEMP/age/keys.txt"
+          echo "SOPS_AGE_KEY_FILE=$RUNNER_TEMP/age/keys.txt" >> "$GITHUB_ENV"
 
-      - name: Check Flake /w override nix-secrets
+      - name: Flake check with secrets input override
         run: |
           nix flake check \
             --no-write-lock-file \
