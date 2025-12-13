@@ -1,26 +1,25 @@
-{ pkgs }:
-
+{pkgs}:
 pkgs.writeShellApplication {
-    name = "undim_screen";
-    runtimeInputs = with pkgs; [ ddcutil hyprland gnused gawk ];
-    text = ''
-checkBrightness() {
-    ddcutil --bus="$1" getvcp 10 | awk '{print $9}' | sed 's/,//g'
-}
+  name = "undim_screen";
+  runtimeInputs = with pkgs; [ddcutil hyprland gnused gawk];
+  text = ''
+    checkBrightness() {
+        ddcutil --bus="$1" getvcp 10 | awk '{print $9}' | sed 's/,//g'
+    }
 
-undimScreen() {
-    for s in $(ddcutil detect | grep i2c | awk -F- '{ print $2 }'); do
-    BRIGHTNESS=$(checkBrightness "$s")
-      while [[ $BRIGHTNESS != "80" ]]
-      do
-          ddcutil --bus="$s" setvcp 10 80
-          BRIGHTNESS=$(checkBrightness "$s")
-      done
-    wait
-    done
-}
+    undimScreen() {
+        for s in $(ddcutil detect | grep i2c | awk -F- '{ print $2 }'); do
+        BRIGHTNESS=$(checkBrightness "$s")
+          while [[ $BRIGHTNESS != "80" ]]
+          do
+              ddcutil --bus="$s" setvcp 10 80
+              BRIGHTNESS=$(checkBrightness "$s")
+          done
+        wait
+        done
+    }
 
-undimScreen
-hyprctl dispatch exec -- makoctl mode -s default
-    '';
+    undimScreen
+    hyprctl dispatch exec -- makoctl mode -s default
+  '';
 }

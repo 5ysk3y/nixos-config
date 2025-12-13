@@ -1,15 +1,16 @@
-{ config, lib, pkgs, inputs, vars, hostname, ... }:
-
-let
-
-  scripts = rec {
-      undim_screen = (import ./scripts/undim_screen.nix {inherit pkgs;});
-    };
-
-in
-
 {
-
+  config,
+  lib,
+  pkgs,
+  inputs,
+  vars,
+  hostname,
+  ...
+}: let
+  scripts = rec {
+    undim_screen = import ./scripts/undim_screen.nix {inherit pkgs;};
+  };
+in {
   options = with lib; {
     applications = {
       hypr = {
@@ -21,10 +22,9 @@ in
     };
   };
 
-
-  config = with lib; mkIf config.applications.hypr.enable {
-
-    # Shared hyprland configuration
+  config = with lib;
+    mkIf config.applications.hypr.enable {
+      # Shared hyprland configuration
 
       wayland.windowManager.hyprland = {
         enable = true;
@@ -32,7 +32,7 @@ in
         systemd = {
           enable = true;
           variables = [
-          "--all"
+            "--all"
           ];
         };
         extraConfig = ''
@@ -138,8 +138,7 @@ in
 
           $HYPRLAND_CONFIG_PATH = /home/${vars.username}/.config/hypr
           source = ${vars.nixos-config}/hosts/${hostname}/applications/hypr/hyprland.conf
-           '';
-
+        '';
       };
-  };
+    };
 }

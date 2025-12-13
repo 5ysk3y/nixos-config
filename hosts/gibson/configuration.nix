@@ -1,23 +1,26 @@
 # Gibson NixOS Main Configuration
-
-{ config, lib, pkgs, pkgs-stable, inputs, hostname, vars, ... }:
-
-let
-
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-stable,
+  inputs,
+  hostname,
+  vars,
+  ...
+}: let
   sddmTheme = inputs.hyprddm.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
     theme = "cyberpunk";
   };
-
-in
-
-{ imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+in {
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   networking = {
     hostName = "${hostname}"; # Define your hostname.
-    timeServers = [ "192.168.1.1" ] ;
+    timeServers = ["192.168.1.1"];
     networkmanager = {
       enable = true;
     };
@@ -29,36 +32,35 @@ in
   # Select internationalisation properties.
   i18n.defaultLocale = "en_GB.UTF-8";
 
-  i18n.extraLocaleSettings = { 
-    LC_ADDRESS = "en_GB.UTF-8"; 
-    LC_IDENTIFICATION = "en_GB.UTF-8"; 
-    LC_MEASUREMENT = "en_GB.UTF-8"; 
-    LC_MONETARY = "en_GB.UTF-8"; 
-    LC_NAME = "en_GB.UTF-8"; 
-    LC_NUMERIC = "en_GB.UTF-8"; 
-    LC_PAPER = "en_GB.UTF-8"; 
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "en_GB.UTF-8";
+    LC_IDENTIFICATION = "en_GB.UTF-8";
+    LC_MEASUREMENT = "en_GB.UTF-8";
+    LC_MONETARY = "en_GB.UTF-8";
+    LC_NAME = "en_GB.UTF-8";
+    LC_NUMERIC = "en_GB.UTF-8";
+    LC_PAPER = "en_GB.UTF-8";
     LC_TELEPHONE = "en_GB.UTF-8";
     LC_TIME = "en_GB.UTF-8";
   };
-
 
   # Configure keymap in X11
   services = {
     xserver = {
       xkb.layout = "us";
       xkb.variant = "";
-      videoDrivers = [ "nvidia" ];
+      videoDrivers = ["nvidia"];
     };
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users = {
     users."${vars.username}" = {
-      isNormalUser = true; 
+      isNormalUser = true;
       description = "${vars.username}";
-      extraGroups = [ "networkmanager" "wheel" "audio" "i2c" "libvirtd" "gamemode" "sops" ];
-  #   packages = with pkgs; [    ];
-  #   USER PKGS MANAGED IN HOME.NIX    
+      extraGroups = ["networkmanager" "wheel" "audio" "i2c" "libvirtd" "gamemode" "sops"];
+      #   packages = with pkgs; [    ];
+      #   USER PKGS MANAGED IN HOME.NIX
       shell = pkgs.zsh;
       hashedPasswordFile = config.sops.secrets."hosts/user_pass".path;
     };
@@ -96,24 +98,24 @@ in
       "configureSyncthing" = {
         enable = true;
         description = "Sets up syncthing for new installs";
-        path = with pkgs; [ jq curl gawk ];
-        wantedBy = [ "syncthing.service" ];
+        path = with pkgs; [jq curl gawk];
+        wantedBy = ["syncthing.service"];
         script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
-       };
+      };
       "nix-daemon" = {
         environment = {
           TMPDIR = "/nix/tmp";
         };
         serviceConfig = {
           RequiresMountsFor = [
-             "/nix/tmp"
+            "/nix/tmp"
           ];
         };
         restartTriggers = [
           config.environment.etc."nix/nix.conf".source
         ];
-        after = [ "local-fs.target" ];
-       };
+        after = ["local-fs.target"];
+      };
     };
   };
 
@@ -133,10 +135,10 @@ in
       pulseaudio
       sddmTheme
       v4l-utils
-      vim 
+      vim
       wineWowPackages.stagingFull
       xdg-utils
-      ];
+    ];
 
     sessionVariables = rec {
       CLIPBOARD_NOGUI = "1";
@@ -150,7 +152,7 @@ in
       WLR_NO_HARDWARE_CURSORS = "1";
       __GL_MaxFramesAllowed = "1";
       __GL_GSYNC_ALLOWED = "1";
-      __GL_VRR_ALLOWED  = "0";
+      __GL_VRR_ALLOWED = "0";
     };
 
     variables = rec {
@@ -158,7 +160,8 @@ in
     };
 
     pathsToLink = [
-      "/share/xdg-desktop-portal" "/share/applications"
+      "/share/xdg-desktop-portal"
+      "/share/applications"
     ];
   };
 
@@ -166,7 +169,7 @@ in
   security = {
     rtkit = {
       enable = true;
-      };
+    };
 
     pki = {
       certificates = [
@@ -176,27 +179,27 @@ in
 
     pam = {
       services = {
-          login = {
-            u2fAuth = true;
-          };
+        login = {
+          u2fAuth = true;
+        };
 
-          sudo = {
-            u2fAuth = true;
-          };
+        sudo = {
+          u2fAuth = true;
+        };
 
-          hyprlock = {
-            u2fAuth = true;
-          };
+        hyprlock = {
+          u2fAuth = true;
+        };
 
-          sddm = {
-            text = ''
-              auth     sufficient    pam_u2f.so  cue
-              auth     include       login
-              account  include       login
-              password include       login
-              session  include       login
-            '';
-          };
+        sddm = {
+          text = ''
+            auth     sufficient    pam_u2f.so  cue
+            auth     include       login
+            account  include       login
+            password include       login
+            session  include       login
+          '';
+        };
       };
 
       u2f = {
@@ -211,7 +214,7 @@ in
 
     polkit = {
       enable = true;
-     };
+    };
   };
 
   # List services that you want to enable:
@@ -258,15 +261,15 @@ in
           "00-combined-sink" = {
             "pulse.cmd" = [
               {
-                cmd  = "load-module";
+                cmd = "load-module";
                 args = "module-combine-sink sink_name=HDMI_External sink_properties='device.description=\"HDMI / External\"' slaves=alsa_output.pci-0000_0a_00.4.analog-stereo,alsa_output.pci-0000_08_00.1.hdmi-stereo-extra1";
               }
             ];
           };
         };
       };
-  };
-   
+    };
+
     pcscd = {
       enable = true;
     };
@@ -290,7 +293,7 @@ in
       dataDir = "${vars.syncthingPath}";
       configDir = "/home/${vars.username}/.config/syncthing";
       openDefaultPorts = true;
-      overrideDevices = true;     # overrides any devices added or deleted through the WebUI
+      overrideDevices = true; # overrides any devices added or deleted through the WebUI
 
       key = config.sops.secrets."syncthing-key".path;
       cert = config.sops.secrets."syncthing-cert".path;
@@ -320,7 +323,7 @@ in
         folders = {
           "${vars.syncthingPath}" = {
             path = "${vars.syncthingPath}";
-            devices = [ "SyncMaster" ];
+            devices = ["SyncMaster"];
             id = "sync";
             label = "Sync";
             type = "receiveonly";
@@ -331,26 +334,25 @@ in
 
     udev = {
       enable = true;
-      packages = with pkgs; [ pkgs-stable.yubikey-manager yubikey-personalization libu2f-host ];
-      extraRules =
-      ''
-# SteelSeries Aerox 3
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1836", MODE="0666"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1836", MODE="0666"
+      packages = with pkgs; [pkgs-stable.yubikey-manager yubikey-personalization libu2f-host];
+      extraRules = ''
+        # SteelSeries Aerox 3
+        SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1836", MODE="0666"
+        SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1836", MODE="0666"
 
-# SteelSeries Aerox 3 Wireless (wired mode)
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="183a", MODE="0666"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="183a", MODE="0666"
+        # SteelSeries Aerox 3 Wireless (wired mode)
+        SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="183a", MODE="0666"
+        SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="183a", MODE="0666"
 
-# SteelSeries Aerox 3 Wireless (2.4 GHz wireless mode)
-SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1838", MODE="0666"
-SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1838", MODE="0666" 
+        # SteelSeries Aerox 3 Wireless (2.4 GHz wireless mode)
+        SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1838", MODE="0666"
+        SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1838", MODE="0666"
 
-# Logitech C920 HD Pro Webcam Default Settings
-SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTR{index}=="0", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl -d $devnode -c tilt_absolute=20000 -c zoom_absolute=150"
+        # Logitech C920 HD Pro Webcam Default Settings
+        SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTR{index}=="0", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl -d $devnode -c tilt_absolute=20000 -c zoom_absolute=150"
 
-# Backlight control
-KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
+        # Backlight control
+        KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       '';
     };
 
@@ -366,7 +368,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       sddm = {
         enable = true;
         package = pkgs.kdePackages.sddm;
-        extraPackages = with pkgs; [ kdePackages.qtmultimedia ];
+        extraPackages = with pkgs; [kdePackages.qtmultimedia];
         theme = "sddm-astronaut-theme";
         wayland = {
           enable = true;
@@ -374,7 +376,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
         settings = {
           General = {
             PrimaryOutput = "DP-1";
-          }; 
+          };
         };
       };
     };
@@ -405,7 +407,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       };
     };
 
-    steam = { 
+    steam = {
       enable = true;
     };
 
@@ -430,7 +432,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
   };
 
   nix = {
-    nixPath = [ 
+    nixPath = [
       "nixpkgs=${inputs.nixpkgs}"
     ];
     package = pkgs.nixVersions.latest;
@@ -468,7 +470,7 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
   };
 
   # Allow unfree packages
-  nixpkgs = { 
+  nixpkgs = {
     config = {
       allowUnfree = true;
     };
@@ -496,17 +498,21 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
       open = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.stable // {
-        open = config.boot.kernelPackages.nvidiaPackages.stable.open.overrideAttrs (old: {
-          patches = (old.patches or [ ]) ++ [
-            (pkgs.fetchpatch {
-              name = "get_dev_pagemap.patch";
-              url = "https://github.com/NVIDIA/open-gpu-kernel-modules/commit/3e230516034d29e84ca023fe95e284af5cd5a065.patch";
-              hash = "sha256-BhL4mtuY5W+eLofwhHVnZnVf0msDj7XBxskZi8e6/k8=";
-            })
-          ];
-        });
-      };
+      package =
+        config.boot.kernelPackages.nvidiaPackages.stable
+        // {
+          open = config.boot.kernelPackages.nvidiaPackages.stable.open.overrideAttrs (old: {
+            patches =
+              (old.patches or [])
+              ++ [
+                (pkgs.fetchpatch {
+                  name = "get_dev_pagemap.patch";
+                  url = "https://github.com/NVIDIA/open-gpu-kernel-modules/commit/3e230516034d29e84ca023fe95e284af5cd5a065.patch";
+                  hash = "sha256-BhL4mtuY5W+eLofwhHVnZnVf0msDj7XBxskZi8e6/k8=";
+                })
+              ];
+          });
+        };
     };
 
     bluetooth = {
@@ -558,95 +564,95 @@ KERNEL=="i2c-[0-9]*", GROUP="i2c", MODE="0660"
     templates = {
       "configureSyncting.service" = {
         content = ''
-## THIS TOOK HOURS OF MY FUCKING LIFE MAN
+          ## THIS TOOK HOURS OF MY FUCKING LIFE MAN
 
-DIR=${vars.syncthingPath}
-TOKEN=${config.sops.placeholder."services/syncthing/token"}
+          DIR=${vars.syncthingPath}
+          TOKEN=${config.sops.placeholder."services/syncthing/token"}
 
-function checkSync {
-    export SYNC_PERCENTAGE=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/completion?folder=sync | jq '."completion"' | awk -F. '{print $1}')
-}
+          function checkSync {
+              export SYNC_PERCENTAGE=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/completion?folder=sync | jq '."completion"' | awk -F. '{print $1}')
+          }
 
-function waitSync {
-    checkSync
-    while [[ $SYNC_PERCENTAGE -lt 100 ]]
-    do
-        sleep 15
-        checkSync
-        echo "Sync is at $SYNC_PERCENTAGE%"
-    done
-    if [[ $SYNC_PERCENTAGE -eq 100 ]]; then
-        echo "Synthing setup has finished. Switch builds to ensure all secrets are included."
-        curl -s -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "sendreceive"}'
-    else
-        echo "Sync appears to have finished synching but there's an issue. Please check it out."
-        fi
-}
+          function waitSync {
+              checkSync
+              while [[ $SYNC_PERCENTAGE -lt 100 ]]
+              do
+                  sleep 15
+                  checkSync
+                  echo "Sync is at $SYNC_PERCENTAGE%"
+              done
+              if [[ $SYNC_PERCENTAGE -eq 100 ]]; then
+                  echo "Synthing setup has finished. Switch builds to ensure all secrets are included."
+                  curl -s -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "sendreceive"}'
+              else
+                  echo "Sync appears to have finished synching but there's an issue. Please check it out."
+                  fi
+          }
 
-function syncFix {
-    # ENSURE that the local folder is set to "Receive Only" - it is by default.
-    echo "Setting local folder to receive only"
-    receiveOnly
-    echo "Beginning Sync. Please wait..."
-    sleep 15
-    syncRevert
-    sleep 15
-    waitSync
-}
+          function syncFix {
+              # ENSURE that the local folder is set to "Receive Only" - it is by default.
+              echo "Setting local folder to receive only"
+              receiveOnly
+              echo "Beginning Sync. Please wait..."
+              sleep 15
+              syncRevert
+              sleep 15
+              waitSync
+          }
 
-function syncRevert {
-    curl -s -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/scan?folder=sync
-    sleep 2
-    curl -s -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/revert?folder=sync
+          function syncRevert {
+              curl -s -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/scan?folder=sync
+              sleep 2
+              curl -s -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/revert?folder=sync
 
-}
+          }
 
-function receiveOnly {
-    curl -s -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "receiveonly"}'
-}
+          function receiveOnly {
+              curl -s -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "receiveonly"}'
+          }
 
-function sendReceive {
-    curl -s -o /dev/null -w "%{http_code}" -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "sendreceive"}'
-}
+          function sendReceive {
+              curl -s -o /dev/null -w "%{http_code}" -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "sendreceive"}'
+          }
 
-sleep 5
-echo "Starting..."
-if [ ! -d "$DIR" ]; then
-    echo "No sync folder detected. Configuring..."
+          sleep 5
+          echo "Starting..."
+          if [ ! -d "$DIR" ]; then
+              echo "No sync folder detected. Configuring..."
 
-    receiveOnly
-    mkdir -p $DIR/.stfolder
-    echo "Directory created."
-    chown -R ${vars.username}:users $DIR
-    echo "Permissions Set."
-    sleep 2
+              receiveOnly
+              mkdir -p $DIR/.stfolder
+              echo "Directory created."
+              chown -R ${vars.username}:users $DIR
+              echo "Permissions Set."
+              sleep 2
 
-    STATUS=$(curl -s -X GET http://localhost:8384/rest/noauth/health | jq -r '."status"')
-    echo "Status reports as: $STATUS"
+              STATUS=$(curl -s -X GET http://localhost:8384/rest/noauth/health | jq -r '."status"')
+              echo "Status reports as: $STATUS"
 
-    if [ "$STATUS" == "OK" ]; then
-      echo "Starting Sync Fix"
-      syncFix
-    else
-      echo "Check the service status of Syncthing. It shows as: $STATUS"
-    fi
+              if [ "$STATUS" == "OK" ]; then
+                echo "Starting Sync Fix"
+                syncFix
+              else
+                echo "Check the service status of Syncthing. It shows as: $STATUS"
+              fi
 
-else
-  receiveOnly
-  syncRevert
-  sleep 10
-  checkSync
-  if [[ $SYNC_PERCENTAGE -ne 100 ]]; then
-    echo "Starting Sync Fix"
-    syncFix
-  else
-    echo "Everything looks like it's already setup! Setting folder to Send/Receive mode.."
-    sendReceive
-    echo "All done!"
-  fi
+          else
+            receiveOnly
+            syncRevert
+            sleep 10
+            checkSync
+            if [[ $SYNC_PERCENTAGE -ne 100 ]]; then
+              echo "Starting Sync Fix"
+              syncFix
+            else
+              echo "Everything looks like it's already setup! Setting folder to Send/Receive mode.."
+              sendReceive
+              echo "All done!"
+            fi
 
-fi
-      '';
+          fi
+        '';
       };
     };
   };

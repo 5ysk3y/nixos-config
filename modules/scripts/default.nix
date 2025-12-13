@@ -1,5 +1,10 @@
-{ config, lib, pkgs, vars, ... }: {
-
+{
+  config,
+  lib,
+  pkgs,
+  vars,
+  ...
+}: {
   options = with lib; {
     scripts = {
       enable = mkEnableOption "Enables Custom Scripts";
@@ -12,21 +17,21 @@
     };
   };
 
-  config = with lib; mkIf config.scripts.enable (mkMerge [
+  config = with lib;
+    mkIf config.scripts.enable (mkMerge [
+      (mkIf (config.scripts.gaming) {
+        home.packages = with pkgs; [
+          (import ./gaming {inherit pkgs;})
+        ];
+      })
 
-    (mkIf (config.scripts.gaming) {
-      home.packages = with pkgs; [
-        (import ./gaming {inherit pkgs;})
-      ];
-    })
-
-    (mkIf (config.scripts.nix) {
-      home.packages = with pkgs; let
-        nixScripts = import ./nix { inherit pkgs vars; };
-      in [
-        nixScripts.nix-build-system
-        nixScripts.nix-secrets
-      ];
-    })
-  ]);
+      (mkIf (config.scripts.nix) {
+        home.packages = with pkgs; let
+          nixScripts = import ./nix {inherit pkgs vars;};
+        in [
+          nixScripts.nix-build-system
+          nixScripts.nix-secrets
+        ];
+      })
+    ]);
 }

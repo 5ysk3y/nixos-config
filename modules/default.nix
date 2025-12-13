@@ -1,5 +1,9 @@
-{ config, lib, pkgs, ... }: {
-
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}: {
   imports = [
     ./applications
     ./conf
@@ -9,7 +13,7 @@
   # Application Defaults
 
   applications = with lib; {
-   hypr = {
+    hypr = {
       enable = mkDefault false;
       apps = {
         hyprland = mkDefault true;
