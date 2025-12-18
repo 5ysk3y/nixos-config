@@ -409,20 +409,6 @@
         path = "${config.xdg.configHome}/rbw/config.json";
       };
 
-      # gnupg
-      gnupg-BFC2DEE396C3C60124F1DD48D021869A34507FAE = {
-        format = "binary";
-        sopsFile = "${vars.secretsPath}/secrets/gnupg/BFC2DEE396C3C60124F1DD48D021869A34507FAE.key";
-        path = "${config.home.homeDirectory}/.gnupg/private-keys-v1.d/BFC2DEE396C3C60124F1DD48D021869A34507FAE.key";
-      };
-
-      # pass
-      gnupg-pass = {
-        format = "binary";
-        sopsFile = "${vars.secretsPath}/secrets/gnupg/main.enc.gpg";
-        path = "${config.home.homeDirectory}/.local/share/pass/main.gpg";
-      };
-
       # chatgpt
       "services/chatgpt/api_key" = { };
     };
