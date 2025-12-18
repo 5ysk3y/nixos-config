@@ -57,6 +57,12 @@ in
             source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/gnupg/pubring.kbx";
           };
 
+      home.file."${config.home.homeDirectory}/.local/share/pass/main.gpg" =
+        mkIf config.confSymlinks.configs.gnupg
+          {
+            source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/gnupg/main.gpg";
+          };
+
       home.file."${config.xdg.configHome}/OpenRGB/MainBlue.orp" =
         lib.mkIf config.confSymlinks.configs.openrgb
           {
