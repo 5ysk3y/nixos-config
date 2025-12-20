@@ -26,7 +26,8 @@
         echo ""
       fi
       cd $CONFIG
-      nix flake update
+      echo "Updating all flake inputs"
+      sudo nix flake update
       echo ""
       echo "Flake updated"
       cd $HOME
