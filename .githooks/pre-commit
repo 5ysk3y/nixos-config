@@ -3,6 +3,3 @@ set -eu
 
 # Format Nix files
 nix run nixpkgs#nixfmt-tree -- .
-
-# Stage any formatting changes so the commit includes them
-git add -A
