@@ -1,11 +1,11 @@
 # NixOS Configuration
 
 ## Contents
-- [Introduction](#-introduction)
+- [Introduction](#introduction)
 - [Philosophy](#-philosophy)
 - [Secrets](#-secrets)
 - [What’s in This Repo](#-whats-in-this-repo)
-- [Installation](#-installation-)
+- [Installation](#-installation)
 - [Local Development & Rebuilds](#-local-development--rebuilds)
 - [CI Integration](#-ci-integration)
 - [Structure & Ongoing Work](#-structure--ongoing-work)
@@ -171,4 +171,3 @@ This repository exists primarily for my own systems, but it’s public in the sp
 If something here inspires you, feel free to adapt it — just don’t expect it to drop cleanly into your environment without modification.
 
 Expect change. Expect iteration. That’s the point.
-
