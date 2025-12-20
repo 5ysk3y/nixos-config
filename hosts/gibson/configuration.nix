@@ -161,6 +161,7 @@ in
       ADW_DISABLE_PORTAL = "1";
       GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
+      NVD_BACKEND = "direct";
       LIBVA_DRIVER_NAME = "nvidia";
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       WLR_NO_HARDWARE_CURSORS = "1";
@@ -508,7 +509,7 @@ in
     graphics = {
       enable = true;
       enable32Bit = true;
-      # extraPackages = with pkgs; [ ... ] # For additional packages if needed
+      extraPackages = with pkgs; [ nvidia-vaapi-driver ]; # For additional packages if needed
     };
 
     nvidia = {
