@@ -294,6 +294,10 @@ in
       implementation = "broker";
     };
 
+    upower = {
+      enable = true;
+    };
+
     logind = {
       settings = {
         Login = {
