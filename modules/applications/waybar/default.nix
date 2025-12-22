@@ -8,9 +8,7 @@
 }:
 let
   scripts = rec {
-    check_rbw = import ./scripts/check_rbw.nix { inherit pkgs; };
-    mouse_battery = import ./scripts/mouse_battery.nix { inherit pkgs; };
-    mouse_colour = import ./scripts/mouse_colour.nix { inherit pkgs; };
+    waybar = import ./scripts { inherit pkgs; };
     scroll_mpris = import ./scripts/scroll-mpris { inherit pkgs; };
   };
 in
@@ -73,7 +71,7 @@ in
                   "format" = "{}";
                   "escape" = "true";
                   "interval" = 30;
-                  "exec" = "${scripts.check_rbw.outPath}/bin/check_rbw";
+                  "exec" = "${scripts.waybar.check_rbw.outPath}/bin/check_rbw";
                 };
                 "idle_inhibitor" = {
                   "format" = "{icon}";
@@ -116,16 +114,16 @@ in
                   "format" = "  {icon}{text} ";
                   "return-type" = "json";
                   "format-icons" = {
-                    "100" = " ";
-                    "75" = " ";
-                    "50" = " ";
-                    "25" = " ";
-                    "0" = " ";
+                    "100" = "  ";
+                    "75" = "  ";
+                    "50" = "  ";
+                    "25" = "  ";
+                    "0" = "  ";
                     "charging" = "  ";
                   };
-                  "exec" = "${scripts.mouse_battery.outPath}/bin/mouse_battery";
+                  "exec" = "${scripts.waybar.mouse_battery.outPath}/bin/mouse_battery";
                   "restart-interval" = 10;
-                  "on-click" = "${scripts.mouse_colour.outPath}/bin/mouse_colour";
+                  "on-click" = "${scripts.waybar.mouse_colour.outPath}/bin/mouse_colour";
                 };
 
                 "custom/media" = {
