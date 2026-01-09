@@ -69,7 +69,9 @@ in
       home.activation.installDoomEmacs =
         with vars;
         lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          export PATH=/etc/profiles/per-user/rickie/bin/emacs:$PATH
           ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
+          cd ${config.xdg.configHome}/emacs/ && ${pkgs.git}/bin/git reset HEAD --hard && ${pkgs.git}/bin/git pull
         '';
     }
 
