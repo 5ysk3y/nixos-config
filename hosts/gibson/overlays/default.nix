@@ -24,6 +24,10 @@
             keyutils
           ];
       };
+
+      webcord = prev.webcord.override {
+        buildNpmPackage = prev.buildNpmPackage.override { nodejs = final.nodejs_22; };
+      };
     })
   ];
 }
