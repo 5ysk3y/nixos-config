@@ -62,7 +62,6 @@ in
               border_size = 1
               col.active_border = 0xffbd93f9
               col.inactive_border = 0xff44475a
-              no_border_on_floating = true
 
               layout = master
           }

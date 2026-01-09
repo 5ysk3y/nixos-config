@@ -66,7 +66,7 @@ in
             c.content.xss_auditing = True
 
             c.downloads.remove_finished = 300000
-            c.qt.chromium.process_model = "process-per-site-instance"
+            c.qt.chromium.process_model = "process-per-site"
             c.scrolling.smooth = True
             c.statusbar.show = "in-mode"
 
@@ -77,7 +77,8 @@ in
 
             c.window.title_format = "qutebrowser"
 
-            c.qt.args = ["enable-gpu-rasterization", "ignore-gpu-blocklist"]
+            c.qt.args = []
+            c.qt.workarounds.disable_accessibility = "always"
           '';
 
           keyBindings = {
