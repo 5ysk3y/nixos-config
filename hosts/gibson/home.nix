@@ -49,7 +49,7 @@
       krita
       libnotify
       mpvpaper
-      nixfmt-rfc-style
+      nixfmt
       nixd
       neofetch
       obs-cmd
@@ -107,7 +107,7 @@
       enable = true;
       dotDir = "${config.xdg.configHome}/zsh";
       loginExtra = ''
-        Hyprland && exit
+        start-hyprland && exit
       '';
       autosuggestion = {
         enable = true;

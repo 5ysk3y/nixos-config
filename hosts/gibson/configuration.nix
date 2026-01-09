@@ -161,6 +161,7 @@ in
       ADW_DISABLE_PORTAL = "1";
       GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
+      GBM_BACKEND = "nvidia-drm";
       NVD_BACKEND = "direct";
       LIBVA_DRIVER_NAME = "nvidia";
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
