@@ -57,6 +57,12 @@
       url = "path:./flakes/sddm-themes";
     };
 
+    # Darwin/Mac
+    nix-darwin = {
+      url = "github:LnL7/nix-darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Secrets
     nix-secrets = {
       url = "path:/etc/nixos/nix-secrets";
@@ -130,10 +136,11 @@
             } # End Home-Manager
           ]; # End modules
         }; # End gibson
+      };
 
-        # Testing VM (macbook)
-        "macbook" = nixpkgs.lib.nixosSystem rec {
-          system = "aarch64-linux";
+      darwinConfigurations = with inputs; {
+        "macbook" = inputs.nix-darwin.lib.darwinSystem rec {
+          system = "aarch64-darwin";
           specialArgs = {
             hostname = "macbook";
             inherit (pkgsFor "${system}") pkgs-stable;
@@ -141,10 +148,10 @@
           };
 
           modules = with specialArgs; [
-            ./hosts/${hostname}/configuration.nix
+            ./hosts/${hostname}/darwin-configuration.nix
 
             # Begin Home Manager Setup
-            home-manager.nixosModules.home-manager
+            home-manager.darwinModules.home-manager
             {
               home-manager.extraSpecialArgs = {
                 inherit
@@ -158,6 +165,7 @@
 
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "before-nix";
               home-manager.sharedModules = [
                 inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
               ];
