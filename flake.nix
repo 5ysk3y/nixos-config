@@ -65,7 +65,7 @@
 
     # Secrets
     nix-secrets = {
-      url = "path:/etc/nixos/nix-secrets";
+      url = "git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main";
       flake = false;
     };
   };
