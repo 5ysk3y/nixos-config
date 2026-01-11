@@ -10,7 +10,7 @@
 }:
 {
   networking.hostName = "macbook"; # Define your hostname.
-  
+
   # Set your time zone.
   time.timeZone = "Europe/London";
 

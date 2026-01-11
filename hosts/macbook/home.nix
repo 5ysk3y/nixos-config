@@ -8,7 +8,7 @@
   ...
 }:
 
-let 
+let
   ghKey = pkgs.fetchurl {
     url = "https://github.com/5ysk3y.gpg";
     sha256 = "1w6vml01gf81mnck4gmwi91ynkhwdsw8z84lxjlz8bvbwrj6cwrx";
@@ -30,12 +30,15 @@ in
   programs = {
     home-manager = {
       enable = true;
-    }; 
+    };
 
     gpg = {
       enable = true;
       publicKeys = [
-        { source = ghKey; trust = 5; }
+        {
+          source = ghKey;
+          trust = 5;
+        }
       ];
     };
 
