@@ -23,7 +23,7 @@
         echo ""
         cd $CONFIG
         echo "Updating all flake inputs"
-        sudo nix flake update
+        nix flake update
         echo ""
         echo "Flake updated"
       else
