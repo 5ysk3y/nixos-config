@@ -35,7 +35,6 @@
           in
           [
             nixScripts.nix-build-system
-            nixScripts.nix-secrets
           ];
       })
     ]);
