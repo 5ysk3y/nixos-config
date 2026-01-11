@@ -1,44 +1,45 @@
-#!/usr/bin/env -S nix shell nixpkgs#bashInteractive nixpkgs#age nixpkgs#git nixpkgs#openssh nixpkgs#coreutils --command bash
+#!/usr/bin/env -S nix shell nixpkgs#bashInteractive nixpkgs#coreutils nixpkgs#git nixpkgs#openssh nixpkgs#gnupg nixpkgs#pcsclite nixpkgs#age nixpkgs#age-plugin-yubikey --command bash
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-AGE_KEY_TMP="$(mktemp)"
-GH_KEY_TMP="$(mktemp)"
-CLEANUP_DONE=0
-
-cleanup() {
-  if [[ $CLEANUP_DONE -eq 0 ]]; then
-    rm -f "$AGE_KEY_TMP" "$GH_KEY_TMP"
-    CLEANUP_DONE=1
-  fi
-}
-trap cleanup EXIT
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
 usage() {
   cat <<EOF
-Usage: bootstrap/install.sh [--target /mnt] [--user username] [--uid 1000] [--gid 100] [--host hostname] [--dry-run|--install] [--config-dest PATH]
+Usage: bootstrap/install.sh [--target /mnt] [--user username] [--uid 1000] [--gid 100] [--host hostname] [--dry-run|--install] [--config-dest PATH] [--secrets-subdir PATH] [--secrets-blob PATH]
 
-This script bootstraps secrets into a target mount (typically /mnt) so NixOS can be installed from scratch:
+This script bootstraps a fresh NixOS install using a single YubiKey:
 
-  - Decrypts bootstrap age identity and GitHub deploy SSH key
-  - Creates a bare transport repo at <target>/home/<user>/.cache/nix-secrets.git
-  - Deploys full secrets work-tree to <target>/etc/nixos/nix-secrets (no .git)
-  - Writes age keys to <target>/var/lib/age/keys.txt
-  - (--install) copies nixos-config into the target and runs nixos-install
+  - Ensures pcscd + gpg smartcard coexist cleanly (scdaemon disable-ccid)
+  - Uses YubiKey-backed SSH auth to clone:
+      - nixos-config into <config-dest>
+      - nix-secrets into <config-dest>/<secrets-subdir>
+  - Decrypts YubiKey-encrypted age identity blob from nix-secrets:
+      - writes <target>/var/lib/age/keys.txt
+  - (--install) runs nixos-install using the cloned nixos-config flake
 
 Options:
-  --target PATH       Target mountpoint (default: /mnt)
-  --user NAME         Username for cache path (default: rickie)
-  --uid N             UID for ownership of cache dir (default: 1000)
-  --gid N             GID for ownership of cache dir (default: 100)
-  --host NAME         Hostname to install (default: gibson)
-  --dry-run           Do not run nixos-install (default)
-  --install           Run nixos-install after bootstrapping secrets
-  --config-dest PATH  Where to place nixos-config in the target (default: <target>/home/<user>/nixos-config)
-  --help              Show this help
+  --target PATH         Target mountpoint (default: /mnt)
+  --user NAME           Username for target home path (default: rickie)
+  --uid N               UID for ownership of <target>/home/<user> (default: 1000)
+  --gid N               GID for ownership of <target>/home/<user> (default: 100)
+  --host NAME           Hostname to install (default: gibson)
+  --dry-run             Do not run nixos-install (default)
+  --install             Run nixos-install after bootstrapping secrets
+  --config-dest PATH    Where to place nixos-config in the target
+                        (default: <target>/home/<user>/nixos-config)
+  --secrets-subdir PATH Where nix-secrets is cloned relative to config-dest
+                        (default: secrets)
+  --secrets-blob PATH   Path to the encrypted age identity blob inside nix-secrets
+                        (default: bootstrap/age-keys.txt.age)
+  --help                Show this help
+
+Notes:
+  - Run this as your normal user, not with sudo.
+    The script will sudo only for the few target root paths it must write.
+  - Requires the YubiKey to be plugged in, you will be prompted to touch it.
+  - Uses your existing SSH, YubiKey setup to access GitHub (git@github.com).
 EOF
 }
 
@@ -49,6 +50,8 @@ USER_UID="1000"
 USER_GID="100"
 DO_INSTALL=0
 CONFIG_DEST=""
+SECRETS_SUBDIR="secrets"
+SECRETS_BLOB_REL="bootstrap/age-keys.txt.age"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -60,6 +63,8 @@ while [[ $# -gt 0 ]]; do
     --install) DO_INSTALL=1; shift;;
     --dry-run) DO_INSTALL=0; shift;;
     --config-dest) CONFIG_DEST="$2"; shift 2;;
+    --secrets-subdir) SECRETS_SUBDIR="$2"; shift 2;;
+    --secrets-blob) SECRETS_BLOB_REL="$2"; shift 2;;
     --help|-h) usage; exit 0;;
     *) die "Unknown arg: $1";;
   esac
@@ -70,133 +75,172 @@ done
 MODE="dry-run"
 [[ $DO_INSTALL -eq 1 ]] && MODE="install"
 
-echo "=== NixOS bootstrap (secrets deploy) ==="
-echo "Repo root: $ROOT_DIR"
-echo "Target:    $TARGET"
-echo "User:      $USER_NAME ($USER_UID:$USER_GID)"
-echo "Host:      $HOST"
-echo "Mode:      $MODE"
-echo
-
-[[ -d "$TARGET" ]] || die "Target path does not exist: $TARGET"
-[[ -f "$ROOT_DIR/secrets/bootstrap-age-master.enc" ]] || die "Missing $ROOT_DIR/secrets/bootstrap-age-master.enc"
-[[ -f "$ROOT_DIR/secrets/bootstrap-gh-token.enc" ]] || die "Missing $ROOT_DIR/secrets/bootstrap-gh-token.enc"
+NIXOS_CONFIG_ORIGIN="git@github.com:5ysk3y/nixos-config.git"
+NIX_SECRETS_ORIGIN="git@github.com:5ysk3y/nix-secrets.git"
+NIX_SECRETS_BRANCH="main"
 
 # --- Paths in the TARGET filesystem ---
 USER_HOME="$TARGET/home/$USER_NAME"
-CACHE_DIR="$USER_HOME/.cache"
-SECRETS_BARE="$CACHE_DIR/nix-secrets.git"
-SECRETS_WORKTREE="$TARGET/etc/nixos/nix-secrets"
-
 AGE_KEYS_DIR="$TARGET/var/lib/age"
 AGE_KEYS_FILE="$AGE_KEYS_DIR/keys.txt"
 
-ORIGIN="git@github.com:5ysk3y/nix-secrets.git"
-BRANCH="main"
+CONFIG_PARENT="$(dirname "$CONFIG_DEST")"
+SECRETS_DEST="$CONFIG_DEST/$SECRETS_SUBDIR"
+SECRETS_BLOB="$SECRETS_DEST/$SECRETS_BLOB_REL"
 
-# Force SSH to use ONLY the deploy key; do not talk to agent/YubiKey
-SSH_OPTS=(
-  -i "$GH_KEY_TMP"
-  -o IdentitiesOnly=yes
-  -o IdentityAgent=none
-  -o StrictHostKeyChecking=accept-new
-)
+TMPDIR="$(mktemp -d)"
+YUBI_IDENT="$TMPDIR/yubikey-identity.txt"
+CLEANUP_DONE=0
+cleanup() {
+  if [[ $CLEANUP_DONE -eq 0 ]]; then
+    rm -rf "$TMPDIR"
+    CLEANUP_DONE=1
+  fi
+}
+trap cleanup EXIT
 
-echo "Decrypting age master key..."
-age --decrypt "$ROOT_DIR/secrets/bootstrap-age-master.enc" > "$AGE_KEY_TMP"
-[[ -s "$AGE_KEY_TMP" ]] || die "Failed to decrypt age master key (empty output)"
-chmod 600 "$AGE_KEY_TMP"
-echo "Age master key decrypted to $AGE_KEY_TMP"
-echo
-
-echo "Decrypting GitHub deploy SSH key..."
-age --decrypt -i "$AGE_KEY_TMP" "$ROOT_DIR/secrets/bootstrap-gh-token.enc" > "$GH_KEY_TMP"
-[[ -s "$GH_KEY_TMP" ]] || die "Failed to decrypt GitHub deploy key (empty output)"
-chmod 600 "$GH_KEY_TMP"
-echo "GitHub deploy key decrypted to $GH_KEY_TMP"
-echo
-
-echo "Preparing target directories..."
-mkdir -p "$TARGET/etc/nixos" "$TARGET/var/lib" "$CACHE_DIR" "$AGE_KEYS_DIR"
-chown -R "$USER_UID:$USER_GID" "$USER_HOME" || true
-
-echo "  bare repo:  $SECRETS_BARE"
-echo "  work-tree:  $SECRETS_WORKTREE"
-echo "  age keys:   $AGE_KEYS_FILE"
-echo
-
-# Clone bare repo into the user's cache within the target
-if [[ ! -d "$SECRETS_BARE" ]]; then
-  echo "Cloning nix-secrets (bare) into $SECRETS_BARE..."
-  SSH_AUTH_SOCK= \
-    GIT_SSH_COMMAND="ssh ${SSH_OPTS[*]}" \
-    git clone --bare "$ORIGIN" "$SECRETS_BARE"
-    
+# Use sudo only when needed
+SUDO=""
+if [[ ${EUID:-0} -ne 0 ]]; then
+  command -v sudo >/dev/null 2>&1 || die "This script needs sudo available for a few steps when not run as root."
+  SUDO="sudo"
 fi
 
-# Ensure refs/remotes/origin/main exists in the bare repo (explicit refspec!)
-echo "Fetching origin/$BRANCH into refs/remotes/origin/$BRANCH..."
-SSH_AUTH_SOCK= \
-  GIT_SSH_COMMAND="ssh ${SSH_OPTS[*]}" \
-   git --git-dir="$SECRETS_BARE" fetch origin "$BRANCH:refs/remotes/origin/$BRANCH"
+echo "=== NixOS bootstrap (YubiKey-first) ==="
+echo "Repo root:     $ROOT_DIR"
+echo "Target:        $TARGET"
+echo "User:          $USER_NAME ($USER_UID:$USER_GID)"
+echo "Host:          $HOST"
+echo "Mode:          $MODE"
+echo "Config dest:   $CONFIG_DEST"
+echo "Secrets dest:  $SECRETS_DEST"
+echo "Secrets blob:  $SECRETS_BLOB_REL"
+echo
 
-# Ensure bare repo is fully user-owned (prevents later permission issues)
-chown -R "$USER_UID:$USER_GID" "$SECRETS_BARE"
+[[ -d "$TARGET" ]] || die "Target path does not exist: $TARGET"
 
-# Deploy work-tree with NO .git
-echo "Deploying secrets work-tree to $SECRETS_WORKTREE..."
-mkdir -p "$SECRETS_WORKTREE"
+echo "Preparing target directories..."
+# These may fail if TARGET is root-owned, that’s fine, we fall back to sudo
+mkdir -p "$TARGET/etc/nixos" "$USER_HOME" "$CONFIG_PARENT" 2>/dev/null || true
+$SUDO mkdir -p "$TARGET/etc/nixos" "$USER_HOME" "$CONFIG_PARENT"
+$SUDO mkdir -p "$TARGET/var/lib" "$AGE_KEYS_DIR"
 
-git -c safe.directory="$SECRETS_WORKTREE" \
-  --git-dir="$SECRETS_BARE" --work-tree="$SECRETS_WORKTREE" \
-  checkout -f -B "$BRANCH" "refs/remotes/origin/$BRANCH"
+$SUDO chown -R "$USER_UID:$USER_GID" "$USER_HOME" >/dev/null 2>&1 || true
 
-git -c safe.directory="$SECRETS_WORKTREE" \
-  --git-dir="$SECRETS_BARE" --work-tree="$SECRETS_WORKTREE" \
-  reset --hard "refs/remotes/origin/$BRANCH"
+# --- Ensure smartcard plumbing works cleanly (pcscd + GPG coexistence) ---
+# We configure scdaemon disable-ccid for the CURRENT user running the script.
+GNUPG_HOME="${GNUPGHOME:-$HOME/.gnupg}"
+mkdir -p "$GNUPG_HOME"
+chmod 700 "$GNUPG_HOME"
 
-# Ensure user owns bare secrets
-chown -R "$USER_UID:$USER_GID" "$SECRETS_BARE"
+SCDAEMON_CONF="$GNUPG_HOME/scdaemon.conf"
+if ! grep -qx 'disable-ccid' "$SCDAEMON_CONF" 2>/dev/null; then
+  echo "Configuring GnuPG scdaemon to avoid CCID conflicts (disable-ccid)..."
+  echo "disable-ccid" >> "$SCDAEMON_CONF"
+fi
 
-# Ensure root owns deployed secrets
-chown -R root:root "$SECRETS_WORKTREE"
-chmod -R go-rwx "$SECRETS_WORKTREE" || true
+echo "Restarting smartcard daemons..."
+gpgconf --kill scdaemon >/dev/null 2>&1 || true
+gpgconf --kill gpg-agent >/dev/null 2>&1 || true
 
-# Install age key where sops-nix will look on the installed system
-echo "Installing age key to $AGE_KEYS_FILE..."
-install -m 0600 "$AGE_KEY_TMP" "$AGE_KEYS_FILE"
-chown root:root "$AGE_KEYS_FILE"
+if command -v systemctl >/dev/null 2>&1; then
+  $SUDO systemctl restart pcscd >/dev/null 2>&1 || true
+else
+  $SUDO pkill pcscd >/dev/null 2>&1 || true
+  $SUDO pcscd >/dev/null 2>&1 || true
+fi
+
+# --- Ensure SSH can talk to GitHub (known_hosts) ---
+SSH_DIR="${HOME}/.ssh"
+KNOWN_HOSTS="${SSH_DIR}/known_hosts"
+mkdir -p "$SSH_DIR"
+chmod 700 "$SSH_DIR"
+touch "$KNOWN_HOSTS"
+chmod 600 "$KNOWN_HOSTS"
+
+if ! ssh-keygen -F github.com -f "$KNOWN_HOSTS" >/dev/null 2>&1; then
+  echo "Adding github.com to known_hosts..."
+  ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> "$KNOWN_HOSTS" 2>/dev/null || true
+fi
+
+# --- Quick probe that the YubiKey age plugin sees a key ---
+echo "Checking YubiKey age identities..."
+AGE_RECIP="$(age-plugin-yubikey --list | grep . | tail -n1 || true)"
+[[ -n "$AGE_RECIP" ]] || die "No YubiKey age recipients found. Expected 'age-plugin-yubikey --list' to show at least one. Is the YubiKey inserted and usable?"
+
+echo "Using YubiKey recipient: $AGE_RECIP"
+echo
+
+# --- Clone nixos-config into target, IMPORTANT: runs as invoking user so SSH agent works ---
+if [[ -d "$CONFIG_DEST/.git" ]]; then
+  echo "nixos-config already exists at $CONFIG_DEST, fetching latest..."
+  git -C "$CONFIG_DEST" fetch --all --prune
+else
+  echo "Cloning nixos-config into $CONFIG_DEST..."
+  $SUDO rm -rf "$CONFIG_DEST" >/dev/null 2>&1 || true
+  rm -rf "$CONFIG_DEST"
+  git clone "$NIXOS_CONFIG_ORIGIN" "$CONFIG_DEST"
+fi
+
+# --- Clone nix-secrets under nixos-config tree ---
+if [[ -d "$SECRETS_DEST/.git" ]]; then
+  echo "nix-secrets already exists at $SECRETS_DEST, fetching latest..."
+  git -C "$SECRETS_DEST" fetch --all --prune
+  git -C "$SECRETS_DEST" checkout "$NIX_SECRETS_BRANCH"
+  git -C "$SECRETS_DEST" reset --hard "origin/$NIX_SECRETS_BRANCH"
+else
+  echo "Cloning nix-secrets into $SECRETS_DEST..."
+  mkdir -p "$(dirname "$SECRETS_DEST")"
+  rm -rf "$SECRETS_DEST"
+  git clone --branch "$NIX_SECRETS_BRANCH" "$NIX_SECRETS_ORIGIN" "$SECRETS_DEST"
+fi
+
+# Ownership of the config tree should belong to the target user
+$SUDO chown -R "$USER_UID:$USER_GID" "$CONFIG_DEST" >/dev/null 2>&1 || true
+
+# --- Decrypt the YubiKey-encrypted age identity blob into the target root ---
+[[ -f "$SECRETS_BLOB" ]] || die "Missing secrets blob: $SECRETS_BLOB"
 
 echo
-echo "✅ Secrets bootstrap complete."
+echo "Generating YubiKey identity descriptor (non-secret)..."
+age-plugin-yubikey --identity > "$YUBI_IDENT"
+
+echo "Decrypting age identity blob, requires YubiKey touch..."
+$SUDO install -d -m 0700 "$AGE_KEYS_DIR"
+$SUDO age -d -i "$YUBI_IDENT" -o "$AGE_KEYS_FILE" "$SECRETS_BLOB"
+$SUDO chmod 0600 "$AGE_KEYS_FILE"
+$SUDO chown root:root "$AGE_KEYS_FILE"
+
+echo
+echo "✅ Bootstrap complete."
 echo
 echo "What exists in target now:"
-echo "  - $SECRETS_WORKTREE (root-owned, no .git)  -> flake input path"
-echo "  - $SECRETS_BARE (user-owned bare repo)     -> live updates can fetch as $USER_NAME"
-echo "  - $AGE_KEYS_FILE                           -> sops-nix decryption key"
+echo "  - $CONFIG_DEST                     -> nixos-config (git clone)"
+echo "  - $SECRETS_DEST                    -> nix-secrets  (git clone)"
+echo "  - $AGE_KEYS_FILE                   -> sops-nix age keyFile on installed system"
 echo
 
 if [[ $DO_INSTALL -eq 0 ]]; then
   echo "Next steps:"
-  echo "  1) Clone/copy nixos-config into $CONFIG_DEST (or wherever you prefer)"
-  echo "  2) Run nixos-install --root $TARGET --flake $CONFIG_DEST#$HOST"
+  echo "  1) Review config at: $CONFIG_DEST"
+  echo "  2) Run: nixos-install --root $TARGET --flake $CONFIG_DEST#$HOST"
   exit 0
 fi
 
 echo "=== Install mode ==="
 
-# Guardrails: target must look like a mounted NixOS install root
 [[ -d "$TARGET/etc" ]] || die "Target looks wrong: $TARGET/etc missing"
-[[ -d "$SECRETS_WORKTREE" ]] || die "Secrets work-tree missing at $SECRETS_WORKTREE"
 [[ -f "$AGE_KEYS_FILE" ]] || die "Age key missing at $AGE_KEYS_FILE"
-
-echo "Copying nixos-config into target: $CONFIG_DEST"
-mkdir -p "$(dirname "$CONFIG_DEST")"
-rm -rf "$CONFIG_DEST"
-cp -a "$ROOT_DIR" "$CONFIG_DEST"
-chown -R "$USER_UID:$USER_GID" "$CONFIG_DEST" || true
+[[ -d "$CONFIG_DEST/.git" ]] || die "nixos-config clone missing at $CONFIG_DEST"
 
 echo "Running nixos-install..."
-nixos-install --root "$TARGET" --flake "$CONFIG_DEST#$HOST"
+# Keep essentials (especially SSH_AUTH_SOCK) so git+ssh flake inputs can work during install if needed.
+$SUDO env -i \
+  HOME="$HOME" \
+  USER="$USER" \
+  PATH="$PATH" \
+  SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-}" \
+  NIX_CONFIG="${NIX_CONFIG:-}" \
+  nixos-install --root "$TARGET" --flake "$CONFIG_DEST#$HOST"
 
 echo "✅ nixos-install completed."

@@ -89,7 +89,4 @@ jobs:
 
       - name: Flake check with secrets input override
         run: |
-          nix flake check \
-            --no-write-lock-file \
-            --override-input nix-secrets \
-              "git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main&shallow=1"
+          nix flake check --no-write-lock-file
