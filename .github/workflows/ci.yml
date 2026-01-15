@@ -49,6 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,6 +57,8 @@ jobs:
 
       - name: Run gitleaks (no git history)
         uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: >
             detect
