@@ -1,0 +1,16 @@
+title = "gitleaks config for nixos-config"
+
+[allowlist]
+description = "Ignore expected non-secret metadata and encrypted artifacts"
+paths = [
+  '''^\.sops\.yaml$''',
+  '''.*\.age$''',
+  '''.*\.enc$''',
+  '''.*\.gpg$''',
+  '''^secrets/''',
+  '''^nix-secrets/''',
+]
+
+regexes = [
+  '''age1[0-9a-z]{10,}''',
+]

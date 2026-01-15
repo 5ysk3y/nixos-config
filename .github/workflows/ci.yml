@@ -26,9 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/determinate-nix-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Nix format check (nixfmt-tree)
         run: |
           set -euo pipefail
@@ -42,13 +44,34 @@ jobs:
             exit 1
           }
 
-  eval-check:
+  gitleaks:
+    name: Secret scan (gitleaks)
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run gitleaks (no git history)
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: >
+            detect
+            --no-git
+            --redact
+            --config .gitleaks.toml
+
+  eval-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
       - uses: DeterminateSystems/determinate-nix-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Basic flake shape checks, no secrets
         run: |
           nix flake show --no-write-lock-file
@@ -58,9 +81,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/determinate-nix-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - name: Free up disk space
         run: |
           df -h
@@ -87,6 +112,6 @@ jobs:
           chmod 0600 "$RUNNER_TEMP/age/keys.txt"
           echo "SOPS_AGE_KEY_FILE=$RUNNER_TEMP/age/keys.txt" >> "$GITHUB_ENV"
 
-      - name: Flake check with secrets input override
+      - name: Flake check
         run: |
           nix flake check --no-write-lock-file
