@@ -36,13 +36,18 @@ jobs:
         run: |
           echo "GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" >> "$GITHUB_ENV"
 
+      - name: Compute PR title 
+        id: prtitle
+        run: |
+          echo "title=flake: system updates ($(date -u +'%d/%m/%y'))" >> "$GITHUB_OUTPUT"
+
       - name: Update flake.lock (create PR)
         id: update
         uses: DeterminateSystems/update-flake-lock@v28
         with:
           token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
 
-          pr-title: "flake: system updates ({date:%d/%m/%y})"
+          pr-title: ${{ steps.prtitle.outputs.title }}
           pr-labels: |
             dependencies
             automated
