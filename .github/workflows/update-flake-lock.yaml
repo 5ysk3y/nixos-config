@@ -1,0 +1,45 @@
+name: Update flake.lock
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 7 * * 0"
+
+jobs:
+  update-flake-lock:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Update flake.lock (create PR)
+        id: update
+        uses: DeterminateSystems/update-flake-lock@v28
+        with:
+          token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
+
+          pr-title: "flake: system updates ({date:%d/%m/%y})"
+          pr-labels: |
+            dependencies
+            automated
+
+          sign-commits: true
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      # Enable auto-merge for the PR that was just created/updated
+      - name: Enable auto-merge
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
+          pull-request-number: ${{ steps.update.outputs.pull-request-number }}
+          merge-method: rebase
