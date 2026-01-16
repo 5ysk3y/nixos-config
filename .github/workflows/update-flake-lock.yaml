@@ -47,7 +47,11 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
 
-          pr-title: ${{ steps.prtitle.outputs.title }}
+          pr-title: ${{ steps.prtitle.outputs.title }}          
+          pr-body: |
+            Automated `flake.lock` update.
+
+            {{ env.GIT_COMMIT_MESSAGE }}
           pr-labels: |
             dependencies
             automated
@@ -62,4 +66,4 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
           pull-request-number: ${{ steps.update.outputs.pull-request-number }}
-          merge-method: rebase
+          merge-method: squash
