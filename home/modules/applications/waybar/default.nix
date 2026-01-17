@@ -162,233 +162,204 @@ in
           ]; # End waybar.settings
 
           style = ''
-            @define-color background-darker rgba(30, 31, 41, 230);
-            @define-color background #282a36;
-            @define-color selection #44475a;
-            @define-color foreground #f8f8f2;
-            @define-color comment #6272a4;
-            @define-color cyan #8be9fd;
-            @define-color green #50fa7b;
-            @define-color orange #ffb86c;
-            @define-color pink #ff79c6;
-            @define-color purple #bd93f9;
-            @define-color red #ff5555;
-            @define-color yellow #f1fa8c;
+            @define-color bg0 rgba(8, 10, 18, 0.55);
+            @define-color panel rgba(12, 16, 28, 0.68);
+            @define-color panel2 rgba(16, 20, 34, 0.72);
+
+            @define-color fg #e6e6e6;
+            @define-color fgDim rgba(230, 230, 230, 0.75);
+
+            @define-color neonCyan rgba(120, 255, 240, 0.85);
+            @define-color neonPink rgba(255, 0, 200, 0.72);
+            @define-color neonPurple rgba(180, 120, 255, 0.70);
+            @define-color warn rgba(255, 190, 80, 0.85);
+            @define-color crit rgba(255, 70, 70, 0.85);
+
             * {
-                /* `otf-font-awesome` is required to be installed for icons */
-                font-family: noto sans mono, FontAwesome6Free, SymbolsNerdFont;
-                font-size: 10px;
-                min-height: 0;
-                border: none;
-                border-radius: 0;
-            }
-
-            #window {
-                padding-left: 10px;
-                padding-right: 10px;
-                border-bottom: 2px solid #bd93f9;
-            }
-
-
-            window.DP-1 * {
-                font-size: 10px;
+              font-family: noto sans mono, FontAwesome6Free, SymbolsNerdFont;
+              font-size: 10px;
+              min-height: 0;
+              border: none;
+              border-radius: 0;
             }
 
             window#waybar {
-                transition-property: background-color;
-                transition-duration: 0.5s;
+              background-image: repeating-linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.03),
+                rgba(255, 255, 255, 0.03) 1px,
+                rgba(0, 0, 0, 0.0) 3px,
+                rgba(0, 0, 0, 0.0) 6px
+              );
+              background-color: @bg0;
+              color: @fg;
+              transition-property: background-color;
+              transition-duration: 0.25s;
             }
 
             window#waybar.hidden {
-                opacity: 0.5;
+              opacity: 0.5;
             }
 
-            /*
-            window#waybar.empty {
-                background-color: transparent;
-            }
-            window#waybar.solo {
-                background-color: #FFFFFF;
-            }
-            */
-
-            #workspaces button {
-                all: initial;
-                /* Remove GTK theme values (waybar #1351) */
-                min-width: 0;
-                /* Fix weird spacing in materia (waybar #450) */
-                box-shadow: inset 0 -3px transparent;
-                /* Use box-shadow instead of border so the text isn't offset */
-                padding: 6px 8px;
-                margin: 6px 3px;
-                border-radius: 4px;
-                background-color: #1e1e2e;
-                color: #cdd6f4;
+            /* window title, keep it minimal and “HUD” */
+            #window {
+              padding-left: 10px;
+              padding-right: 10px;
+              background: transparent;
+              border-bottom: 2px solid rgba(180, 120, 255, 0.45);
+              color: @fgDim;
             }
 
-            #workspaces button:hover {
-                box-shadow: inherit;
-                text-shadow: inherit;
-                color: #1e1e2e;
-                background-color: #cdd6f4;
-            }
-
-            #workspaces button.active {
-                color: #1e1e2e;
-                background-color: #cdd6f4;
-            }
-
-            #workspaces button.urgent {
-                background-color: #f38ba8;
-            }
-
-            #mode {
-                background-color: #64727D;
-                border-bottom: 3px solid #ffffff;
-            }
-
+            /* Base “chip” style for modules */
             #clock,
-            #battery,
             #cpu,
             #memory,
             #disk,
             #temperature,
             #pulseaudio,
             #custom-media,
-            #custom-rbw
-            #mode,
-            #idle_inhibitor {
-                padding: 0 10px;
-                margin: 0 4px;
-                color: #ffffff;
+            #custom-rbw,
+            #idle_inhibitor,
+            #custom-steelseries,
+            #mode {
+              padding: 6px 10px;
+              margin: 6px 4px;
+              background: @panel;
+              border: 1px solid rgba(120, 255, 240, 0.14);
+              border-radius: 12px;
+              color: @fg;
+              box-shadow:
+                0 0 0 1px rgba(255, 0, 200, 0.06) inset,
+                0 6px 16px rgba(0, 0, 0, 0.35);
             }
 
-            #window,
-            #workspaces {
-                background-color: transparent;
+            /* Workspace strip stays “floating” */
+            #workspaces,
+            #window {
+              background-color: transparent;
             }
 
-            /* If workspaces is the leftmost module, omit left margin */
-            .modules-left > widget:first-child > #workspaces {
-                margin-left: 0;
+            /* Workspaces, cyber pills */
+            #workspaces button {
+              all: initial;
+              font-family: noto sans mono, FontAwesome6Free, SymbolsNerdFont;
+              font-size: 10px;
+
+              min-width: 0;
+              padding: 6px 10px;
+              margin: 6px 3px;
+
+              border-radius: 12px;
+              background: @panel;
+              color: @fgDim;
+
+              border: 1px solid rgba(120, 255, 240, 0.12);
+              box-shadow: 0 6px 16px rgba(0, 0, 0, 0.30);
+              transition: all 120ms ease;
             }
 
-            /* If workspaces is the rightmost module, omit right margin */
-            .modules-right > widget:last-child > #workspaces {
-                margin-right: 0;
+            #workspaces button:hover {
+              color: @fg;
+              border-color: rgba(120, 255, 240, 0.35);
+              box-shadow: 0 0 18px rgba(120, 255, 240, 0.18);
             }
 
-            #clock {
-                background-color: @pink;
+            #workspaces button.active {
+              color: rgba(8, 10, 18, 0.90);
+              background: rgba(120, 255, 240, 0.92);
+              border-color: rgba(120, 255, 240, 0.65);
+              box-shadow:
+                0 0 0 1px rgba(255, 0, 200, 0.22) inset,
+                0 0 24px rgba(120, 255, 240, 0.26);
             }
 
-            label {
-                all: unset;
+            #workspaces button.urgent {
+              border-color: @crit;
+              box-shadow: 0 0 20px rgba(255, 70, 70, 0.25);
             }
 
-            label:focus {
-                background-color: #000000;
+            /* margin fixes you already had */
+            .modules-left > widget:first-child > #workspaces { margin-left: 0; }
+            .modules-right > widget:last-child > #workspaces { margin-right: 0; }
+
+            label { all: unset; }
+            label:focus { background-color: #000000; }
+
+            /* Right side: give each module a neon “edge accent” instead of full block color */
+            #cpu { border-left: 3px solid rgba(120, 255, 240, 0.55); }
+            #memory { border-left: 3px solid rgba(180, 120, 255, 0.55); }
+            #temperature { border-left: 3px solid rgba(255, 190, 80, 0.55); }
+            #pulseaudio { border-left: 3px solid rgba(255, 0, 200, 0.45); }
+            #clock { border-left: 3px solid rgba(180, 120, 255, 0.45); }
+            #custom-media { border-left: 3px solid rgba(120, 255, 240, 0.45); }
+            #custom-steelseries { border-left: 3px solid rgba(255, 0, 200, 0.45); }
+            #idle_inhibitor { border-left: 3px solid rgba(180, 120, 255, 0.45); }
+            #custom-rbw { border-left: 3px solid rgba(120, 255, 240, 0.35); }
+
+            /* Preserve your media min width */
+            #custom-media {
+              min-width: 140px;
             }
 
-            #custom-steelseries {
-                background-color: @selection;
-                color: #FFFFFF;
-                padding: 5px 5px 5px 0px;
-                margin-left: 3px;
-                margin-right: 3px;
-            }
-
-            #cpu {
-                background-color: @cyan;
-                color: #000000;
-            }
-
-            #memory {
-                background-color: @purple;
-                color: #FFFFFF;
-            }
-
-            #pulseaudio {
-                background-color: @green;
-                color: #000000;
-            }
-
-            #custom-volume {
-                background-color: @background;
-                color: white;
-                padding: 5px 6px 5px 6px;
-                margin-left: 3px;
-                margin-right: 3px;
+            /* Temperature and audio state handling */
+            #temperature.critical {
+              border-left: 3px solid @crit;
+              box-shadow: 0 0 24px rgba(255, 70, 70, 0.18);
             }
 
             #pulseaudio.muted {
-                background-color: #90b1b1;
-                color: #2a5c45;
+              border-left: 3px solid @warn;
+              color: @fgDim;
             }
 
-            #custom-media {
-                background-color: @yellow;
-                color: #2a5c45;
-                min-width: 100px;
-            }
-
-            #temperature {
-                background-color: @orange;
-                color: #000000;
-            }
-
-            #temperature.critical {
-                background-color: @red;
-            }
-
-            #idle_inhibitor {
-                color: #FFF;
-            }
-
+            /* Idle inhibitor state */
             #idle_inhibitor.activated {
-                background-color: #44475a;
-                color: #FFF;
+              border-left: 3px solid @neonPink;
+              box-shadow: 0 0 18px rgba(255, 0, 200, 0.18);
             }
 
-            #custom-rbw {
-                color: #FFF;
-                padding: 0 10px;
-                color: #ffffff;
-            }
-
-            #language {
-                background: #00b093;
-                color: #740864;
-                padding: 0 5px;
-                margin: 0 5px;
-                min-width: 16px;
-            }
-
+            /* Your steelseries battery states, keep them but cyber */
             #custom-steelseries.fine {
-                background-color: yellowgreen;
-                color: black;
+              border-left: 3px solid rgba(120, 255, 240, 0.60);
             }
 
             #custom-steelseries.nearlylowbat {
-                background-color: firebrick;
-                color: white;
+              border-left: 3px solid @warn;
+              box-shadow: 0 0 18px rgba(255, 190, 80, 0.15);
             }
 
             @keyframes blink {
-                to {
-                    background-color: red;
-                    color: white;
-                }
+              to {
+                border-left-color: rgba(255, 70, 70, 1.0);
+                box-shadow: 0 0 22px rgba(255, 70, 70, 0.25);
+              }
             }
 
             #custom-steelseries.lowbat:not(.fine) {
-                background: red;
-                color: red;
-                animation-name: blink;
-                animation-duration: 1.2s;
-                animation-timing-function: ease-in-out;
-                animation-iteration-count: infinite;
-                animation-direction: alternate;
+              border-left: 3px solid @crit;
+              animation-name: blink;
+              animation-duration: 1.0s;
+              animation-timing-function: ease-in-out;
+              animation-iteration-count: infinite;
+              animation-direction: alternate;
+            }
+
+            /* Drawer children, your "sub-icons" class */
+            .sub-icons > * {
+              margin-left: 6px;
+            }
+
+            /* Tooltips, match the bar */
+            tooltip {
+              background: rgba(8, 10, 18, 0.92);
+              border: 1px solid rgba(120, 255, 240, 0.25);
+              border-radius: 12px;
+              box-shadow: 0 12px 22px rgba(0, 0, 0, 0.45);
+            }
+
+            tooltip label {
+              color: @fg;
+              padding: 6px 8px;
             }
           ''; # End waybar.style
         }; # End waybar
