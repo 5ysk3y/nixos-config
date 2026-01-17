@@ -25,6 +25,7 @@
     sessionVariables = {
       NIXOS_OZONE_WL = 1;
       QT_SCALE_FACTOR_ROUNDING_POLICY = "RoundPreferFloor";
+      GIT_AUTO_FETCH_INTERVAL = 1200;
     };
 
     packages = with pkgs; [
@@ -132,6 +133,7 @@
           "sudo"
           "git"
           "vi-mode"
+          "git-auto-fetch"
         ];
       };
       history = {
@@ -160,7 +162,17 @@
           name = "5ysk3y";
           email = "62815243+5ysk3y@users.noreply.github.com";
         };
-        push.autoSetupRemote = "true";
+        alias = {
+          newpr = "!git fetch origin -p && git checkout -B wip origin/main";
+          st = "!git status";
+        };
+        push = {
+          default = "current";
+          autoSetupRemote = "true";
+        };
+        branch = {
+          autoSetupMerge = true;
+        };
         commit.gpgsign = true;
         user.signingkey = "7D73BA8CF10F7F67";
       };
