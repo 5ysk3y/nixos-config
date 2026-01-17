@@ -11,6 +11,7 @@ let
     waybar = import ./scripts { inherit pkgs; };
     scroll_mpris = import ./scripts/scroll-mpris { inherit pkgs; };
   };
+  waybarConfig = vars.flakeSource + "/hosts/${hostname}/applications/waybar/waybar.conf";
 in
 {
   options = with lib; {
@@ -33,7 +34,7 @@ in
               mainBar = {
                 "layer" = "top";
                 "position" = "top";
-                "includes" = [ "${vars.nixos-config}/hosts/${hostname}/applications/waybar/waybar.conf" ];
+                "includes" = [ waybarConfig ];
                 "height" = 40;
 
                 "modules-left" = [ "hyprland/workspaces" ];
