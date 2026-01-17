@@ -168,7 +168,6 @@
     };
 
     yt-dlp = {
-      enable = true;
       settings = {
         cookies-from-browser = "chromium:'~/.local/share/qutebrowser'";
       };
