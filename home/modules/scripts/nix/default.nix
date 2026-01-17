@@ -11,8 +11,7 @@
       gnused
     ];
     text = ''
-      CONFIG="${vars.nixos-config}"
-      HOME="/home/${vars.username}"
+      CONFIG="${vars.nixos-path}"
       OUTFILE="$HOME/changes_$(date +%d-%m-%y).out"
       cd $CONFIG
       echo "Beginning build. This may take some time."

@@ -11,6 +11,7 @@ let
   scripts = rec {
     undim_screen = import ./scripts/undim_screen.nix { inherit pkgs; };
   };
+  hyprConfig = vars.flakeSource + "/hosts/${hostname}/applications/hypr/hyprland.conf";
 in
 {
   options = with lib; {
@@ -28,6 +29,8 @@ in
     with lib;
     mkIf config.applications.hypr.enable {
       # Shared hyprland configuration
+
+      xdg.configFile."hypr/${hostname}.conf".source = hyprConfig;
 
       wayland.windowManager.hyprland = {
         enable = true;
@@ -138,8 +141,8 @@ in
           $WS9 = 9-ext2
           $WS0 = 10-ext3
 
-          $HYPRLAND_CONFIG_PATH = /home/${vars.username}/.config/hypr
-          source = ${vars.nixos-config}/hosts/${hostname}/applications/hypr/hyprland.conf
+          $HYPRLAND_CONFIG_PATH = ${config.xdg.configHome}/hypr
+          source = $HYPRLAND_CONFIG_PATH/${hostname}.conf
         '';
       };
     };

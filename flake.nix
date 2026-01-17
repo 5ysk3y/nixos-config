@@ -75,7 +75,8 @@
     let
       vars = rec {
         username = "rickie";
-        nixos-config = "/home/${username}/nixos-config";
+        nixos-path = "/home/${username}/nixos-config";
+        flakeSource = self;
         secretsPath = builtins.toString inputs.nix-secrets;
         syncthingPath = "/home/${username}/Sync";
       };
