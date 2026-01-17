@@ -107,6 +107,10 @@ in
       enable = true;
       package = htop-vim;
     };
+
+    yt-dlp = {
+      enable = true;
+    };
   };
 
   services = {

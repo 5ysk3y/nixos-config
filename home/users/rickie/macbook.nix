@@ -13,10 +13,8 @@
     };
 
     packages = with pkgs; [
-      gnupg
       mpv
       nixfmt
-      yt-dlp
     ];
   };
 
