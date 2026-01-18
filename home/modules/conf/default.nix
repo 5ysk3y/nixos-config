@@ -49,7 +49,7 @@ in
 
   config =
     with lib;
-    mkIf config.confSymlinks.enable {
+    mkIf (config.confSymlinks.enable && pkgs.stdenv.hostPlatform.isLinux) {
       ## Symlinks
       home.file."${config.home.homeDirectory}/.local/share/pass/main.gpg" =
         mkIf config.confSymlinks.configs.gnupg

@@ -75,7 +75,7 @@ in
         '';
     }
 
-    (mkIf pkgs.stdenv.isLinux (
+    (mkIf pkgs.stdenv.hostPlatform.isLinux (
       let
         # Do not use emacs-nox here, which makes the mouse wheel work abnormally in terminal mode.
         # pgtk (pure gtk) build add native support for wayland.

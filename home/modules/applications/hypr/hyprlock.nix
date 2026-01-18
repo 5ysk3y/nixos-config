@@ -19,7 +19,7 @@
 
   config =
     with lib;
-    mkIf config.applications.hypr.enable (mkMerge [
+    mkIf (config.applications.hypr.enable && pkgs.stdenv.hostPlatform.isLinux) (mkMerge [
       (mkIf (config.applications.hypr.apps.hyprlock) {
         programs = {
           hyprlock = {
@@ -34,7 +34,7 @@
         };
       })
 
-      (mkIf (config.applications.hypr.apps.hyprlock && hostname == "gibson") {
+      (mkIf config.applications.hypr.apps.hyprlock {
         programs = {
           hyprlock = {
             settings = {
@@ -81,7 +81,7 @@
         };
       })
 
-      (mkIf (config.applications.hypr.apps.hyprlock && hostname == "macbook") {
+      (mkIf config.applications.hypr.apps.hyprlock {
         programs = {
           hyprlock = {
             settings = {

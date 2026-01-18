@@ -86,8 +86,6 @@
   applications = {
     hypr.enable = true;
     doomemacs = true;
-    qutebrowser = true;
-    fuzzel = true;
   };
 
   ## END CUSTOM MODULES

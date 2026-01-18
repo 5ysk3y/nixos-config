@@ -22,7 +22,7 @@ in
 
   config =
     with lib;
-    mkIf config.applications.waybar {
+    mkIf (config.applications.waybar && pkgs.stdenv.hostPlatform.isLinux) {
       programs = {
         waybar = {
           enable = true;

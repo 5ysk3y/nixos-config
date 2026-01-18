@@ -25,8 +25,8 @@ in
 
   config =
     with lib;
-    mkIf config.applications.hypr.enable (mkMerge [
-      (mkIf (config.applications.hypr.apps.hypridle && hostname == "gibson") {
+    mkIf (config.applications.hypr.enable && pkgs.stdenv.hostPlatform.isLinux) (mkMerge [
+      (mkIf config.applications.hypr.apps.hypridle {
         services = {
           hypridle = with pkgs; {
             enable = true;
