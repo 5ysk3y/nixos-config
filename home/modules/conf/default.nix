@@ -121,7 +121,7 @@ in
     home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.json" =
       lib.mkIf (config.confSymlinks.configs.streamdeckui && isLinux)
         {
-          text = builtins.readFile ./files/streamdeck-ui/streamdeck-ui.json;
+          text = builtins.readFile ./files/streamdeck-ui/streamdeck_ui.json;
         };
 
     home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.conf" =
