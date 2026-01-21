@@ -7,14 +7,19 @@
   ...
 }:
 let
-  qute-rbw = pkgs.writeShellScriptBin "qute-rbw" ''
+  isLinux = pkgs.stdenv.hostPlatform.isLinux;
+
+  quteRbw = pkgs.writeShellScriptBin "qute-rbw" ''
     ${pkgs.rbw}/bin/rbw unlocked > /dev/null 2>&1
     RC="$?"
 
     if [[ "$RC" -eq 1 ]]; then
-        ${pkgs.kitty}/bin/kitty -T "rbw password prompt" ${pkgs.rbw}/bin/rbw unlock > /dev/null 2>&1 && ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow qutebrowser && ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
+      ${pkgs.kitty}/bin/kitty -T "rbw password prompt" \
+        ${pkgs.rbw}/bin/rbw unlock > /dev/null 2>&1 \
+        && ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow qutebrowser \
+        && ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
     else
-        ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
+      ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
     fi
   '';
 in
@@ -28,6 +33,7 @@ in
   config =
     with lib;
     mkIf config.applications.qutebrowser {
+      home.packages = lib.mkIf isLinux [ quteRbw ];
       programs = {
         qutebrowser = {
           enable = true;
@@ -82,24 +88,31 @@ in
           '';
 
           keyBindings = {
-            normal = {
-              ",M" = "hint links spawn mpv {hint-url}";
-              ",m" = "spawn mpv {url}";
-              ";M" = "hint --rapid links spawn mpv {hint-url}";
-              "<Ctrl+Shift+i>:" = "devtools";
-              "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${qute-rbw.outPath}/bin/qute-rbw";
-              "xb" = "config-cycle statusbar.show always never";
-              "er" = "spawn -u readability";
-            };
+            normal = lib.mkMerge [
+              {
+                ",M" = "hint links spawn mpv {hint-url}";
+                ",m" = "spawn mpv {url}";
+                ";M" = "hint --rapid links spawn mpv {hint-url}";
+                "<Ctrl+Shift+i>:" = "devtools";
+                "xb" = "config-cycle statusbar.show always never";
+                "er" = "spawn -u readability";
+              }
+              (lib.mkIf isLinux {
+                "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${quteRbw}/bin/qute-rbw";
+              })
+            ];
 
-            insert = {
-              "<Ctrl+l>" = "spawn -u ${qute-rbw.outPath}/bin/qute-rbw";
-            };
+            insert = lib.mkMerge [
+              { }
+              (lib.mkIf isLinux {
+                "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${quteRbw}/bin/qute-rbw";
+              })
+            ];
 
             passthrough = {
               "<Ctrl+x>" = "mode-leave";
             };
-          }; # End Keybindings
+          }; # End keybinds
 
           quickmarks = {
             yt = "https://youtube.com";
@@ -119,10 +132,10 @@ in
           };
         }; # End qutebrowser
 
-        rofi = {
+        rofi = lib.mkIf isLinux {
           enable = true;
           package = pkgs.rofi;
-        }; # End Rofi
+        }; # End rofi
       }; # End programs
     }; # End config
 }

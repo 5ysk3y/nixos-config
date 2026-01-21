@@ -1,0 +1,411 @@
+{
+    "state": {
+        "AL26H1A03798": {
+            "buttons": {
+                "0": {
+                    "0": {
+                        "state": 1,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/streaming-streaming[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ streaming toggle",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 2,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            },
+                            "1": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/streaming-streaming[off].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ streaming toggle",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 1,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "1": {
+                        "state": 1,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/streaming-record[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ recording toggle",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 2,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            },
+                            "1": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/streaming-record[off].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ recording toggle",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 1,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "2": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "",
+                                "keys": "",
+                                "write": "",
+                                "command": "",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "3": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "",
+                                "keys": "",
+                                "write": "",
+                                "command": "",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "4": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "",
+                                "keys": "",
+                                "write": "",
+                                "command": "",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "5": {
+                        "state": 1,
+                        "states": {
+                            "1": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/scenes-starting[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ scene starting Starting",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 1,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "6": {
+                        "state": 1,
+                        "states": {
+                            "1": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/scenes-gameplay[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ scene live Live",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 1,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "7": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "AFK\nBOI",
+                                "icon": "",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ scene afk AFK",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "middle-top",
+                                "text_horizontal_align": "",
+                                "font": "${pkgs.google-fonts}/share/fonts/truetype/Silkscreen-Regular.ttf",
+                                "font_color": "",
+                                "font_size": 22,
+                                "background_color": "#aa55ff"
+                            }
+                        }
+                    },
+                    "8": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/sources-facecam[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ scene facecam Facecam",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "9": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/scenes-ended[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ scene finish Finish",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "10": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/music-music-play.svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "playerctl -p cider play-pause",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 2,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            },
+                            "1": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/music-music-pause.svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "playerctl -p cider play-pause",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 1,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "11": {
+                        "state": 1,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/settings-mic[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ toggle-mute \"Mic/Aux\"",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 2,
+                                "text_vertical_align": "middle",
+                                "text_horizontal_align": "",
+                                "font": "${pkgs.google-fonts}/share/fonts/truetype/Silkscreen-Regular.ttf",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            },
+                            "1": {
+                                "text": "",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/settings-mic[off].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ toggle-mute \"Mic/Aux\"",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 1,
+                                "text_vertical_align": "top",
+                                "text_horizontal_align": "",
+                                "font": "${pkgs.google-fonts}/share/fonts/truetype/Silkscreen-Regular.ttf",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "12": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "ON",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/settings-camera-generic[on].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ scene-item toggle Live \"Cam + Border\"",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 2,
+                                "text_vertical_align": "middle-bottom",
+                                "text_horizontal_align": "",
+                                "font": "${pkgs.google-fonts}/share/fonts/truetype/Silkscreen-Regular.ttf",
+                                "font_color": "",
+                                "font_size": 12,
+                                "background_color": ""
+                            },
+                            "1": {
+                                "text": "Off",
+                                "icon": "/home/rickie/Sync/Files/obs-studio/StreamDeck_Icons/settings-camera-generic[off].svg",
+                                "keys": "",
+                                "write": "",
+                                "command": "obs-cmd -w obsws://localhost:4455/aZ6ReAkavhmGXkzZ scene-item toggle Live \"Cam + Border\"",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 1,
+                                "text_vertical_align": "middle-bottom",
+                                "text_horizontal_align": "",
+                                "font": "${pkgs.google-fonts}/share/fonts/truetype/Silkscreen-Regular.ttf",
+                                "font_color": "",
+                                "font_size": 12,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "13": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "",
+                                "keys": "",
+                                "write": "",
+                                "command": "",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    },
+                    "14": {
+                        "state": 0,
+                        "states": {
+                            "0": {
+                                "text": "",
+                                "icon": "",
+                                "keys": "",
+                                "write": "",
+                                "command": "",
+                                "brightness_change": 0,
+                                "switch_page": 0,
+                                "switch_state": 0,
+                                "text_vertical_align": "",
+                                "text_horizontal_align": "",
+                                "font": "",
+                                "font_color": "",
+                                "font_size": 0,
+                                "background_color": ""
+                            }
+                        }
+                    }
+                }
+            },
+            "display_timeout": 1800,
+            "brightness": 99,
+            "brightness_dimmed": 0,
+            "rotation": 0,
+            "page": 0
+        }
+    },
+    "streamdeck_ui_version": 2
+}
