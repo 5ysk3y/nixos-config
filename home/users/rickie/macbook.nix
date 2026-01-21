@@ -18,6 +18,10 @@
     ];
   };
 
+  confSymlinks = {
+    enable = true;
+  };
+
   ## START PROGAMS
 
   programs = {

@@ -14,7 +14,7 @@
 
   config =
     with lib;
-    mkIf config.applications.fuzzel {
+    mkIf (config.applications.fuzzel && pkgs.stdenv.hostPlatform.isLinux) {
       programs = {
         fuzzel = {
           enable = true;

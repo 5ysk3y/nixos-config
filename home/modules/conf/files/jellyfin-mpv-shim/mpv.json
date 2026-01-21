@@ -1,0 +1,14 @@
+ao=%8%pipewire
+cache=%3%yes
+demuxer-max-bytes=%2%1G
+geometry=%11%25%+10+10/1
+gpu-context=%7%wayland
+hwdec=%5%vaapi
+ontop=%3%yes
+osc=%3%yes
+save-position-on-quit=%3%yes
+stream-buffer-size=%4%5MiB
+user-agent=%11%Mozilla/5.0
+vo=%14%dmabuf-wayland
+volume=%2%70
+ytdl-format=%19%bestvideo+bestaudio

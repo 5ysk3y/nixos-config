@@ -27,7 +27,7 @@ in
 
   config =
     with lib;
-    mkIf config.applications.hypr.enable {
+    mkIf (config.applications.hypr.enable && pkgs.stdenv.hostPlatform.isLinux) {
       # Shared hyprland configuration
 
       xdg.configFile."hypr/${hostname}.conf".source = hyprConfig;
