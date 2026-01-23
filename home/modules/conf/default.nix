@@ -112,10 +112,10 @@ in
           '';
         };
 
-    home.file."${config.xdg.configHome}/jellyfin-mpv-shim/mpv.json" =
+    home.file."${config.xdg.configHome}/jellyfin-mpv-shim/mpv.conf" =
       lib.mkIf config.confSymlinks.configs.jellyfinShim
         {
-          text = builtins.readFile ./files/jellyfin-mpv-shim/mpv.json;
+          text = builtins.readFile ./files/jellyfin-mpv-shim/mpv.conf;
         };
 
     home.file."${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.json" =
