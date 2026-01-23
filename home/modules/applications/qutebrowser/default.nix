@@ -85,6 +85,7 @@ in
 
             c.qt.args = []
             c.qt.workarounds.disable_accessibility = "always"
+            c.qt.force_software_rendering = "chromium"
           '';
 
           keyBindings = {
