@@ -19,6 +19,7 @@ in
 
     sessionVariables = {
       GIT_AUTO_FETCH_INTERVAL = 1200;
+      NIXOS_CONFIG = "${config.home.homeDirectory}/nixos-config";
     };
 
     packages = with pkgs; [
