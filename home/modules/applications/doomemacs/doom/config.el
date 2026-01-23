@@ -98,8 +98,19 @@
 (setq lsp-nix-nixd-server-path "nixd"
       lsp-nix-nixd-formatting-command [ "nixfmt" ]
       lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
-      lsp-nix-nixd-nixos-options-expr "(builtins.getFlake \"/home/rickie/nixos-config\").nixosConfigurations.gibson.options"
-      lsp-nix-nixd-home-manager-options-expr "(builtins.getFlake \"/home/rickie/nixos-config\").homeConfigurations.\"rickie@gibson\".options"))
+
+      ;; Use $NIXOS_CONFIG when available so Linux and macOS both work.
+      lsp-nix-nixd-nixos-options-expr
+      (let* ((repo (or (getenv "NIXOS_CONFIG")
+                       (expand-file-name "~/nixos-config")))
+             (flake (format "(builtins.getFlake \"%s\")" repo)))
+        (format "%s.nixosConfigurations.gibson.options" flake))
+
+      lsp-nix-nixd-home-manager-options-expr
+      (let* ((repo (or (getenv "NIXOS_CONFIG")
+                       (expand-file-name "~/nixos-config")))
+             (flake (format "(builtins.getFlake \"%s\")" repo)))
+        (format "%s.nixosConfigurations.gibson.config.home-manager.users.rickie.home.options" flake)))
 
 (add-hook! 'nix-mode-hook
          ;; enable autocompletion with company
