@@ -16,6 +16,10 @@
       url = "github:nixos/nixpkgs/nixos-25.05";
     };
 
+    nixpkgs-darwin = {
+      url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    };
+
     # Other Stuff
     emacs-overlay = {
       url = "github:nix-community/emacs-overlay/master";
@@ -90,8 +94,13 @@
             inherit system;
             config.allowUnfree = true;
           };
+          pkgs-darwin = import nixpkgs-darwin {
+            inherit system;
+            config.allowUnfree = true;
+          };
         };
     in
+
     {
       nixosConfigurations = with inputs; {
         # Main Machine (Gibson)
@@ -143,7 +152,7 @@
           system = "aarch64-darwin";
           specialArgs = {
             hostname = "macbook";
-            inherit (pkgsFor "${system}") pkgs-stable;
+            inherit (pkgsFor "${system}") pkgs-darwin;
             inherit inputs system vars;
           };
 
