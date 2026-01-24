@@ -69,7 +69,7 @@ in
           email = "62815243+5ysk3y@users.noreply.github.com";
         };
         alias = {
-          newpr = "!f() { git fetch origin -p && git checkout -B \"$1\" origin/main; }; f";
+          newpr = "!f() { git fetch origin -p && git checkout -B \"$1\" origin/main && git branch --unset-upstream; }; f";
           st = "!git status";
         };
         push = {
