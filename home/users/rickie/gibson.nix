@@ -113,7 +113,7 @@
       };
       initContent = ''
         vim() {
-          emacsclient -c --no-wait "$@"
+          emacsclient -c --tty "$@"
         }
 
         bindkey -M viins '\e.' insert-last-word
