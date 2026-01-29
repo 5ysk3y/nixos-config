@@ -18,6 +18,7 @@ in
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+    ../../nixosModules/containers
   ];
 
   networking = {
@@ -25,6 +26,11 @@ in
     timeServers = [ "192.168.1.1" ];
     networkmanager = {
       enable = true;
+    };
+    nat = {
+      enable = true;
+      internalInterfaces = [ "ve-pentesting" ];
+      externalInterface = "enp7s0";
     };
   };
 
@@ -144,6 +150,7 @@ in
       linux-firmware
       lm_sensors
       lutris
+      nixos-container
       nix-prefetch-github
       openssl
       pulseaudio

@@ -1,0 +1,10 @@
+{
+  pkgs,
+  lib,
+  ...
+}:
+{
+  imports = [
+    ./pentesting
+  ];
+}
