@@ -6,7 +6,7 @@
 {
   imports = [
     ../../home/modules
-    ../../home/users/rickie/common.nix
-    ../../home/users/rickie/macbook.nix
+    ../../home/user/common.nix
+    ../../home/user/macbook.nix
   ];
 }

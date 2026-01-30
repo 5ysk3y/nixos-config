@@ -37,7 +37,7 @@
       (inputs.nixos-xivlauncher-rb.packages.${stdenv.hostPlatform.system}.default.override {
         useGameMode = true;
       })
-      (import ../../modules/applications/dim-screen { inherit pkgs; })
+      (import ../modules/applications/dim-screen { inherit pkgs; })
       jellyfin-mpv-shim
       jq
       keyutils
