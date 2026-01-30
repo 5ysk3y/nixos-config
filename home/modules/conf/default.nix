@@ -109,16 +109,16 @@ in
               '';
             };
 
-        "${config.xdg.configHome}/jellyfin-mpv-shim/mpv.json" =
+        "${config.xdg.configHome}/jellyfin-mpv-shim/mpv.conf" =
           lib.mkIf config.confSymlinks.configs.jellyfinShim
             {
-              text = builtins.readFile ./files/jellyfin-mpv-shim/mpv.json;
+              text = builtins.readFile ./files/jellyfin-mpv-shim/mpv.conf;
             };
 
         "${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.json" =
           lib.mkIf (config.confSymlinks.configs.streamdeckui && isLinux)
             {
-              text = builtins.readFile ./files/streamdeck-ui/streamdeck-ui.json;
+              text = builtins.readFile ./files/streamdeck-ui/streamdeck_ui.json;
             };
 
         "${config.xdg.configHome}/streamdeck-ui/streamdeck_ui.conf" =
