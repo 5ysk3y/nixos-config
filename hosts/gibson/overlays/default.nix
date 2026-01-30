@@ -25,8 +25,14 @@
           ];
       };
 
-      webcord = prev.webcord.override {
-        buildNpmPackage = prev.buildNpmPackage.override { nodejs = final.nodejs_22; };
+      mpv-unwrapped = prev.mpv-unwrapped.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [
+          ./patches/mpv-fence-leak.patch
+        ];
+      });
+
+      mpv = prev.mpv.override {
+        mpv-unwrapped = final.mpv-unwrapped;
       };
     })
   ];
