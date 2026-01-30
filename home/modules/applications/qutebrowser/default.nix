@@ -7,7 +7,7 @@
   ...
 }:
 let
-  isLinux = pkgs.stdenv.hostPlatform.isLinux;
+  inherit (pkgs.stdenv.hostPlatform) isLinux;
 
   quteRbw = pkgs.writeShellScriptBin "qute-rbw" ''
     ${pkgs.rbw}/bin/rbw unlocked > /dev/null 2>&1

@@ -120,32 +120,34 @@
             # Begin Home Manager Setup
             home-manager.nixosModules.home-manager
             rec {
-              home-manager.extraSpecialArgs = {
-                inherit
-                  inputs
-                  vars
-                  doomemacs
-                  hostname
-                  pkgs-stable
-                  pkgs-old
-                  ;
-              };
+              home-manager = {
+                extraSpecialArgs = {
+                  inherit
+                    inputs
+                    vars
+                    doomemacs
+                    hostname
+                    pkgs-stable
+                    pkgs-old
+                    ;
+                };
 
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.sharedModules = [
-                inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
-              ];
-
-              home-manager.users.${vars.username} = with specialArgs; {
-                imports = [
-                  ./hosts/${hostname}/home.nix
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                sharedModules = [
+                  inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
                 ];
+
+                users.${vars.username} = with specialArgs; {
+                  imports = [
+                    ./hosts/${hostname}/home.nix
+                  ];
+                };
               };
             } # End Home-Manager
           ]; # End modules
         }; # End gibson
-      };
+      }; # End nixosConfigurations
 
       darwinConfigurations = with inputs; {
         "macbook" = inputs.nix-darwin.lib.darwinSystem rec {
@@ -162,31 +164,32 @@
             # Begin Home Manager Setup
             home-manager.darwinModules.home-manager
             {
-              home-manager.extraSpecialArgs = {
-                inherit
-                  inputs
-                  vars
-                  doomemacs
-                  hostname
-                  pkgs-stable
-                  ;
-              };
-
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.backupFileExtension = "before-nix";
-              home-manager.sharedModules = [
-                inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
-              ];
-
-              home-manager.users.${vars.username} = with specialArgs; {
-                imports = [
-                  ./hosts/${hostname}/home.nix
+              home-manager = {
+                extraSpecialArgs = {
+                  inherit
+                    inputs
+                    vars
+                    doomemacs
+                    hostname
+                    pkgs-stable
+                    ;
+                };
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                backupFileExtension = "before-nix";
+                sharedModules = [
+                  inputs.sops-nix.homeManagerModules.sops # home-manager sops-nix
                 ];
+
+                users.${vars.username} = with specialArgs; {
+                  imports = [
+                    ./hosts/${hostname}/home.nix
+                  ];
+                };
               };
             } # End Home-Manager
           ]; # End modules
         }; # End macbook
-      };
+      }; # End darwinConfigurations
     };
 }

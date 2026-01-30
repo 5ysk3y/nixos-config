@@ -85,27 +85,22 @@
     consoleLogLevel = 3;
   };
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/rootfs";
-    fsType = "xfs";
-  };
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-label/rootfs";
+      fsType = "xfs";
+    };
 
-  fileSystems."/boot" = {
-    device = "/dev/disk/by-label/BOOT";
-    fsType = "vfat";
-  };
+    "/boot" = {
+      device = "/dev/disk/by-label/BOOT";
+      fsType = "vfat";
+    };
 
-  fileSystems."/home/${vars.username}/games" = {
-    device = "/dev/disk/by-label/GAMES";
-    fsType = "ext4";
+    "/home/${vars.username}/games" = {
+      device = "/dev/disk/by-label/GAMES";
+      fsType = "ext4";
+    };
   };
-
-  #  fileSystems."/nix/tmp" =
-  #    { device = "/dev/disk/by-label/nix-build";
-  #      fsType = "xfs";
-  #      options = [ "noatime" "discard" "nofail" ];
-  #      neededForBoot = false;
-  #    };
 
   swapDevices = [ { device = "/dev/disk/by-label/swap"; } ];
 
@@ -113,13 +108,6 @@
     enableAllFirmware = true;
   };
 
-  # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
-  # (the default) this is the recommended approach. When using systemd-networkd it's
-  # still possible to use this option, but it's recommended to use it in conjunction
-  # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.eno1.useDHCP = lib.mkDefault true;
-  # networking.interfaces.virbr0.useDHCP = lib.mkDefault true;
-
   nixpkgs.hostPlatform = lib.mkDefault "${system}";
 }

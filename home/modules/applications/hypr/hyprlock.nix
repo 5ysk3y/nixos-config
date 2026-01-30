@@ -20,7 +20,7 @@
   config =
     with lib;
     mkIf (config.applications.hypr.enable && pkgs.stdenv.hostPlatform.isLinux) (mkMerge [
-      (mkIf (config.applications.hypr.apps.hyprlock) {
+      (mkIf config.applications.hypr.apps.hyprlock {
         programs = {
           hyprlock = {
             enable = true;
