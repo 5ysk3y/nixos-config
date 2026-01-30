@@ -34,45 +34,48 @@ in
 
   config = mkIf config.applications.doomemacs (mkMerge [
     {
-      home.packages = with pkgs; [
-        ## Doom dependencies
-        git
-        (ripgrep.override { withPCRE2 = true; })
-        gnutls # for TLS connectivity
+      home = {
+        packages = with pkgs; [
+          ## Doom dependencies
+          git
+          (ripgrep.override { withPCRE2 = true; })
+          gnutls # for TLS connectivity
 
-        ## Optional dependencies
-        imagemagick # for image-dired
-        fd # faster projectile indexing
-        zstd # for undo-fu-session/undo-tree compression
+          ## Optional dependencies
+          imagemagick # for image-dired
+          fd # faster projectile indexing
+          zstd # for undo-fu-session/undo-tree compression
 
-        # go-mode
-        # gocode # project archived, use gopls instead
+          # go-mode
+          # gocode # project archived, use gopls instead
 
-        ## Module dependencies
-        # :checkers spell
-        #(aspellWithDicts (ds: with ds; [en en-computers en-science]))
-        # :tools editorconfig
-        #editorconfig-core-c # per-project style config
-        # :tools lookup & :lang org +roam
-        #sqlite
-        # :lang latex & :lang org (latex previews)
-        # texlive.combined.scheme-medium
-      ];
+          ## Module dependencies
+          # :checkers spell
+          #(aspellWithDicts (ds: with ds; [en en-computers en-science]))
+          # :tools editorconfig
+          #editorconfig-core-c # per-project style config
+          # :tools lookup & :lang org +roam
+          #sqlite
+          # :lang latex & :lang org (latex previews)
+          # texlive.combined.scheme-medium
+        ];
+
+        file."${config.xdg.configHome}/doom" = {
+          source = ./doom;
+          recursive = true;
+        };
+
+        activation.installDoomEmacs =
+          with vars;
+          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+            export PATH=/etc/profiles/per-user/rickie/bin/emacs:$PATH
+            ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
+            cd ${config.xdg.configHome}/emacs/ && ${pkgs.git}/bin/git reset HEAD --hard && ${pkgs.git}/bin/git pull
+          '';
+      };
 
       programs.zsh.envExtra = envExtra;
 
-      home.file."${config.xdg.configHome}/doom" = {
-        source = ./doom;
-        recursive = true;
-      };
-
-      home.activation.installDoomEmacs =
-        with vars;
-        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-          export PATH=/etc/profiles/per-user/rickie/bin/emacs:$PATH
-          ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
-          cd ${config.xdg.configHome}/emacs/ && ${pkgs.git}/bin/git reset HEAD --hard && ${pkgs.git}/bin/git pull
-        '';
     }
 
     (mkIf pkgs.stdenv.hostPlatform.isLinux (

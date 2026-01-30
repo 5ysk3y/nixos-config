@@ -21,13 +21,13 @@
   config =
     with lib;
     mkIf config.scripts.enable (mkMerge [
-      (mkIf (config.scripts.gaming) {
+      (mkIf config.scripts.gaming {
         home.packages = with pkgs; [
           (import ./gaming { inherit pkgs; })
         ];
       })
 
-      (mkIf (config.scripts.nix) {
+      (mkIf config.scripts.nix {
         home.packages =
           with pkgs;
           let
