@@ -7,8 +7,8 @@
 {
   imports = [
     ../../home/modules
-    ../../home/users/rickie/common.nix
-    ../../home/users/rickie/gibson.nix
+    ../../home/user/common.nix
+    ../../home/user/gibson.nix
     inputs.wayland-pipewire-idle-inhibit.homeModules.default
   ];
 }
