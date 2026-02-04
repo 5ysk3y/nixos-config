@@ -1,12 +1,13 @@
 {
   config,
   lib,
+  inputs,
   ...
 }:
 {
   imports = [
-    ../../home/modules
-    ../../home/user/common.nix
     ../../home/user/macbook.nix
+    inputs.self.homeManagerModules.default
+    inputs.self.homeManagerModules.commonConfig
   ];
 }
