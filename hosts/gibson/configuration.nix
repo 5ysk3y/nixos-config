@@ -10,17 +10,15 @@
   ...
 }:
 let
-  sddmTheme = inputs.hyprddm.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+  sddmTheme = inputs.sddm-themes.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
     theme = "cyberpunk";
   };
 in
 {
   imports = [
-    # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    inputs.self.nixosModules.core.nix
-    inputs.self.nixosModules.core.security
-    inputs.self.nixosModules.containers.pentesting
+    inputs.self.nixosModules.core
+    inputs.self.nixosModules.containers-pentesting
   ];
 
   networking = {
@@ -35,9 +33,6 @@ in
       externalInterface = "enp7s0";
     };
   };
-
-  # Set your time zone.
-  time.timeZone = "Europe/London";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_GB.UTF-8";

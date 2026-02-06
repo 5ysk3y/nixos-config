@@ -12,8 +12,7 @@
 {
 
   imports = [
-    inputs.self.nixosModules.core.nix
-    inputs.self.nixosModules.core.security
+    inputs.self.darwinModules.core
   ];
 
   networking.hostName = "macbook"; # Define your hostname.
@@ -25,24 +24,11 @@
     enable = false;
   };
 
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.${vars.username} = {
     home = "/Users/${vars.username}";
     shell = pkgs.zsh;
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
   ];
 
@@ -57,14 +43,6 @@
     variables = {
     };
   };
-
-  #security = {
-  #  pki = {
-  #    certificates = [
-  #      (builtins.readFile ../../certs/root-ca.crt)
-  #    ];
-  #  };
-  #};
 
   services.openssh.enable = false;
 
