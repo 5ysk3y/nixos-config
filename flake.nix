@@ -191,5 +191,10 @@
           ]; # End modules
         }; # End macbook
       }; # End darwinConfigurations
+
+      homeManagerModules = {
+        default = import ./home/modules;
+        commonConfig = import ./home/user/common.nix;
+      };
     };
 }
