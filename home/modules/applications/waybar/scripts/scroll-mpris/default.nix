@@ -10,7 +10,7 @@ rustPlatform.buildRustPackage {
     rev = "3e393327eff442ac74b4babbecc84dc2da82b2b6";
     sha256 = "sha256-KWEKD5NmeMih/GPqYsx+Mn5aUTJarSqR6pp9/IYdF4Y=";
   };
-  cargoHash = "sha256-2KhyUoz7G637jXDFSXAgLJP6FGW9dJMzYMi41aaiqaU=";
+  cargoHash = "sha256-Hs+lGesdwkQuQwQKKtwDIg4BH8iqYXS7m4izaV6SZUA=";
   nativeBuildInputs = [ pkg-config ];
   buildInputs = [ dbus ];
   patches = [
