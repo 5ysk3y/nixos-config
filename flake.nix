@@ -196,5 +196,7 @@
         default = import ./home/modules;
         commonConfig = import ./home/user/common.nix;
       };
+
+      nixosModules = import ./nixosModules;
     };
 }

@@ -1,10 +1,7 @@
 {
-  pkgs,
-  lib,
-  ...
-}:
-{
-  imports = [
-    ./pentesting
-  ];
+  pentesting = {
+    imports = [
+      ./pentesting
+    ];
+  };
 }
