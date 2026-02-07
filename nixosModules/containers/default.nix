@@ -1,7 +1,3 @@
 {
-  pentesting = {
-    imports = [
-      ./pentesting
-    ];
-  };
+  pentesting = import ./pentesting;
 }
