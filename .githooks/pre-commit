@@ -3,3 +3,4 @@ set -eu
 
 # Format Nix files
 nix run nixpkgs#nixfmt-tree -- .
+nix run nixpkgs#statix -- check .
