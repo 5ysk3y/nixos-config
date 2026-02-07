@@ -1,8 +1,8 @@
-name: NixOS CI
+name: Nix CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
       - "README.md"
       - "docs/**"
@@ -21,16 +21,28 @@ on:
       - "**/*.jpg"
       - "**/*.svg"
 
+concurrency:
+  group: ${{ github.workflow }}:${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   fmt-check:
+    name: formatting check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flakehub-cache-action@v3
+
       - name: Nix format check (nixfmt-tree)
         run: |
           set -euo pipefail
@@ -44,9 +56,28 @@ jobs:
             exit 1
           }
 
-  gitleaks:
-    name: Secret scan (gitleaks)
+  lint-check:
+    name: lint check
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - uses: DeterminateSystems/flakehub-cache-action@v3
+
+      - name: statix
+        run: |
+          set -euo pipefail
+          nix run nixpkgs#statix -- check .
+
+  gitleaks:
+    name: gitleaks scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: read
@@ -61,30 +92,59 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   eval-check:
+    name: eval check (linux)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flakehub-cache-action@v3
+
       - name: Basic flake shape checks, no secrets
         run: |
+          set -euo pipefail
           nix flake show --no-write-lock-file
           nix eval .#nixosConfigurations.gibson.pkgs.stdenv.hostPlatform.system --no-write-lock-file
 
-  flake-secrets-check:
-    runs-on: ubuntu-latest
+  darwin-eval-check:
+    name: eval check (darwin)
+    runs-on: macos-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: DeterminateSystems/flakehub-cache-action@v3
+
+      - name: Basic flake shape checks (darwin)
+        run: |
+          set -euo pipefail
+          nix flake show --no-write-lock-file
+          nix eval .#darwinConfigurations.macbook.pkgs.stdenv.hostPlatform.system --no-write-lock-file
+
+  flake-secrets-check:
+    name: full flake check (with secrets)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - uses: DeterminateSystems/flakehub-cache-action@v3
+
       - name: Free up disk space
         run: |
+          set -euo pipefail
           df -h
           sudo rm -rf /usr/share/dotnet \
                       /opt/ghc \
@@ -99,11 +159,13 @@ jobs:
 
       - name: Add GitHub to known_hosts
         run: |
+          set -euo pipefail
           mkdir -p ~/.ssh
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
 
       - name: Prepare age key in runner temp
         run: |
+          set -euo pipefail
           mkdir -p "$RUNNER_TEMP/age"
           printf "%s" "${{ secrets.SOPS_AGE_KEY }}" > "$RUNNER_TEMP/age/keys.txt"
           chmod 0600 "$RUNNER_TEMP/age/keys.txt"
@@ -111,4 +173,5 @@ jobs:
 
       - name: Flake check
         run: |
+          set -euo pipefail
           nix flake check --no-write-lock-file
