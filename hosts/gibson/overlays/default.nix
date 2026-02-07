@@ -32,7 +32,7 @@
       });
 
       mpv = prev.mpv.override {
-        mpv-unwrapped = final.mpv-unwrapped;
+        inherit (final) mpv-unwrapped;
       };
     })
   ];

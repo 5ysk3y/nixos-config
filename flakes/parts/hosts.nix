@@ -1,6 +1,6 @@
 { inputs, ... }:
 let
-  lib = inputs.nixpkgs.lib;
+  inherit (inputs.nixpkgs) lib;
   inherit (inputs)
     nixpkgs
     nixpkgs-stable
@@ -145,7 +145,7 @@ let
   };
 
   filterHosts = kind: lib.filterAttrs (_: v: v.kind == kind) hosts;
-  mapHosts = f: hs: lib.mapAttrs (_: v: f v) hs;
+  mapHosts = f: hs: lib.mapAttrs (_: f) hs;
 
 in
 {
