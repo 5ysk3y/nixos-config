@@ -1,4 +1,4 @@
-{ ... }:
+_:
 let
   nix-modules = import ./../../nixosModules;
 in
@@ -11,7 +11,7 @@ in
 
     nixosModules = nix-modules;
     darwinModules = {
-      core = nix-modules.core;
+      inherit (nix-modules) core;
     };
   };
 }
