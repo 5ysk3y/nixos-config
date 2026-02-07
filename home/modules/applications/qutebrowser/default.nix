@@ -83,9 +83,15 @@ in
 
             c.window.title_format = "qutebrowser"
 
-            c.qt.args = []
+            c.qt.args = (c.qt.args or []) + [
+              "--site-per-process",
+              "--disable-features=ProcessSharingWithDefaultSiteInstances",
+              "--disable-background-timer-throttling",
+              "--disable-backgrounding-occluded-windows"
+            ]
             c.qt.workarounds.disable_accessibility = "always"
             c.qt.force_software_rendering = "chromium"
+
           '';
 
           keyBindings = {
@@ -131,6 +137,125 @@ in
             google = "https://google.com/search?q={}";
             gtfo = "https://gtfobins.github.io/#{}";
           };
+
+          greasemonkey = [
+            (pkgs.writeText "chatgpt-slimmer.user.js" ''
+              // ==UserScript==
+              // @name         ChatGPT DOM Slimmer (Memory Friendly)
+              // @namespace    qutebrowser
+              // @version      1.2
+              // @description  Collapses older messages into placeholders while releasing DOM memory, keeps last 50 visible
+              // @match        https://chat.openai.com/*
+              // @match        https://chatgpt.com/*
+              // @run-at       document-idle
+              // @grant        none
+              // ==/UserScript==
+
+              (function () {
+                "use strict";
+
+                var MAX_VISIBLE = 50;
+                var PLACEHOLDER_CLASS = "gm-msg-placeholder";
+                var COLLAPSED_ATTR = "data-gm-collapsed";
+                var STORE_ATTR = "data-gm-html";
+
+                function getMessages() {
+                  // Selector is intentionally conservative, ChatGPT markup shifts.
+                  // If this breaks, first thing to adjust is this selector.
+                  return Array.from(document.querySelectorAll("main article"));
+                }
+
+                function makePlaceholder(index, html) {
+                  var ph = document.createElement("div");
+                  ph.className = PLACEHOLDER_CLASS;
+                  ph.setAttribute(COLLAPSED_ATTR, "true");
+                  ph.setAttribute(STORE_ATTR, html);
+
+                  ph.textContent = "🔽 Collapsed message " + (index + 1) + ". Click to expand";
+
+                  ph.style.cssText = [
+                    "padding: 10px",
+                    "margin: 5px 0",
+                    "background: #2d2d2d",
+                    "border: 1px dashed #666",
+                    "border-radius: 6px",
+                    "color: #aaa",
+                    "font-size: 14px",
+                    "cursor: pointer",
+                    "user-select: none"
+                  ].join("; ");
+
+                  ph.addEventListener("click", function () {
+                    var stored = ph.getAttribute(STORE_ATTR) || "";
+                    var tpl = document.createElement("template");
+                    tpl.innerHTML = stored;
+
+                    // Replace placeholder with the reconstructed message nodes.
+                    // If stored HTML had a single root element (it should), we insert that.
+                    var node = tpl.content.firstElementChild;
+                    if (node) {
+                      ph.replaceWith(node);
+                      // Mark it as pinned so it won't immediately get collapsed again.
+                      node.setAttribute("data-gm-pinned", "true");
+                    }
+                  });
+
+                  return ph;
+                }
+
+                function collapseOldMessages() {
+                  var messages = getMessages();
+                  if (messages.length <= MAX_VISIBLE) return;
+
+                  var toCollapse = messages.slice(0, messages.length - MAX_VISIBLE);
+
+                  for (var i = 0; i < toCollapse.length; i++) {
+                    var msg = toCollapse[i];
+
+                    // If user expanded it, don't re-collapse.
+                    if (msg.getAttribute("data-gm-pinned") === "true") continue;
+
+                    // Avoid collapsing twice if already replaced.
+                    // Also avoid collapsing placeholders if selector ever changes.
+                    if (msg.classList && msg.classList.contains(PLACEHOLDER_CLASS)) continue;
+
+                    // Store HTML and release the DOM node.
+                    var html = msg.outerHTML;
+
+                    var ph = makePlaceholder(i, html);
+                    msg.replaceWith(ph);
+                  }
+                }
+
+                // Debounce work, ChatGPT causes a huge number of mutations.
+                var timer = null;
+                function scheduleCollapse() {
+                  if (timer) window.clearTimeout(timer);
+                  timer = window.setTimeout(function () {
+                    // Use idle time if possible.
+                    if (window.requestIdleCallback) {
+                      window.requestIdleCallback(collapseOldMessages, { timeout: 1500 });
+                    } else {
+                      collapseOldMessages();
+                    }
+                  }, 600);
+                }
+
+                var observer = new MutationObserver(scheduleCollapse);
+                observer.observe(document.body, { childList: true, subtree: true });
+
+                // Also run after scroll settles, long threads tend to stutter while scrolling.
+                var scrollTimer = null;
+                window.addEventListener("scroll", function () {
+                  if (scrollTimer) window.clearTimeout(scrollTimer);
+                  scrollTimer = window.setTimeout(scheduleCollapse, 250);
+                }, { passive: true });
+
+                window.setTimeout(scheduleCollapse, 1500);
+              })();
+            '')
+          ];
+
         }; # End qutebrowser
 
         rofi = lib.mkIf isLinux {
