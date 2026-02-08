@@ -120,6 +120,12 @@
       '';
     };
 
+    git = {
+      settings = {
+        user.signingKey = "7D73BA8CF10F7F67";
+      };
+    };
+
     imv = {
       enable = true;
     };

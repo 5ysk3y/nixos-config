@@ -30,6 +30,12 @@
         nixos-rebuild = "sudo darwin-rebuild switch --flake .#macbook";
       };
     };
+
+    git = {
+      settings = {
+        user.signingKey = "D4D5DFADF6AE96D9";
+      };
+    };
   };
 
   ## END PROGAMS

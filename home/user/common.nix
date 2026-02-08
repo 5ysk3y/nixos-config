@@ -80,7 +80,6 @@ in
           autoSetupMerge = true;
         };
         commit.gpgsign = true;
-        user.signingkey = "7D73BA8CF10F7F67";
       };
       includes = [
         {
