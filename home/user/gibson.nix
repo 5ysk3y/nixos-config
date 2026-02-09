@@ -28,6 +28,7 @@
       bat
       bitwarden-desktop
       bottles
+      discord
       dracula-theme
       fontconfig
       glib
@@ -332,9 +333,10 @@
     portal = {
       enable = true;
       config = {
-        common = {
+        hyprland = {
           default = [
             "hyprland"
+            "gtk"
           ];
         };
       };
