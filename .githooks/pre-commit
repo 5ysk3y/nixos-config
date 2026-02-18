@@ -4,3 +4,24 @@ set -eu
 # Format Nix files
 nix run nixpkgs#nixfmt-tree -- .
 nix run nixpkgs#statix -- check .
+set -eu
+
+# Get staged files, null separated, filter to .nix
+staged_nix_files="$(git diff --cached --name-only -z --diff-filter=ACMR | tr '\0' '\n' | grep -E '\.nix$' || true)"
+
+if [ -n "$staged_nix_files" ]; then
+  echo "Formatting staged Nix files"
+
+  # Run formatter only on staged .nix files
+  # shellcheck disable=SC2086
+  nix run nixpkgs#nixfmt -- $staged_nix_files
+
+  # Re stage in case formatting changed files
+  # shellcheck disable=SC2086
+  git add -- $staged_nix_files
+else
+  echo "No staged Nix files to format"
+fi
+
+echo "Statix"
+nix run nixpkgs#statix -- check .

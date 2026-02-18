@@ -18,7 +18,7 @@ in
   imports = [
     ./hardware-configuration.nix
     inputs.self.nixosModules.core
-    inputs.self.nixosModules.containers-pentesting
+    inputs.self.nixosModules.containers
   ];
 
   networking = {
@@ -158,17 +158,18 @@ in
     ];
 
     sessionVariables = rec {
+      ADW_DISABLE_PORTAL = "1";
       CLIPBOARD_NOGUI = "1";
+      DOCKER_HOST = "unix://$XDG_RUNTIME_DIR/podman/podman.sock";
       ENABLE_DPMS = "1";
       ENABLE_DDC = "1";
-      ADW_DISABLE_PORTAL = "1";
       GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
       GBM_BACKEND = "nvidia-drm";
       NVD_BACKEND = "direct";
       LIBVA_DRIVER_NAME = "nvidia";
-      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       WLR_NO_HARDWARE_CURSORS = "1";
+      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       __GL_MaxFramesAllowed = "1";
       __GL_GSYNC_ALLOWED = "1";
       __GL_VRR_ALLOWED = "0";
@@ -516,9 +517,6 @@ in
   };
 
   virtualisation = {
-    libvirtd = {
-      enable = true;
-    };
   };
 
   sops = {

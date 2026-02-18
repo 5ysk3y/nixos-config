@@ -25,6 +25,7 @@
     };
 
     packages = with pkgs; [
+      act
       bat
       bitwarden-desktop
       bottles

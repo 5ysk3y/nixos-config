@@ -8,4 +8,5 @@
   containers = import ./containers;
 
   containers-pentesting = import ./containers/pentesting;
+  containers-virtualisation = import ./containers/virtualisation;
 }
