@@ -21,6 +21,7 @@
       echo ""
       echo "Build complete. Providing result:"
       echo ""
+      rm -rf ~/changes_*
       nvd diff /run/current-system "$CONFIG"/result > "$OUTFILE"
 
       #Cleanup
