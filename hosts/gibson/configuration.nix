@@ -154,7 +154,6 @@ in
       sddmTheme
       v4l-utils
       vim
-      wineWowPackages.stagingFull
       xdg-utils
     ];
 
