@@ -174,4 +174,4 @@ jobs:
       - name: Flake check
         run: |
           set -euo pipefail
-          nix flake check --no-write-lock-file
+          nix flake check --no-write-lock-file --all-systems

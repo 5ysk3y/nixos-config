@@ -1,3 +1,6 @@
 {
-  pentesting = import ./pentesting;
+  imports = [
+    ./pentesting
+    ./virtualisation
+  ];
 }

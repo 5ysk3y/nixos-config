@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
+
+echo "Running gitleaks (native) …"
+nix run nixpkgs#gitleaks -- protect --staged --redact
+
+echo "Running CI jobs via act …"
+act push -j eval-check --pull=false --rm
+
+echo "All local checks passed, proceeding with push"
