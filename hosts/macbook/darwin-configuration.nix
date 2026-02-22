@@ -46,5 +46,21 @@
 
   services.openssh.enable = false;
 
-  system.stateVersion = 5;
+  launchd.user.agents.emacs-daemon = {
+    serviceConfig = {
+      ProgramArguments = [
+        "${pkgs.emacs}/bin/emacs"
+        "--fg-daemon"
+      ];
+      RunAtLoad = true;
+      KeepAlive = true;
+      StandardOutPath = "/tmp/emacs-daemon.log";
+      StandardErrorPath = "/tmp/emacs-daemon.err";
+    };
+  };
+
+  system = {
+    stateVersion = 5;
+    primaryUser = "${vars.username}";
+  };
 }
