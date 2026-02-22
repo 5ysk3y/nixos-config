@@ -43,15 +43,15 @@ jobs:
       - uses: DeterminateSystems/determinate-nix-action@v3
       - uses: DeterminateSystems/flakehub-cache-action@v3
 
-      - name: Nix format check (nixfmt-tree)
+      - name: Nix format check (nixfmt)
         run: |
           set -euo pipefail
-          nix run nixpkgs#nixfmt-tree -- .
+          nix run nixpkgs#nixfmt -- .
           git diff --exit-code || {
             echo ""
             echo "Formatting required."
-            echo "Run this locally to fix:"
-            echo "  nix run nixpkgs#nixfmt-tree -- ."
+            echo "Run this locally to fix (or just commit again and let hooks handle it):"
+            echo "  nix run nixpkgs#nixfmt -- ."
             echo ""
             exit 1
           }
@@ -80,16 +80,18 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: DeterminateSystems/determinate-nix-action@v3
+      - uses: DeterminateSystems/flakehub-cache-action@v3
+
+      - name: Run gitleaks (native)
+        run: |
+          set -euo pipefail
+          nix run nixpkgs#gitleaks -- detect --source . --redact
 
   eval-check:
     name: eval check (linux)
@@ -108,7 +110,7 @@ jobs:
         run: |
           set -euo pipefail
           nix flake show --no-write-lock-file
-          nix eval .#nixosConfigurations.gibson.pkgs.stdenv.hostPlatform.system --no-write-lock-file
+          nix eval .#nixosConfigurations.gibson.pkgs.stdenv.hostPlatform.system --no-write-lock-file >/dev/null
 
   darwin-eval-check:
     name: eval check (darwin)
@@ -127,7 +129,7 @@ jobs:
         run: |
           set -euo pipefail
           nix flake show --no-write-lock-file
-          nix eval .#darwinConfigurations.macbook.pkgs.stdenv.hostPlatform.system --no-write-lock-file
+          nix eval .#darwinConfigurations.macbook.pkgs.stdenv.hostPlatform.system --no-write-lock-file >/dev/null
 
   flake-secrets-check:
     name: full flake check (with secrets)
