@@ -40,6 +40,7 @@
         useGameMode = true;
       })
       (import ../modules/applications/dim-screen { inherit pkgs; })
+      jellyfin-desktop
       jellyfin-mpv-shim
       jq
       keyutils
