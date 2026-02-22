@@ -43,6 +43,11 @@ in
         GNUMAKEFLAGS = "-j12";
         LESSHISTFILE = "-";
       };
+      initContent = ''
+        vim() {
+          emacsclient -c --tty "$@"
+        }
+      '';
       oh-my-zsh = {
         enable = true;
         theme = "gentoo";

@@ -115,10 +115,6 @@
         path = "${config.xdg.dataHome}/zsh/zsh_history";
       };
       initContent = ''
-        vim() {
-          emacsclient -c --tty "$@"
-        }
-
         bindkey -M viins '\e.' insert-last-word
       '';
     };

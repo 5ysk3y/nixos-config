@@ -20,6 +20,8 @@ let
     export PATH="${config.xdg.configHome}/emacs/bin:$PATH"
   '';
 
+  rsyncChown = if pkgs.stdenv.hostPlatform.isDarwin then "" else "--chown=${vars.username}:users";
+
   myEmacsPackagesFor =
     emacs:
     ((pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
@@ -69,7 +71,7 @@ in
           with vars;
           lib.hm.dag.entryAfter [ "writeBoundary" ] ''
             export PATH=/etc/profiles/per-user/rickie/bin/emacs:$PATH
-            ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 --chown=${username}:users ${doomemacs}/ ${config.xdg.configHome}/emacs/
+            ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 ${rsyncChown} ${doomemacs}/ ${config.xdg.configHome}/emacs/
             cd ${config.xdg.configHome}/emacs/ && ${pkgs.git}/bin/git reset HEAD --hard && ${pkgs.git}/bin/git pull
           '';
       };
@@ -80,9 +82,6 @@ in
 
     (mkIf pkgs.stdenv.hostPlatform.isLinux (
       let
-        # Do not use emacs-nox here, which makes the mouse wheel work abnormally in terminal mode.
-        # pgtk (pure gtk) build add native support for wayland.
-        # https://www.gnu.org/savannah-checkouts/gnu/emacs/emacs.html#Releases
         emacsPkg = myEmacsPackagesFor pkgs.emacs-pgtk;
       in
       {
@@ -98,5 +97,10 @@ in
         };
       }
     ))
+    (mkIf pkgs.stdenv.hostPlatform.isDarwin {
+      home.packages = [
+        (myEmacsPackagesFor pkgs.emacs)
+      ];
+    })
   ]);
 }
