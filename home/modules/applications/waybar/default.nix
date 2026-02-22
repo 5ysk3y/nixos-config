@@ -190,7 +190,7 @@ in
                 rgba(255, 255, 255, 0.03),
                 rgba(255, 255, 255, 0.03) 1px,
                 rgba(0, 0, 0, 0.0) 3px,
-                rgba(0, 0, 0, 0.0) 6px
+                rgba(0, 0, 0, 0.0) 3px
               );
               background-color: @bg0;
               color: @fg;
