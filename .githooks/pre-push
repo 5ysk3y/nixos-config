@@ -1,12 +1,29 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
-
 echo "Running gitleaks (native) …"
 nix run nixpkgs#gitleaks -- protect --staged --redact
 
-echo "Running CI jobs via act …"
-act push -j eval-check --pull=false --rm
+echo "Running flake shape check …"
+nix flake show --no-write-lock-file >/dev/null
+
+# Detect platform
+os="$(uname -s)"
+
+case "$os" in
+  Linux)
+    echo "Running eval check for nixosConfigurations.gibson (linux) …"
+    nix eval .#nixosConfigurations.gibson.pkgs.stdenv.hostPlatform.system \
+      --no-write-lock-file >/dev/null
+    ;;
+  Darwin)
+    echo "Running eval check for darwinConfigurations.macbook (darwin) …"
+    nix eval .#darwinConfigurations.macbook.pkgs.stdenv.hostPlatform.system \
+      --no-write-lock-file >/dev/null
+    ;;
+  *)
+    echo "Unknown OS '$os', skipping platform specific eval checks"
+    ;;
+esac
 
 echo "All local checks passed, proceeding with push"
