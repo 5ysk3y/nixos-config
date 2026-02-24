@@ -8,9 +8,10 @@
     nixpkgs-old.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
-    # nix-darwin
+    # nix-darwin / mac related
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    mac-app-util.url = "github:hraban/mac-app-util";
 
     # home-manager
     home-manager.url = "github:nix-community/home-manager";
