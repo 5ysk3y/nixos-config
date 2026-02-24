@@ -45,7 +45,7 @@ in
       };
       initContent = ''
         vim() {
-          emacsclient -c --tty "$@"
+          emacsclient -t "$@"
         }
       '';
       oh-my-zsh = {
