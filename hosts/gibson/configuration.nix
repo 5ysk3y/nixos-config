@@ -176,7 +176,7 @@ in
     };
 
     variables = rec {
-      EDITOR = "emacsclient --create-frame --tty";
+      EDITOR = "emacsclient -t";
     };
 
     pathsToLink = [

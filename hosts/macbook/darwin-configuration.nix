@@ -29,10 +29,8 @@
     shell = pkgs.zsh;
   };
 
-  environment.systemPackages = with pkgs; [
-  ];
-
   environment = {
+    systemPackages = with pkgs; [ ];
     etc = {
       "nix/nix.custom.conf" = {
         text = ''
@@ -40,7 +38,8 @@
         '';
       };
     };
-    variables = {
+    variables = rec {
+      EDITOR = "emacsclient -t";
     };
   };
 
@@ -52,6 +51,13 @@
         "${pkgs.emacs}/bin/emacs"
         "--fg-daemon"
       ];
+      EnvironmentVariables = {
+        TERMINFO_DIRS =
+          "/Applications/Ghostty.app/Contents/Resources/terminfo:"
+          + "${pkgs.ncurses.out}/share/terminfo:"
+          + "/usr/share/terminfo:/etc/terminfo";
+      };
+
       RunAtLoad = true;
       KeepAlive = true;
       StandardOutPath = "/tmp/emacs-daemon.log";
