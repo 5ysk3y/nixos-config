@@ -24,42 +24,36 @@ let
 
   myEmacsPackagesFor =
     emacs:
-    ((pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
+    (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
       epkgs.nix-mode
       epkgs.lsp-mode
-    ]));
+    ]);
+
+  emacsPkg =
+    if pkgs.stdenv.hostPlatform.isLinux then
+      myEmacsPackagesFor pkgs.emacs-pgtk
+    else
+      myEmacsPackagesFor pkgs.emacs;
 in
 {
-  options.applications = {
-    doomemacs = mkEnableOption "Doom Emacs Editor";
-  };
+  options.applications.doomemacs = mkEnableOption "Doom Emacs Editor";
 
   config = mkIf config.applications.doomemacs (mkMerge [
     {
       home = {
         packages = with pkgs; [
+          # Emacs itself, consistent across platforms
+          emacsPkg
+
           ## Doom dependencies
           git
           (ripgrep.override { withPCRE2 = true; })
-          gnutls # for TLS connectivity
+          gnutls
 
           ## Optional dependencies
-          imagemagick # for image-dired
-          fd # faster projectile indexing
-          zstd # for undo-fu-session/undo-tree compression
-
-          # go-mode
-          # gocode # project archived, use gopls instead
-
-          ## Module dependencies
-          # :checkers spell
-          #(aspellWithDicts (ds: with ds; [en en-computers en-science]))
-          # :tools editorconfig
-          #editorconfig-core-c # per-project style config
-          # :tools lookup & :lang org +roam
-          #sqlite
-          # :lang latex & :lang org (latex previews)
-          # texlive.combined.scheme-medium
+          imagemagick
+          fd
+          zstd
         ];
 
         file."${config.xdg.configHome}/doom" = {
@@ -67,40 +61,54 @@ in
           recursive = true;
         };
 
-        activation.installDoomEmacs =
-          with vars;
-          lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-            export PATH=/etc/profiles/per-user/rickie/bin/emacs:$PATH
-            ${pkgs.rsync}/bin/rsync -ogavz --chmod=D2755,F744 ${rsyncChown} ${doomemacs}/ ${config.xdg.configHome}/emacs/
-            cd ${config.xdg.configHome}/emacs/ && ${pkgs.git}/bin/git reset HEAD --hard && ${pkgs.git}/bin/git pull
-          '';
+        activation.installDoomEmacs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+                      set -euo pipefail
+
+                      export DOOMDIR="${config.xdg.configHome}/doom"
+                      export EMACSDIR="${config.xdg.configHome}/emacs"
+                      export PATH="${config.home.profileDirectory}/bin:${config.xdg.configHome}/emacs/bin:$PATH"
+
+                      mkdir -p "${config.xdg.configHome}"
+                      mkdir -p "${config.xdg.stateHome}/doom"
+
+          	    ${pkgs.rsync}/bin/rsync -ogav --delete \
+          	      --exclude '.local' --exclude '.cache' \
+          	      --chmod=D2755,F744 ${rsyncChown} \
+          	      ${doomemacs}/ "$EMACSDIR/"
+
+                      stamp="${config.xdg.stateHome}/doom/sync-stamp"
+                      key="${emacsPkg}|${doomemacs}"
+
+                      if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ]; then
+                        echo "doom: inputs changed, running doom sync -u"
+                        "${config.xdg.configHome}/emacs/bin/doom" sync -u
+                        echo "$key" > "$stamp"
+
+                        ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
+                          /bin/launchctl kickstart -k gui/$(/usr/bin/id -u)/org.nixos.emacs-daemon || true
+                        ''}
+                        ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+                          systemctl --user restart emacs || true
+                        ''}
+                      else
+                        echo "doom: inputs unchanged, skipping doom sync"
+                      fi
+        '';
       };
 
       programs.zsh.envExtra = envExtra;
-
     }
 
-    (mkIf pkgs.stdenv.hostPlatform.isLinux (
-      let
-        emacsPkg = myEmacsPackagesFor pkgs.emacs-pgtk;
-      in
-      {
-        home.packages = [ emacsPkg ];
-        services.emacs = {
+    (mkIf pkgs.stdenv.hostPlatform.isLinux {
+      services.emacs = {
+        enable = true;
+        package = emacsPkg;
+        client = {
           enable = true;
-          package = emacsPkg;
-          client = {
-            enable = true;
-            arguments = [ " --create-frame --tty" ];
-          };
-          startWithUserSession = true;
+          arguments = [ " --create-frame --tty" ];
         };
-      }
-    ))
-    (mkIf pkgs.stdenv.hostPlatform.isDarwin {
-      home.packages = [
-        (myEmacsPackagesFor pkgs.emacs)
-      ];
+        startWithUserSession = true;
+      };
     })
   ]);
 }
