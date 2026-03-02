@@ -599,11 +599,11 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "path": "./flakes/sddm-themes",
+        "path": "./flake/sddm-themes",
         "type": "path"
       },
       "original": {
-        "path": "./flakes/sddm-themes",
+        "path": "./flake/sddm-themes",
         "type": "path"
       },
       "parent": []
