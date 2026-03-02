@@ -120,6 +120,7 @@ let
 
       modules = [
         (hostPath hostname + /darwin-configuration.nix)
+        (import (hostPath hostname + /overlays))
       ]
       ++ mkHomeManagerModule {
         platformModule = inputs.home-manager.darwinModules.home-manager;
