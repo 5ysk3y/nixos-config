@@ -31,7 +31,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     wayland-pipewire-idle-inhibit.url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
     nix-gaming.url = "github:fufexan/nix-gaming";
-    sddm-themes.url = "path:./flakes/sddm-themes";
+    sddm-themes.url = "path:./flake/sddm-themes";
 
     doomemacs.url = "github:doomemacs/doomemacs";
     doomemacs.flake = false;
@@ -49,8 +49,8 @@
       ];
 
       imports = [
-        ./flakes/parts/hosts.nix
-        ./flakes/parts/modules.nix
+        ./flake/parts/hosts.nix
+        ./flake/parts/modules.nix
       ];
     };
 }
