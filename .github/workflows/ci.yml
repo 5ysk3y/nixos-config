@@ -38,10 +38,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
-      - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/flakehub-cache-action@v3
+      - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
+      - uses: DeterminateSystems/flakehub-cache-action@b346310c0af974cf01100bfb63602580e7f9f97a
 
       - name: Nix format check (nixfmt)
         run: |
@@ -64,10 +64,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
-      - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/flakehub-cache-action@v3
+      - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
+      - uses: DeterminateSystems/flakehub-cache-action@b346310c0af974cf01100bfb63602580e7f9f97a
 
       - name: statix
         run: |
@@ -81,12 +81,12 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
           fetch-depth: 0
 
-      - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/flakehub-cache-action@v3
+      - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
+      - uses: DeterminateSystems/flakehub-cache-action@b346310c0af974cf01100bfb63602580e7f9f97a
 
       - name: Run gitleaks (native)
         run: |
@@ -101,10 +101,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
-      - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/flakehub-cache-action@v3
+      - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
+      - uses: DeterminateSystems/flakehub-cache-action@b346310c0af974cf01100bfb63602580e7f9f97a
 
       - name: Basic flake shape checks, no secrets
         run: |
@@ -120,10 +120,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
-      - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/flakehub-cache-action@v3
+      - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
+      - uses: DeterminateSystems/flakehub-cache-action@b346310c0af974cf01100bfb63602580e7f9f97a
 
       - name: Basic flake shape checks (darwin)
         run: |
@@ -139,10 +139,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
-      - uses: DeterminateSystems/determinate-nix-action@v3
-      - uses: DeterminateSystems/flakehub-cache-action@v3
+      - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
+      - uses: DeterminateSystems/flakehub-cache-action@b346310c0af974cf01100bfb63602580e7f9f97a
 
       - name: Free up disk space
         run: |
@@ -155,7 +155,7 @@ jobs:
           df -h
 
       - name: Start ssh-agent and add deploy key
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
 
