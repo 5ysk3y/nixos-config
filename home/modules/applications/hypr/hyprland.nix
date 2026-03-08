@@ -66,7 +66,8 @@ in
               col.active_border = 0xffbd93f9
               col.inactive_border = 0xff44475a
 
-              layout = master
+              layout = scrolling
+
           }
 
           cursor {
@@ -91,11 +92,6 @@ in
               animation = border,1,6,default
               animation = fade,1,6,default
               animation = workspaces,1,6,default,fade
-          }
-
-          master {
-              new_status = master
-              new_on_top = true
           }
 
           misc {
