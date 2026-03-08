@@ -49,15 +49,6 @@ in
     LC_TIME = "en_GB.UTF-8";
   };
 
-  # Configure keymap in X11
-  services = {
-    xserver = {
-      xkb.layout = "us";
-      xkb.variant = "";
-      videoDrivers = [ "nvidia" ];
-    };
-  };
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users = {
     users."${vars.username}" = {
@@ -160,7 +151,7 @@ in
     sessionVariables = rec {
       ADW_DISABLE_PORTAL = "1";
       CLIPBOARD_NOGUI = "1";
-      DOCKER_HOST = "unix://$XDG_RUNTIME_DIR/podman/podman.sock";
+      DOCKER_HOST = "unix://\${XDG_RUNTIME_DIR}/podman/podman.sock";
       ENABLE_DPMS = "1";
       ENABLE_DDC = "1";
       GTK_THEME = "Dracula:dark";
@@ -393,14 +384,27 @@ in
         extraPackages = with pkgs; [ kdePackages.qtmultimedia ];
         theme = "sddm-astronaut-theme";
         wayland = {
-          enable = true;
+          enable = false;
         };
         settings = {
-          General = {
-            PrimaryOutput = "DP-1";
+          X11 = {
+            DisplayCommand = "${pkgs.writeShellScript "sddm-xsetup" ''
+              #!/bin/sh
+              ${pkgs.xrandr}/bin/xrandr \
+                --output DP-1 --primary --auto \
+                --output HDMI-A-1 --off \
+                --output DP-2 --off
+            ''}";
           };
         };
       };
+    };
+
+    xserver = {
+      xkb.layout = "us";
+      xkb.variant = "";
+      videoDrivers = [ "nvidia" ];
+      enable = true;
     };
   };
 
