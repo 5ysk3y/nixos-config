@@ -133,6 +133,7 @@ jobs:
 
   flake-secrets-check:
     name: full flake check (with secrets)
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
