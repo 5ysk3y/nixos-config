@@ -22,7 +22,7 @@ jobs:
         uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Start ssh-agent and add deploy read-only key (private flake inputs)
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@v0.10.0
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
 
