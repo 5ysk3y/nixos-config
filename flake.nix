@@ -23,6 +23,7 @@
 
     # other stuff
     flake-parts.url = "github:hercules-ci/flake-parts";
+    import-tree.url = "github:vic/import-tree";
 
     nixos-xivlauncher-rb.url = "github:drakon64/nixos-xivlauncher-rb";
     nixos-xivlauncher-rb.inputs.nixpkgs.follows = "nixpkgs";
@@ -42,15 +43,13 @@
 
   outputs =
     inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [
-        "x86_64-linux"
-        "aarch64-darwin"
-      ];
-
-      imports = [
-        ./flake/parts/hosts.nix
-        ./flake/parts/modules.nix
-      ];
-    };
+    flake-parts.lib.mkFlake { inherit inputs; } (
+      {
+        systems = [
+          "x86_64-linux"
+          "aarch64-darwin"
+        ];
+      }
+      // (inputs.import-tree ./flake/parts)
+    );
 }
