@@ -51,6 +51,16 @@ in
               readOnly = true;
             };
 
+            systemProfiles = lib.mkOption {
+              type = lib.types.listOf lib.types.path;
+              readOnly = true;
+            };
+
+            homeProfiles = lib.mkOption {
+              type = lib.types.listOf lib.types.path;
+              readOnly = true;
+            };
+
             vars = lib.mkOption {
               type = lib.types.lazyAttrsOf lib.types.anything;
               readOnly = true;
@@ -109,7 +119,7 @@ in
               ];
 
               users.${host.vars.username} = {
-                imports = [
+                imports = host.homeProfiles ++ [
                   host.homeModule
                 ];
               };
@@ -119,62 +129,12 @@ in
         ];
     };
 
-    repo.hosts = {
-      gibson =
-        let
-          hostname = "gibson";
-          system = "x86_64-linux";
-          path = ./../../../hosts/gibson;
-        in
-        rec {
-          kind = "nixos";
-          inherit hostname system path;
-          systemModule = path + /configuration.nix;
-          homeModule = path + /home.nix;
-          overlaysModule = path + /overlays;
-
-          modules = [
-            systemModule
-            overlaysModule
-          ];
-
-          vars = mkVars {
-            inherit
-              inputs
-              username
-              hostname
-              system
-              ;
-          };
-        };
-
-      macbook =
-        let
-          hostname = "macbook";
-          system = "aarch64-darwin";
-          path = ./../../../hosts/macbook;
-        in
-        rec {
-          kind = "darwin";
-          inherit hostname system path;
-          systemModule = path + /darwin-configuration.nix;
-          homeModule = path + /home.nix;
-          overlaysModule = path + /overlays;
-
-          modules = [
-            systemModule
-            overlaysModule
-          ];
-
-          vars = mkVars {
-            inherit
-              inputs
-              username
-              hostname
-              system
-              ;
-          };
-        };
+    repo.hosts = import ../../hosts {
+      inherit
+        inputs
+        mkVars
+        username
+        ;
     };
   };
 }

@@ -17,8 +17,6 @@ in
 {
   imports = [
     ./hardware-configuration.nix
-    inputs.self.nixosModules.core
-    inputs.self.nixosModules.containers
   ];
 
   networking = {
