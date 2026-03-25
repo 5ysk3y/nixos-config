@@ -22,7 +22,8 @@ let
       };
 
       modules =
-        host.modules
+        host.systemProfiles
+        ++ host.modules
         ++ repoLib.mkHomeManagerModule {
           platformModule = inputs.home-manager.darwinModules.home-manager;
           inherit host;

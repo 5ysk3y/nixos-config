@@ -22,7 +22,8 @@ let
       };
 
       modules =
-        host.modules
+        host.systemProfiles
+        ++ host.modules
         ++ [
           inputs.sops-nix.nixosModules.sops
         ]

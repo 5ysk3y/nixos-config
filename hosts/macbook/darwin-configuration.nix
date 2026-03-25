@@ -11,10 +11,6 @@
 }:
 {
 
-  imports = [
-    inputs.self.darwinModules.core
-  ];
-
   networking.hostName = "macbook"; # Define your hostname.
 
   # Set your time zone.

@@ -6,9 +6,6 @@
 }:
 {
   imports = [
-    ../../home/user/gibson.nix
-    inputs.wayland-pipewire-idle-inhibit.homeModules.default
-    inputs.self.homeManagerModules.default
-    inputs.self.homeManagerModules.commonConfig
+    ./../../home/user/gibson.nix
   ];
 }
