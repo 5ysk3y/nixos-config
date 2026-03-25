@@ -34,6 +34,10 @@
       "video=DP-1:2560x1440@144"
       "video=DP-2:1920x1080@144"
       "video=HDMI-A-1:1920x1080@60"
+      "zswap.enabled=1"
+      "zswap.compressor=lz4"
+      "zswap.max_pool_percent=20"
+      "zswap.shrinker_enabled=1"
     ];
     extraModulePackages = with config.boot.kernelPackages; [ ];
     loader = {
