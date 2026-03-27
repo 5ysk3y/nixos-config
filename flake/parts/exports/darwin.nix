@@ -1,6 +1,6 @@
 _:
 let
-  nix-modules = import ./../../../nixosModules;
+  nix-modules = import ./../../../features/nixos;
 in
 {
   flake.darwinModules = {
