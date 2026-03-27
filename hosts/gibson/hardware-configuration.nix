@@ -22,6 +22,7 @@
       "nvidia_modeset"
       "nvidia_uvm"
       "nvidia_drm"
+      "ntsync"
     ];
     blacklistedKernelModules = [
       "ath12k_pci"

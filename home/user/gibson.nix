@@ -213,6 +213,9 @@
 
     mangohud = {
       enable = true;
+      settings = {
+        winesync = 1;
+      };
     };
 
     yt-dlp = {
