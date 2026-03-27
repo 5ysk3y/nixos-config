@@ -10,8 +10,8 @@
   ...
 }:
 let
-  sddmTheme = inputs.sddm-themes.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-    theme = "cyberpunk";
+  sddmTheme = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.sddm-astronaut-theme.override {
+    theme = "post-apocalyptic_hacker";
   };
 in
 {

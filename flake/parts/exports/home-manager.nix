@@ -1,6 +1,6 @@
 _: {
   flake.homeManagerModules = {
-    default = import ./../../../home/modules;
+    default = import ./../../../features/home;
     commonConfig = import ./../../../home/user/common.nix;
   };
 }
