@@ -1,3 +1,3 @@
 _: {
-  flake.nixosModules = import ./../../../nixosModules;
+  flake.nixosModules = import ./../../../features/nixos;
 }

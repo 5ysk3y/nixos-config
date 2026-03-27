@@ -4,7 +4,7 @@
 }:
 {
   imports = [
-    inputs.self.nixosModules.core
-    inputs.self.nixosModules.containers
+    ../../features/nixos/core
+    ../../features/nixos/containers
   ];
 }
