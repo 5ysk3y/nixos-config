@@ -123,6 +123,7 @@
       settings = {
         user.signingKey = "7D73BA8CF10F7F67";
       };
+      signing.format = "openpgp";
     };
 
     imv = {
@@ -369,6 +370,9 @@
       extraConfig = {
         gtk-application-prefer-dark-theme = 1;
       };
+    };
+    gtk4 = {
+      inherit (config.gtk) theme;
     };
   };
 
