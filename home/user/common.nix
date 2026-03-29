@@ -96,6 +96,7 @@ in
           };
         }
       ];
+      signing.format = "openpgp";
     };
 
     gpg = {
