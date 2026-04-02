@@ -4,7 +4,7 @@ _: {
     let
       ghKey = builtins.fetchurl {
         url = "https://github.com/5ysk3y.gpg";
-        sha256 = "1w6vml01gf81mnck4gmwi91ynkhwdsw8z84lxjlz8bvbwrj6cwrx";
+        sha256 = "072875xvjay4ssx8g0a3f8cm51xsc4l63ls6xpjl7abzq29a5m9z";
       };
     in
     {
