@@ -1,7 +1,6 @@
 {
   lib,
   inputs,
-  repoLibHelpers,
   ...
 }:
 let
