@@ -11,7 +11,7 @@
       homePrefix = if isDarwin then "/Users" else "/home";
     in
     {
-      inherit username hostname system;
+      inherit username;
       flakeSource = inputs.self;
       secretsPath = builtins.toString inputs.nix-secrets;
       syncthingPath = "${homePrefix}/${username}/Sync";
