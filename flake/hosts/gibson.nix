@@ -12,7 +12,7 @@ rec {
   kind = "nixos";
   inherit hostname system path;
 
-  systemModule = path + /configuration.nix;
+  systemModule = path + /system.nix;
   homeModule = path + /home.nix;
   overlaysModule = path + /overlays;
 
