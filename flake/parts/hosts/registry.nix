@@ -106,7 +106,6 @@ in
               extraSpecialArgs = {
                 inherit inputs;
                 inherit (host) hostname vars;
-                inherit (inputs) doomemacs;
               }
               // extraSpecialArgs;
 
