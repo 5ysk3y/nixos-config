@@ -17,7 +17,7 @@ rec {
   overlaysModule = path + /overlays;
 
   systemProfiles = [
-    ./../../profiles/nixos/base.nix
+    ./../../profiles/system/nixos.nix
   ];
 
   homeProfiles = [

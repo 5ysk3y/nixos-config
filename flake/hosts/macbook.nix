@@ -17,7 +17,7 @@ rec {
   overlaysModule = path + /overlays;
 
   systemProfiles = [
-    ./../../profiles/darwin/base.nix
+    ./../../profiles/system/darwin.nix
   ];
 
   homeProfiles = [
