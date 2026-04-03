@@ -22,7 +22,7 @@ rec {
 
   homeProfiles = [
     ./../../profiles/home/common.nix
-    ./../../profiles/home/gibson.nix
+    ./../../profiles/home/desktop.nix
   ];
 
   modules = [

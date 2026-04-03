@@ -4,7 +4,6 @@
 }:
 {
   imports = [
-    inputs.self.homeManagerModules.default
     inputs.self.modules.homeManager.base
     inputs.self.modules.homeManager.zsh
     inputs.self.modules.homeManager.zoxide
