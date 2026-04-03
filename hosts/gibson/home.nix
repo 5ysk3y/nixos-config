@@ -105,4 +105,12 @@
       package = pkgs.pinentry-curses;
     };
   };
+
+  features = {
+    home = {
+      mako = {
+        output = "DP-1";
+      };
+    };
+  };
 }
