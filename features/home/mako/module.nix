@@ -4,42 +4,57 @@
   pkgs,
   ...
 }:
-lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-  services.mako = {
-    enable = true;
-    settings = {
-      output = "DP-1";
-      background-color = "#282A36";
-      text-color = "#FFFFFF";
-      padding = "10";
-      font = "Tamzen 12";
-      layer = "overlay";
-      anchor = "top-right";
-      margin = "11";
-      default-timeout = 20000;
-      border-size = 1;
-      border-radius = 5;
-      width = 400;
-      height = 170;
-      max-icon-size = 32;
+let
+  cfg = config.features.home.mako;
+in
+{
+  options.features.home.mako = {
+    output = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "Preferred output name for mako notifications.";
+    };
+  };
 
-      "urgency=low" = {
-        border-color = "#BD93F9";
-      };
+  config = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+    services.mako = {
+      enable = true;
+      settings = {
+        background-color = "#282A36";
+        text-color = "#FFFFFF";
+        padding = "10";
+        font = "Tamzen 12";
+        layer = "overlay";
+        anchor = "top-right";
+        margin = "11";
+        default-timeout = 20000;
+        border-size = 1;
+        border-radius = 5;
+        width = 400;
+        height = 170;
+        max-icon-size = 32;
 
-      "urgency=normal" = {
-        border-color = "#BD93F9";
-        on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
-      };
+        "urgency=low" = {
+          border-color = "#BD93F9";
+        };
 
-      "urgency=high" = {
-        border-color = "#FF5555";
-        on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
-      };
+        "urgency=normal" = {
+          border-color = "#BD93F9";
+          on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
+        };
 
-      "mode=idle" = {
-        default-timeout = 0;
-        ignore-timeout = 1;
+        "urgency=high" = {
+          border-color = "#FF5555";
+          on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
+        };
+
+        "mode=idle" = {
+          default-timeout = 0;
+          ignore-timeout = 1;
+        };
+      }
+      // lib.optionalAttrs (cfg.output != null) {
+        inherit (cfg) output;
       };
     };
   };
