@@ -11,7 +11,7 @@
   lib,
   pkgs,
   vars,
-  doomemacs,
+  inputs,
   ...
 }:
 with lib;
@@ -66,10 +66,10 @@ mkMerge [
         ${pkgs.rsync}/bin/rsync -ogav --delete \
           --exclude '.local' --exclude '.cache' \
           --chmod=D2755,F744 ${rsyncChown} \
-          ${doomemacs}/ "$EMACSDIR/"
+          ${inputs.doomemacs}/ "$EMACSDIR/"
 
         stamp="${config.xdg.stateHome}/doom/sync-stamp"
-        key="${emacsPkg}|${doomemacs}"
+        key="${emacsPkg}|${inputs.doomemacs}"
 
         if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ]; then
           echo "doom: inputs changed, running doom sync -u"
