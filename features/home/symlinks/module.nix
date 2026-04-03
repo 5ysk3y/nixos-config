@@ -17,7 +17,12 @@ in
       source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/gnupg/main.gpg";
     };
 
-    ".ssh" = lib.mkIf isLinux {
+    "Sync" = lib.mkIf isDarwin {
+      source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/Library/Mobile Documents/com~apple~CloudDocs/Sync/";
+      recursive = true;
+    };
+
+    ".ssh" = {
       source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Private/Keys";
       recursive = true;
     };
