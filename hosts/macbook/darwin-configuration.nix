@@ -13,9 +13,6 @@
 
   networking.hostName = "macbook"; # Define your hostname.
 
-  # Set your time zone.
-  time.timeZone = "Europe/London";
-
   nix = {
     enable = false;
   };
@@ -33,9 +30,6 @@
           experimental-features = nix-command flakes
         '';
       };
-    };
-    variables = rec {
-      EDITOR = "emacsclient -t";
     };
   };
 
