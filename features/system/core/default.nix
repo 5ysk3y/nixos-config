@@ -1,9 +1,9 @@
-{ ... }:
-{
+_: {
   imports = [
-    ./nix.nix
+    ./editor.nix
     ./locale.nix
-    ./security.nix
+    ./nix.nix
     ./overlays.nix
+    ./security.nix
   ];
 }

@@ -1,7 +1,7 @@
 {
   imports = [
 
-    # home-manager - shared config
+    # home-manager - shared modules
     ./../../features/home/shared/base.nix
     ./../../features/home/shared/git.nix
     ./../../features/home/shared/gpg.nix

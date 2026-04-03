@@ -1,9 +1,9 @@
 _:
 let
-  nix-modules = import ./../../../features/nixos;
+  nixosModules = import ./../../../features/system;
 in
 {
   flake.darwinModules = {
-    inherit (nix-modules) core;
+    inherit (nixosModules) core;
   };
 }

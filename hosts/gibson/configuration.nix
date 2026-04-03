@@ -164,10 +164,6 @@ in
       __GL_VRR_ALLOWED = "0";
     };
 
-    variables = rec {
-      EDITOR = "emacsclient -t";
-    };
-
     pathsToLink = [
       "/share/xdg-desktop-portal"
       "/share/applications"
