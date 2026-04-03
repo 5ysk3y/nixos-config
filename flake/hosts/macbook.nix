@@ -22,7 +22,7 @@ rec {
 
   homeProfiles = [
     ./../../profiles/home/common.nix
-    ./../../profiles/home/macbook.nix
+    ./../../profiles/home/darwin.nix
   ];
 
   modules = [
