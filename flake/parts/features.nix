@@ -1,12 +1,12 @@
 {
   imports = [
 
-    # home-manager - shared modules
-    ./../../features/home/shared/base.nix
-    ./../../features/home/shared/git.nix
-    ./../../features/home/shared/gpg.nix
-    ./../../features/home/shared/zoxide.nix
-    ./../../features/home/shared/zsh.nix
+    # home-manager - core modules
+    ./../../features/home/core/base.nix
+    ./../../features/home/core/git.nix
+    ./../../features/home/core/gpg.nix
+    ./../../features/home/core/zoxide.nix
+    ./../../features/home/core/zsh.nix
 
     # home-manager - main modules
     ./../../features/home/doomemacs
