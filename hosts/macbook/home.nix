@@ -44,4 +44,18 @@
       };
     };
   };
+
+  features.home.syncthing = {
+    enable = true;
+    deviceName = "macbook";
+
+    folders.sync = {
+      enable = true;
+      path = "${vars.homeDirectory}/Library/Mobile Documents/com~apple~CloudDocs/Sync";
+      type = "receiveonly";
+      peers = [ "syncMaster" ];
+
+      bootstrap.enable = false;
+    };
+  };
 }

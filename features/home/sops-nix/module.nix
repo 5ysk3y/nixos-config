@@ -25,6 +25,21 @@
         path = "${config.xdg.configHome}/rbw/config.json";
       };
 
+      ## syncthing
+      "services/syncthing/user" = { };
+      "services/syncthing/pass" = { };
+      "services/syncthing/token" = { };
+
+      syncthing-cert = {
+        format = "binary";
+        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.cert";
+      };
+
+      syncthing-key = {
+        format = "binary";
+        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.key";
+      };
+
       "services/chatgpt/api_key" = { };
     };
   };
