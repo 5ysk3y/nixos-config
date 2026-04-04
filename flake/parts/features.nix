@@ -23,9 +23,11 @@
     ./../../features/home/playerctld
     ./../../features/home/qutebrowser
     ./../../features/home/sops-nix
+    ./../../features/home/syncthing
     ./../../features/home/symlinks
     ./../../features/home/waybar
     ./../../features/home/wayland-idle-inhibit
     ./../../features/home/xdg-portal-hyprland
+
   ];
 }
