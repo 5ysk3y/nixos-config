@@ -72,8 +72,8 @@ mkMerge [
         key="${emacsPkg}|${inputs.doomemacs}"
 
         if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ]; then
-          echo "doom: inputs changed, running doom sync -u"
-          "${config.xdg.configHome}/emacs/bin/doom" sync -u
+          echo "doom: inputs changed, running doom sync -u --force"
+          "${config.xdg.configHome}/emacs/bin/doom" sync -u --force
           echo "$key" > "$stamp"
 
           ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
