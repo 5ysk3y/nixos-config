@@ -3,6 +3,7 @@
   lib,
   inputs,
   vars,
+  hostname,
   pkgs,
   ...
 }:
@@ -110,6 +111,21 @@
     home = {
       mako = {
         output = "DP-1";
+      };
+      syncthing = {
+        enable = true;
+        deviceName = "${hostname}";
+
+        folders.sync = {
+          enable = true;
+          path = vars.syncthingPath;
+          type = "sendreceive";
+          peers = [ "syncMaster" ];
+
+          bootstrap = {
+            enable = true;
+          };
+        };
       };
     };
   };

@@ -52,6 +52,7 @@ in
     users."${vars.username}" = {
       isNormalUser = true;
       description = "${vars.username}";
+      linger = true;
       extraGroups = [
         "networkmanager"
         "wheel"
@@ -97,17 +98,6 @@ in
       ];
     };
     services = {
-      "configureSyncthing" = {
-        enable = true;
-        description = "Sets up syncthing for new installs";
-        path = with pkgs; [
-          jq
-          curl
-          gawk
-        ];
-        wantedBy = [ "syncthing.service" ];
-        script = "${pkgs.bash}/bin/bash ${config.sops.templates."configureSyncting.service".path}";
-      };
       "nix-daemon" = {
         environment = {
           TMPDIR = "/nix/tmp";
@@ -286,51 +276,6 @@ in
       settings = {
         Login = {
           HandleHibernateKey = "ignore";
-        };
-      };
-    };
-
-    syncthing = {
-      enable = true;
-      user = "${vars.username}";
-      dataDir = "${vars.syncthingPath}";
-      configDir = "/home/${vars.username}/.config/syncthing";
-      openDefaultPorts = true;
-      overrideDevices = true; # overrides any devices added or deleted through the WebUI
-
-      key = config.sops.secrets."syncthing-key".path;
-      cert = config.sops.secrets."syncthing-cert".path;
-
-      settings = {
-        options = {
-          urAccepted = -1;
-          relaysEnabled = false;
-          globalAnnounceEnabled = false;
-        };
-
-        gui = {
-          user = config.sops.secrets."services/syncthing/user";
-          password = config.sops.secrets."services/syncthing/pass";
-          apikey = config.sops.secrets."services/syncthing/token";
-          theme = "dark";
-          tls = true;
-        };
-
-        devices = {
-          "SyncMaster" = {
-            id = "NFYVMXE-T3IVMTV-UMLRBZ3-RQ246DT-QV3CCRG-45W5D23-EYFQFNY-Z6AH7QH";
-            autoAcceptFolders = true;
-          };
-        };
-
-        folders = {
-          "${vars.syncthingPath}" = {
-            path = "${vars.syncthingPath}";
-            devices = [ "SyncMaster" ];
-            id = "sync";
-            label = "Sync";
-            type = "receiveonly";
-          };
         };
       };
     };
@@ -523,22 +468,6 @@ in
     defaultSopsFormat = "yaml";
 
     secrets = {
-      ## syncthing
-      "services/syncthing/user" = { };
-      "services/syncthing/pass" = { };
-      "services/syncthing/token" = { };
-
-      syncthing-cert = {
-        format = "binary";
-        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.cert";
-        owner = "${vars.username}";
-      };
-
-      syncthing-key = {
-        format = "binary";
-        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.key";
-        owner = "${vars.username}";
-      };
 
       # Yubikey
       "system/pam/yubikeyPub" = {
@@ -551,100 +480,6 @@ in
       };
     };
 
-    templates = {
-      "configureSyncting.service" = {
-        content = ''
-          ## THIS TOOK HOURS OF MY FUCKING LIFE MAN
-
-          DIR=${vars.syncthingPath}
-          TOKEN=${config.sops.placeholder."services/syncthing/token"}
-
-          function checkSync {
-              export SYNC_PERCENTAGE=$(curl -s -X GET -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/completion?folder=sync | jq '."completion"' | awk -F. '{print $1}')
-          }
-
-          function waitSync {
-              checkSync
-              while [[ $SYNC_PERCENTAGE -lt 100 ]]
-              do
-                  sleep 15
-                  checkSync
-                  echo "Sync is at $SYNC_PERCENTAGE%"
-              done
-              if [[ $SYNC_PERCENTAGE -eq 100 ]]; then
-                  echo "Synthing setup has finished. Switch builds to ensure all secrets are included."
-                  curl -s -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "sendreceive"}'
-              else
-                  echo "Sync appears to have finished synching but there's an issue. Please check it out."
-                  fi
-          }
-
-          function syncFix {
-              # ENSURE that the local folder is set to "Receive Only" - it is by default.
-              echo "Setting local folder to receive only"
-              receiveOnly
-              echo "Beginning Sync. Please wait..."
-              sleep 15
-              syncRevert
-              sleep 15
-              waitSync
-          }
-
-          function syncRevert {
-              curl -s -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/scan?folder=sync
-              sleep 2
-              curl -s -X POST -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/db/revert?folder=sync
-
-          }
-
-          function receiveOnly {
-              curl -s -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "receiveonly"}'
-          }
-
-          function sendReceive {
-              curl -s -o /dev/null -w "%{http_code}" -X PATCH -H "Authorization: Bearer $TOKEN" http://localhost:8384/rest/config/folders/sync --data '{"type": "sendreceive"}'
-          }
-
-          sleep 5
-          echo "Starting..."
-          if [ ! -d "$DIR" ]; then
-              echo "No sync folder detected. Configuring..."
-
-              receiveOnly
-              mkdir -p $DIR/.stfolder
-              echo "Directory created."
-              chown -R ${vars.username}:users $DIR
-              echo "Permissions Set."
-              sleep 2
-
-              STATUS=$(curl -s -X GET http://localhost:8384/rest/noauth/health | jq -r '."status"')
-              echo "Status reports as: $STATUS"
-
-              if [ "$STATUS" == "OK" ]; then
-                echo "Starting Sync Fix"
-                syncFix
-              else
-                echo "Check the service status of Syncthing. It shows as: $STATUS"
-              fi
-
-          else
-            receiveOnly
-            syncRevert
-            sleep 10
-            checkSync
-            if [[ $SYNC_PERCENTAGE -ne 100 ]]; then
-              echo "Starting Sync Fix"
-              syncFix
-            else
-              echo "Everything looks like it's already setup! Setting folder to Send/Receive mode.."
-              sendReceive
-              echo "All done!"
-            fi
-
-          fi
-        '';
-      };
-    };
   };
 
   # This value determines the NixOS release from which the default settings for stateful data, like file locations and database versions on your system were taken. It‘s perfectly fine and recommended to leave this value at the
