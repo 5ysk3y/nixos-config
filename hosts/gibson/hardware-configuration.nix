@@ -5,18 +5,26 @@
   config,
   lib,
   pkgs,
+  inputs,
   modulesPath,
   system,
   vars,
   ...
 }:
+let
+  qutebrowser-fix = import inputs.nixpkgs-qutebrowser-fix {
+    inherit (pkgs.stdenv.hostPlatform) system;
+    config.allowUnfree = true;
+  };
+in
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_xanmod;
+    #kernelPackages = pkgs.linuxPackages_xanmod;
+    kernelPackages = qutebrowser-fix.linuxPackages_xanmod;
     kernelModules = [
       "nvidia"
       "nvidia_modeset"
@@ -111,6 +119,20 @@
 
   hardware = {
     enableAllFirmware = true;
+
+    graphics = {
+      enable = true;
+      enable32Bit = true;
+      extraPackages = with pkgs; [ nvidia-vaapi-driver ]; # For additional packages if needed
+    };
+
+    nvidia = {
+      modesetting.enable = true;
+      open = true;
+      powerManagement.enable = true;
+      nvidiaSettings = true;
+      package = config.boot.kernelPackages.nvidiaPackages.production;
+    };
   };
 
   networking.useDHCP = lib.mkDefault true;

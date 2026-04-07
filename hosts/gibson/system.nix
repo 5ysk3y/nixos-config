@@ -439,20 +439,6 @@ in
       };
     };
 
-    graphics = {
-      enable = true;
-      enable32Bit = true;
-      extraPackages = with pkgs; [ nvidia-vaapi-driver ]; # For additional packages if needed
-    };
-
-    nvidia = {
-      modesetting.enable = true;
-      open = true;
-      powerManagement.enable = true;
-      nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
-    };
-
     bluetooth = {
       enable = true;
       powerOnBoot = true;
