@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
-      - uses: DeterminateSystems/flakehub-cache-action@f053b608e8a623da93029482500353079142e628
+      - uses: DeterminateSystems/flakehub-cache-action@77fe95416299b8d1351b57bf10a1042a0ed75708
 
       - name: Nix format check (nixfmt)
         run: |
@@ -67,7 +67,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
-      - uses: DeterminateSystems/flakehub-cache-action@f053b608e8a623da93029482500353079142e628
+      - uses: DeterminateSystems/flakehub-cache-action@77fe95416299b8d1351b57bf10a1042a0ed75708
 
       - name: statix
         run: |
@@ -86,7 +86,7 @@ jobs:
           fetch-depth: 0
 
       - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
-      - uses: DeterminateSystems/flakehub-cache-action@f053b608e8a623da93029482500353079142e628
+      - uses: DeterminateSystems/flakehub-cache-action@77fe95416299b8d1351b57bf10a1042a0ed75708
 
       - name: Run gitleaks (native)
         run: |
@@ -104,7 +104,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
-      - uses: DeterminateSystems/flakehub-cache-action@f053b608e8a623da93029482500353079142e628
+      - uses: DeterminateSystems/flakehub-cache-action@77fe95416299b8d1351b57bf10a1042a0ed75708
 
       - name: Basic flake shape checks, no secrets
         run: |
@@ -123,7 +123,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
-      - uses: DeterminateSystems/flakehub-cache-action@f053b608e8a623da93029482500353079142e628
+      - uses: DeterminateSystems/flakehub-cache-action@77fe95416299b8d1351b57bf10a1042a0ed75708
 
       - name: Basic flake shape checks (darwin)
         run: |
@@ -143,7 +143,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: DeterminateSystems/determinate-nix-action@131015bad844610e5e6300f8a143bf625d3e74f4
-      - uses: DeterminateSystems/flakehub-cache-action@f053b608e8a623da93029482500353079142e628
+      - uses: DeterminateSystems/flakehub-cache-action@77fe95416299b8d1351b57bf10a1042a0ed75708
 
       - name: Free up disk space
         run: |
