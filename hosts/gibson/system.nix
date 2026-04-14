@@ -182,7 +182,7 @@ in
 
         sddm = {
           text = ''
-            auth     sufficient    pam_u2f.so  cue
+            auth     sufficient    pam_u2f.so  cue   origin=pam://gibson appid=pam://gibson
             auth     include       login
             account  include       login
             password include       login

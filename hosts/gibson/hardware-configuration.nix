@@ -23,8 +23,8 @@ in
   ];
 
   boot = {
-    #kernelPackages = pkgs.linuxPackages_xanmod;
-    kernelPackages = qutebrowser-fix.linuxPackages_xanmod;
+    #kernelPackages = pkgs.linuxPackages_zen;
+    kernelPackages = qutebrowser-fix.linuxPackages_zen;
     kernelModules = [
       "nvidia"
       "nvidia_modeset"
@@ -131,7 +131,7 @@ in
       open = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.production;
+      package = config.boot.kernelPackages.nvidiaPackages.stable;
     };
   };
 
