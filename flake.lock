@@ -460,17 +460,17 @@
     },
     "nixpkgs-qutebrowser-fix": {
       "locked": {
-        "lastModified": 1773821835,
-        "narHash": "sha256-TJ3lSQtW0E2JrznGVm8hOQGVpXjJyXY2guAxku2O9A4=",
+        "lastModified": 1774476476,
+        "narHash": "sha256-wwnVrY2pc5U/nZFEZpRQ634q+gQ3aPr3bIbeou8M9kk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b40629efe5d6ec48dd1efba650c797ddbd39ace0",
+        "rev": "4ceb3f35581a8ed908a21284105617d32ac59505",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b40629efe5d6ec48dd1efba650c797ddbd39ace0",
+        "rev": "4ceb3f35581a8ed908a21284105617d32ac59505",
         "type": "github"
       }
     },
