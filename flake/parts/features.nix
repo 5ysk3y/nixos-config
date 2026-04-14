@@ -2,11 +2,7 @@
   imports = [
 
     # home-manager - core modules
-    ./../../features/home/core/base.nix
-    ./../../features/home/core/git.nix
-    ./../../features/home/core/gpg.nix
-    ./../../features/home/core/zoxide.nix
-    ./../../features/home/core/zsh.nix
+    ./../../features/home/core
 
     # home-manager - main modules
     ./../../features/home/doomemacs

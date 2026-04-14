@@ -5,6 +5,15 @@
   ...
 }:
 {
+  home.packages = with pkgs; [
+    jellyfin-desktop
+    jellyfin-mpv-shim
+    mpvpaper
+    pavucontrol
+    playerctl
+    vlc
+  ];
+
   programs = {
     imv.enable = true;
 

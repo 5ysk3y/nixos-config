@@ -5,6 +5,7 @@
     inputs.self.modules.homeManager.doomemacs
     inputs.self.modules.homeManager.ghostty
     inputs.self.modules.homeManager.qutebrowser
+    inputs.self.modules.homeManager.nix-settings
     inputs.self.modules.homeManager.sops-nix
     inputs.self.modules.homeManager.symlinks
     inputs.self.modules.homeManager.syncthing

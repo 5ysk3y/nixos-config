@@ -24,44 +24,20 @@
     };
 
     packages = with pkgs; [
-      act
-      bat
       bitwarden-desktop
-      bottles
       discord
       dracula-theme
       fontconfig
-      glib
       grimblast
-      heroic
       hyprpolkitagent
-      (inputs.nixos-xivlauncher-rb.packages.${stdenv.hostPlatform.system}.default.override {
-        useGameMode = true;
-      })
-      jellyfin-desktop
-      jellyfin-mpv-shim
       jq
       keyutils
-      krita
       libnotify
-      mpvpaper
-      nixfmt
-      nixd
       fastfetch
-      obs-cmd
-      pavucontrol
-      playerctl
-      protonup-qt
-      pwvucontrol
-      restic
       rivalcfg
       rofi-rbw-wayland
       signal-desktop
-      sops
       spice-gtk
-      vlc
-      vulkan-tools
-      webcord
       wl-clipboard
       wtype
     ];
@@ -75,8 +51,6 @@
       '';
 
       shellAliases = {
-        ls = "ls --color";
-        ll = "ls -lash";
         build-nix = "nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'";
         cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
         mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
@@ -84,7 +58,6 @@
         nixos-rebuild = "systemd-inhibit --no-pager --no-legend --mode=block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild $@ --option eval-cache false --show-trace";
         spicy = "spicy --spice-ca-file=/etc/pki/libvirt-spice/ca-cert.pem --uri 'spice://127.0.0.1' -p 5900 -s 5901 --title 'th3h4x0r' -f > /dev/null 2>&1 &|";
         pass = "pass -c main";
-        less = "bat $@";
       };
 
       history.path = "${config.xdg.dataHome}/zsh/zsh_history";
