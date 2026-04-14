@@ -65,7 +65,7 @@ in
       #   packages = with pkgs; [    ];
       #   USER PKGS MANAGED IN HOME.NIX
       shell = pkgs.zsh;
-      hashedPasswordFile = config.sops.secrets."hosts/user_pass".path;
+      hashedPasswordFile = config.sops.secrets."system/gibson_user_pass".path;
     };
     groups = {
       sops = { };
@@ -449,7 +449,7 @@ in
   };
 
   sops = {
-    age.keyFile = "/var/lib/age/keys.txt";
+    age.keyFile = "${vars.age.keyFile}";
     defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
 
@@ -461,7 +461,7 @@ in
       };
 
       # System
-      "hosts/user_pass" = {
+      "system/gibson_user_pass" = {
         neededForUsers = true;
       };
     };

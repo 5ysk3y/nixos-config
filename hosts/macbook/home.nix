@@ -4,6 +4,7 @@
   pkgs,
   inputs,
   vars,
+  hostname,
   ...
 }:
 {
@@ -41,6 +42,22 @@
     gpg-agent = {
       pinentry = {
         package = pkgs.pinentry_mac;
+      };
+    };
+  };
+
+  features = {
+    home = {
+      syncthing = {
+        enable = true;
+        deviceName = "${hostname}";
+
+        folders.sync = {
+          enable = true;
+          path = vars.syncthingPath;
+          type = "receiveonly";
+          peers = [ "syncMaster" ];
+        };
       };
     };
   };
