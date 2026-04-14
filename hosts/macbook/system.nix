@@ -42,10 +42,21 @@
         "--fg-daemon"
       ];
       EnvironmentVariables = {
-        TERMINFO_DIRS =
-          "/Applications/Ghostty.app/Contents/Resources/terminfo:"
-          + "${pkgs.ncurses.out}/share/terminfo:"
-          + "/usr/share/terminfo:/etc/terminfo";
+        PATH = lib.concatStringsSep ":" [
+          "/etc/profiles/per-user/${vars.username}/bin"
+          "/run/current-system/sw/bin"
+          "/nix/var/nix/profiles/default/bin"
+          "/usr/bin"
+          "/bin"
+          "/usr/sbin"
+          "/sbin"
+        ];
+        TERMINFO_DIRS = lib.concatStringsSep ":" [
+          "${pkgs.ghostty-bin.terminfo}/share/terminfo"
+          "${pkgs.ncurses.out}/share/terminfo"
+          "/usr/share/terminfo"
+          "/etc/terminfo"
+        ];
       };
 
       RunAtLoad = true;

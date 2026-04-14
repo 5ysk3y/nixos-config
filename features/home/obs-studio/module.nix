@@ -14,4 +14,8 @@
       obs-studio-plugins.obs-gstreamer
     ];
   };
+
+  home.packages = with pkgs; [
+    obs-cmd
+  ];
 }

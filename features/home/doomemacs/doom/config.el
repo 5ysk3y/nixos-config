@@ -80,41 +80,46 @@
 ;;(set-frame-parameter (selected-frame) 'alpha '(95))
 ;;(add-to-list 'default-frame-alist '(alpha . (95)))
 
-(with-eval-after-load 'lsp-mode
+(after! lsp-mode
+  (setq lsp-diagnostics-provider :flycheck)
+
   (lsp-register-client
-    (make-lsp-client :new-connection (lsp-stdio-connection "nixd")
-                     :major-modes '(nix-mode)
-                     :priority 0
-                     :server-id 'nixd)))
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection "nixd")
+    :major-modes '(nix-mode)
+    :priority 1
+    :server-id 'nixd)))
 
-(use-package nix-mode
-:after lsp-mode
-:ensure t
-:hook
-(nix-mode . lsp-deferred) ;; So that envrc mode will work
-:custom
-(lsp-disabled-clients '((nix-mode . nix-nil))) ;; Disable nil so that nixd will be used as lsp-server
-:config
-(setq lsp-nix-nixd-server-path "nixd"
-      lsp-nix-nixd-formatting-command [ "nixfmt" ]
-      lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
+(after! flycheck
+  (flycheck-add-mode 'statix 'nix-mode))
 
-      ;; Use $NIXOS_CONFIG when available so Linux and macOS both work.
-      lsp-nix-nixd-nixos-options-expr
-      (let* ((repo (or (getenv "NIXOS_CONFIG")
-                       (expand-file-name "~/nixos-config")))
-             (flake (format "(builtins.getFlake \"%s\")" repo)))
-        (format "%s.nixosConfigurations.gibson.options" flake))
+(after! nix-mode
+  (add-hook 'nix-mode-hook #'lsp-deferred)
 
-      lsp-nix-nixd-home-manager-options-expr
-      (let* ((repo (or (getenv "NIXOS_CONFIG")
-                       (expand-file-name "~/nixos-config")))
-             (flake (format "(builtins.getFlake \"%s\")" repo)))
-        (format "%s.nixosConfigurations.gibson.config.home-manager.users.rickie.home.options" flake)))
+  (add-hook 'nix-mode-hook
+            (lambda ()
+              (add-to-list 'flycheck-disabled-checkers 'nix)
+              (setq-local company-idle-delay 0.1))))
 
-(add-hook! 'nix-mode-hook
-         ;; enable autocompletion with company
-         (setq company-idle-delay 0.1))
+(after! lsp-nix
+  (let* ((repo (or (getenv "NIXOS_CONFIG")
+                   (expand-file-name "~/nixos-config")))
+         (flake (format "(builtins.getFlake \"%s\")" repo))
+         (is-darwin (eq system-type 'darwin)))
+    (setq lsp-nix-nixd-server-path "nixd"
+          lsp-nix-nixd-formatting-command [ "nixfmt" ]
+          lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
+          lsp-disabled-clients '((nix-mode . nix-nil))
+
+          lsp-nix-nixd-nixos-options-expr
+          (if is-darwin
+              (format "%s.darwinConfigurations.macbook.options" flake)
+            (format "%s.nixosConfigurations.gibson.options" flake))
+
+          lsp-nix-nixd-home-manager-options-expr
+          (if is-darwin
+              (format "%s.darwinConfigurations.macbook.config.home-manager.users.rickie.home.options" flake)
+            (format "%s.nixosConfigurations.gibson.config.home-manager.users.rickie.home.options" flake)))))
 
 (remove-hook 'markdown-mode-hook #'pretty-symbols-mode)
 (set-fontset-font t 'unicode "Noto Color Emoji" nil 'append)

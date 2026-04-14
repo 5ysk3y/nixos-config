@@ -22,7 +22,6 @@
   programs = {
     zsh = {
       shellAliases = {
-        ll = "ls -lah";
         nixos-rebuild = "sudo darwin-rebuild switch --flake .#macbook";
       };
     };

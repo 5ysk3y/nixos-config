@@ -5,8 +5,12 @@
   inputs,
   ...
 }:
+let
+  inherit (lib) optional;
+  inherit (pkgs.stdenv.hostPlatform) isLinux system;
+in
 {
-  nix = {
+  nix = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     gc = {
       automatic = true;
       options = "-d";
@@ -15,8 +19,10 @@
   };
 
   home.packages =
-    with lib;
-    mkIf pkgs.stdenv.hostPlatform.isLinux [
-      inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.nix-build-system
-    ];
+    optional isLinux inputs.self.packages.${system}.nix-build-system
+    ++ (with pkgs; [
+      nixfmt
+      nixd
+      statix
+    ]);
 }
