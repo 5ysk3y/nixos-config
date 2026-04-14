@@ -12,6 +12,7 @@
     ./../../features/home/doomemacs
     ./../../features/home/fuzzel
     ./../../features/home/gaming
+    ./../../features/home/ghostty
     ./../../features/home/gtk-dracula
     ./../../features/home/hypr
     ./../../features/home/kitty
