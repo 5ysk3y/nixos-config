@@ -4,16 +4,21 @@
   pkgs,
   inputs,
   vars,
+  hostname,
   ...
 }:
 {
+  home.packages = with pkgs; [
+    sops
+    age
+    age-plugin-yubikey
+    yubikey-manager
+  ];
+
   sops = {
-    age.keyFile = "/var/lib/age/keys.txt";
+    age.keyFile = "${vars.age.keyFile}";
     defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
-
-    defaultSymlinkPath = "/run/user/1000/secrets";
-    defaultSecretsMountPoint = "/run/user/1000/secrets.d";
 
     secrets = {
       "services/jellyfin/creds" = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
@@ -26,21 +31,17 @@
       };
 
       ## syncthing
-      "services/syncthing/user" = { };
       "services/syncthing/pass" = { };
-      "services/syncthing/token" = { };
 
       syncthing-cert = {
         format = "binary";
-        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.cert";
+        sopsFile = "${vars.secretsPath}/secrets/syncthing/${hostname}.cert";
       };
 
       syncthing-key = {
         format = "binary";
-        sopsFile = "${vars.secretsPath}/secrets/syncthing/syncthing.enc.key";
+        sopsFile = "${vars.secretsPath}/secrets/syncthing/${hostname}.key";
       };
-
-      "services/chatgpt/api_key" = { };
     };
   };
 }
