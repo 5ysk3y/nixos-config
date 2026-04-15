@@ -71,7 +71,7 @@ in
   };
 
   config = {
-    _module.args.repoLib = rec {
+    _module.args.repoLib = {
       pkgsFor = system: {
         pkgs-stable = import inputs.nixpkgs-stable {
           inherit system;

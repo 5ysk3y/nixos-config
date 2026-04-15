@@ -3,8 +3,8 @@
     {
       inputs,
       username,
-      hostname,
       system,
+      ...
     }:
     let
       isDarwin = builtins.match ".*-darwin" system != null;
@@ -18,8 +18,8 @@
     {
       inherit username;
       flakeSource = inputs.self;
-      secretsPath = builtins.toString inputs.nix-secrets;
+      secretsPath = toString inputs.nix-secrets;
       syncthingPath = "${homePrefix}/${username}/Sync";
-      age.keyFile = "${ageKeyFile}";
+      age.keyFile = ageKeyFile;
     };
 }
