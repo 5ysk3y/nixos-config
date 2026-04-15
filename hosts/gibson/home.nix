@@ -6,6 +6,10 @@
   ...
 }:
 {
+  imports = [
+    ./applications/waybar/waybar.nix
+  ];
+
   home = {
     homeDirectory = "/home/${vars.username}";
 

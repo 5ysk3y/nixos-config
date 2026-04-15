@@ -1,156 +1,139 @@
 {
   lib,
   pkgs,
-  hostname,
-  vars,
   ...
 }:
 let
-  scripts = rec {
+  scripts = {
     waybar = import ./scripts { inherit pkgs; };
     scroll_mpris = import ./scripts/scroll-mpris { inherit pkgs; };
   };
-
-  waybarConfig = vars.flakeSource + "/hosts/${hostname}/applications/waybar/waybar.conf";
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
   programs.waybar = {
     enable = true;
     systemd.enable = true;
 
-    settings = lib.mkMerge [
-      (lib.mkIf (hostname == "gibson") {
-        mainBar = {
-          layer = "top";
-          position = "top";
-          includes = [ waybarConfig ];
-          height = 40;
+    settings = {
+      mainBar = with lib; {
+        layer = "top";
+        position = "top";
+        height = 40;
 
-          modules-left = [ "hyprland/workspaces" ];
-          modules-center = [ "hyprland/window" ];
-          modules-right = [
-            "group/quickHacks"
-            "cpu"
-            "memory"
-            "temperature"
-            "custom/steelseries"
-            "custom/media"
-            "pulseaudio"
-            "clock"
+        modules-left = mkDefault [ "hyprland/workspaces" ];
+        modules-center = mkDefault [ "hyprland/window" ];
+        modules-right = mkDefault [
+          "cpu"
+          "memory"
+          "disk"
+          "clock"
+        ];
+
+        "hyprland/workspaces" = {
+          on-click = "activate";
+        };
+
+        "hyprland/window" = {
+          separate-outputs = 1;
+        };
+
+        "group/quickHacks" = {
+          orientation = "inherit";
+          drawer = {
+            "children-class" = "sub-icons";
+          };
+          modules = [
+            "custom/rbw"
+            "idle_inhibitor"
           ];
+        };
 
-          "hyprland/workspaces" = {
-            on-click = "activate";
-          };
+        "custom/rbw" = {
+          format = "{}";
+          escape = "true";
+          interval = 30;
+          exec = "${scripts.waybar.check_rbw.outPath}/bin/check_rbw";
+        };
 
-          "hyprland/window" = {
-            separate-outputs = 1;
-          };
-
-          "group/quickHacks" = {
-            orientation = "inherit";
-            drawer = {
-              "children-class" = "sub-icons";
-            };
-            modules = [
-              "custom/rbw"
-              "idle_inhibitor"
-            ];
-          };
-
-          "custom/rbw" = {
-            format = "{}";
-            escape = "true";
-            interval = 30;
-            exec = "${scripts.waybar.check_rbw.outPath}/bin/check_rbw";
-          };
-
-          idle_inhibitor = {
-            format = "{icon}";
-            "format-icons" = {
-              activated = "󰈈";
-              deactivated = "󰈉";
-            };
-          };
-
-          cpu = {
-            format = " {usage}%";
-            interval = 10;
-            tooltip = false;
-          };
-
-          memory = {
-            format = " {used:0.1f}G";
-          };
-
-          disk = {
-            interval = 10;
-            format = " {free}";
-            path = "/";
-          };
-
-          temperature = {
-            "hwmon-path-abs" = "/sys/devices/pci0000:00/0000:00:18.3/hwmon/";
-            "input-filename" = "temp1_input";
-            "critical-threshold" = 80;
-            "format-critical" = "{icon} {temperatureC}󰔄";
-            format = "{icon} {temperatureC}󰔄";
-            "format-icons" = [
-              ""
-              ""
-              ""
-            ];
-          };
-
-          "custom/steelseries" = {
-            format = "  {icon}{text} ";
-            "return-type" = "json";
-            "format-icons" = {
-              "100" = "  ";
-              "75" = "  ";
-              "50" = "  ";
-              "25" = "  ";
-              "0" = "  ";
-              charging = "  ";
-            };
-            exec = "${scripts.waybar.mouse_battery.outPath}/bin/mouse_battery";
-            "restart-interval" = 10;
-            "on-click" = "${scripts.waybar.mouse_colour.outPath}/bin/mouse_colour";
-          };
-
-          "custom/media" = {
-            "return-type" = "json";
-            escape = "true";
-            "on-click" = "playerctl -s play-pause";
-            "on-click-right" = "playerctl -s stop";
-            "on-scroll-up" = "playerctl -s next";
-            "on-scroll-down" = "playerctl -s previous";
-            exec = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze -b vlc --format '{title} - {artist}'";
-          };
-
-          pulseaudio = {
-            format = "{icon}{volume}%";
-            "format-muted" = "  Muted";
-            "scroll-step" = 10;
-            "format-icons" = [
-              " "
-              " "
-              " "
-            ];
-            "on-click" = "pwvucontrol";
-            "ignored-sinks" = [
-              "Starship/Matisse HD Audio Controller Analog Stereo"
-              "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)"
-            ];
-          };
-
-          clock = {
-            "tooltip-format" = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
-            format = " {:%H:%M}";
+        idle_inhibitor = {
+          format = "{icon}";
+          "format-icons" = {
+            activated = "󰈈";
+            deactivated = "󰈉";
           };
         };
-      })
-    ];
+
+        cpu = {
+          format = " {usage}%";
+          interval = 10;
+          tooltip = false;
+        };
+
+        memory = {
+          format = " {used:0.1f}G";
+        };
+
+        disk = {
+          interval = 10;
+          format = " {free}";
+          path = "/";
+        };
+
+        temperature = {
+          "critical-threshold" = 80;
+          "format-critical" = "{icon} {temperatureC}󰔄";
+          format = "{icon} {temperatureC}󰔄";
+          "format-icons" = [
+            ""
+            ""
+            ""
+          ];
+        };
+
+        "custom/steelseries" = {
+          format = "  {icon}{text} ";
+          "return-type" = "json";
+          "format-icons" = {
+            "100" = "  ";
+            "75" = "  ";
+            "50" = "  ";
+            "25" = "  ";
+            "0" = "  ";
+            charging = "  ";
+          };
+          exec = "${scripts.waybar.mouse_battery.outPath}/bin/mouse_battery";
+          "restart-interval" = 10;
+          "on-click" = "${scripts.waybar.mouse_colour.outPath}/bin/mouse_colour";
+        };
+
+        "custom/media" = {
+          "return-type" = "json";
+          escape = "true";
+          "on-click" = "playerctl -s play-pause";
+          "on-click-right" = "playerctl -s stop";
+          "on-scroll-up" = "playerctl -s next";
+          "on-scroll-down" = "playerctl -s previous";
+          exec = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze -b vlc --format '{title} - {artist}'";
+        };
+
+        pulseaudio = {
+          format = "{icon}{volume}%";
+          "format-muted" = "  Muted";
+          "scroll-step" = 10;
+          "format-icons" = [
+            " "
+            " "
+            " "
+          ];
+          "on-click" = "pwvucontrol";
+        };
+
+        clock = {
+          "tooltip-format" = "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>";
+          format = " {:%H:%M}";
+        };
+      };
+    };
 
     style = ''
       @define-color bg0 rgba(8, 10, 18, 0.55);
