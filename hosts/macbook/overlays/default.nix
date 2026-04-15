@@ -1,14 +1,6 @@
-{
-  config,
-  pkgs,
-  lib,
-  vars,
-  inputs,
-  ...
-}:
-{
+_: {
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: _prev: {
     })
   ];
 }

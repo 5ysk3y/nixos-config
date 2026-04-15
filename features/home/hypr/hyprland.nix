@@ -2,15 +2,11 @@
   config,
   lib,
   pkgs,
-  inputs,
   vars,
   hostname,
   ...
 }:
 let
-  scripts = rec {
-    undim_screen = import ./scripts/undim_screen.nix { inherit pkgs; };
-  };
   hyprConfig = vars.flakeSource + "/hosts/${hostname}/applications/hypr/hyprland.conf";
 in
 {

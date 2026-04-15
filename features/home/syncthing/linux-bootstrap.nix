@@ -8,7 +8,6 @@ let
   inherit (lib)
     mkIf
     filterAttrs
-    concatMapStringsSep
     escapeShellArg
     ;
 

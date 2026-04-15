@@ -2,16 +2,8 @@
   config,
   lib,
   pkgs,
-  inputs,
-  hostname,
   ...
 }:
-let
-  scripts = rec {
-    dim_screen = import ./scripts/dim_screen.nix { inherit pkgs; };
-    undim_screen = import ./scripts/undim_screen.nix { inherit pkgs; };
-  };
-in
 {
   config =
     with lib;
