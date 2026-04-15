@@ -1,12 +1,4 @@
-{
-  config,
-  pkgs,
-  lib,
-  vars,
-  inputs,
-  ...
-}:
-{
+_: {
   nixpkgs.overlays = [
     (final: prev: {
       steam = prev.steam.override {

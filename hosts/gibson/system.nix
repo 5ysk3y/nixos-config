@@ -1,9 +1,7 @@
 # Gibson NixOS Main Configuration
 {
   config,
-  lib,
   pkgs,
-  pkgs-stable,
   inputs,
   hostname,
   vars,
@@ -80,7 +78,7 @@ in
     tamzen
     font-awesome
     material-design-icons
-    (builtins.toString sddmTheme + "/share/fonts")
+    (toString sddmTheme + "/share/fonts")
 
     (google-fonts.override {
       fonts = [
@@ -136,7 +134,7 @@ in
       xdg-utils
     ];
 
-    sessionVariables = rec {
+    sessionVariables = {
       ADW_DISABLE_PORTAL = "1";
       CLIPBOARD_NOGUI = "1";
       DOCKER_HOST = "unix://\${XDG_RUNTIME_DIR}/podman/podman.sock";
@@ -162,9 +160,8 @@ in
 
   # Security Ruleset
   security = {
-    rtkit = {
-      enable = true;
-    };
+    polkit.enable = true;
+    rtkit.enable = true;
 
     pam = {
       services = {
@@ -200,10 +197,6 @@ in
         };
       };
     };
-
-    polkit = {
-      enable = true;
-    };
   };
 
   # List services that you want to enable:
@@ -213,14 +206,8 @@ in
       enable = true;
       alsa.enable = true;
       alsa.support32Bit = true;
-
-      pulse = {
-        enable = true;
-      };
-
-      audio = {
-        enable = true;
-      };
+      pulse.enable = true;
+      audio.enable = true;
 
       wireplumber = {
         enable = true;
@@ -259,31 +246,20 @@ in
       };
     };
 
-    pcscd = {
-      enable = true;
-    };
+    pcscd.enable = true;
+    upower.enable = true;
 
     dbus = {
       enable = true;
       implementation = "broker";
     };
 
-    upower = {
-      enable = true;
-    };
-
-    logind = {
-      settings = {
-        Login = {
-          HandleHibernateKey = "ignore";
-        };
-      };
-    };
+    logind.settings.Login.HandleHibernateKey = "ignore";
 
     udev = {
       enable = true;
       packages = with pkgs; [
-        pkgs-stable.yubikey-manager
+        yubikey-manager
         yubikey-personalization
         libu2f-host
       ];
@@ -352,13 +328,13 @@ in
   # Start Programs
 
   programs = {
-    hyprland = {
-      enable = true;
-    };
 
-    gamescope = {
-      enable = true;
-    };
+    dconf.enable = true;
+    gamescope.enable = true;
+    hyprland.enable = true;
+    steam.enable = true;
+    virt-manager.enable = true;
+    zsh.enable = true;
 
     gamemode = {
       enable = true;
@@ -371,28 +347,11 @@ in
         };
       };
     };
-
-    steam = {
-      enable = true;
-    };
-
-    virt-manager = {
-      enable = true;
-    };
-
-    dconf = {
-      enable = true;
-    };
-
     gnupg = {
       agent = {
         enable = true;
         enableSSHSupport = true;
       };
-    };
-
-    zsh = {
-      enable = true;
     };
   };
 
@@ -421,31 +380,15 @@ in
     };
   };
 
-  # Allow unfree packages
-  nixpkgs = {
-    config = {
-      allowUnfree = true;
-    };
-  };
+  nixpkgs.config.allowUnfree = true;
 
   hardware = {
-    i2c = {
-      enable = true;
-    };
-
-    cpu = {
-      amd = {
-        updateMicrocode = true;
-      };
-    };
-
+    i2c.enable = true;
+    cpu.amd.updateMicrocode = true;
     bluetooth = {
       enable = true;
       powerOnBoot = true;
     };
-  };
-
-  virtualisation = {
   };
 
   sops = {
@@ -467,10 +410,5 @@ in
     };
 
   };
-
-  # This value determines the NixOS release from which the default settings for stateful data, like file locations and database versions on your system were taken. It‘s perfectly fine and recommended to leave this value at the
-  # release version of the first install of this system. Before changing this value read the documentation for this option (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system = {
-    stateVersion = "23.11"; # Did you read the comment?
-  };
+  system.stateVersion = "23.11"; # Did you read the comment?
 }
