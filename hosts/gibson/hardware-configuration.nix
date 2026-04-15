@@ -48,16 +48,14 @@ in
       "zswap.max_pool_percent=20"
       "zswap.shrinker_enabled=1"
     ];
-    extraModulePackages = with config.boot.kernelPackages; [ ];
+    extraModulePackages = [ ];
     loader = {
       timeout = 0;
       systemd-boot = {
         enable = true;
         configurationLimit = 5;
       };
-      efi = {
-        canTouchEfiVariables = true;
-      };
+      efi.canTouchEfiVariables = true;
     };
     initrd = {
       luks = {
@@ -73,9 +71,7 @@ in
           };
         };
       };
-      systemd = {
-        enable = true;
-      };
+      systemd.enable = true;
       availableKernelModules = [
         "nvme"
         "xhci_pci"

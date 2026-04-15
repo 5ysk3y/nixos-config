@@ -1,7 +1,5 @@
 {
   config,
-  lib,
-  inputs,
   vars,
   hostname,
   pkgs,
@@ -68,17 +66,10 @@
     };
 
     git.settings.user.signingKey = "7D73BA8CF10F7F67";
-
-    gpg.scdaemonSettings = {
-      disable-ccid = true;
-    };
+    gpg.scdaemonSettings.disable-ccid = true;
   };
 
-  services.gpg-agent = {
-    pinentry = {
-      package = pkgs.pinentry-curses;
-    };
-  };
+  services.gpg-agent.pinentry.package = pkgs.pinentry-curses;
 
   features = {
     home = {
