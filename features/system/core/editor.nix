@@ -1,5 +1,5 @@
 _: {
-  environment.variables = rec {
+  environment.variables = {
     EDITOR = "emacsclient -t";
   };
 }

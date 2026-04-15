@@ -15,12 +15,7 @@ let
     types
     mapAttrs
     filterAttrs
-    optional
     optionalAttrs
-    attrNames
-    concatLists
-    any
-    hasAttr
     nameValuePair
     ;
 
@@ -29,10 +24,6 @@ let
   cfg = config.features.home.syncthing;
 
   host = if cfg.deviceName != null then cfg.deviceName else hostname;
-
-  hostDevice =
-    topology.devices.${host}
-      or (throw "features.home.syncthing.deviceName '${host}' does not exist in features/home/syncthing/topology.nix");
 
   enabledFolders = filterAttrs (_: f: f.enable) cfg.folders;
 
@@ -66,8 +57,6 @@ let
         devices = folderCfg.peers;
       }
   ) enabledFolders;
-
-  anyBootstrapEnabled = any (f: f.bootstrap.enable) (builtins.attrValues enabledFolders);
 in
 {
 

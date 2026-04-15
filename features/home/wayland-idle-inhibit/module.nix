@@ -1,9 +1,4 @@
-{
-  config,
-  inputs,
-  ...
-}:
-{
+_: {
   services.wayland-pipewire-idle-inhibit = {
     enable = true;
     systemdTarget = "graphical-session.target";
