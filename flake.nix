@@ -7,7 +7,6 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-old.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    nixpkgs-qutebrowser-fix.url = "github:NixOS/nixpkgs/4ceb3f35581a8ed908a21284105617d32ac59505";
 
     # nix-darwin / mac related
     nix-darwin.url = "github:LnL7/nix-darwin";

@@ -11,20 +11,13 @@
   vars,
   ...
 }:
-let
-  qutebrowser-fix = import inputs.nixpkgs-qutebrowser-fix {
-    inherit (pkgs.stdenv.hostPlatform) system;
-    config.allowUnfree = true;
-  };
-in
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
   boot = {
-    #kernelPackages = pkgs.linuxPackages_zen;
-    kernelPackages = qutebrowser-fix.linuxPackages_zen;
+    kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [
       "nvidia"
       "nvidia_modeset"
