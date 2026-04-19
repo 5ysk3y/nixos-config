@@ -166,7 +166,11 @@ in
         cert = config.sops.secrets."syncthing-cert".path;
         key = config.sops.secrets."syncthing-key".path;
 
-        passwordFile = config.sops.secrets."services/syncthing/pass".path;
+        guiCredentials = {
+          username = cfg.gui.user;
+          passwordFile = config.sops.secrets."services/syncthing/pass".path;
+        };
+
         guiAddress = cfg.gui.address;
 
         overrideFolders = true;
@@ -181,7 +185,7 @@ in
           };
 
           gui = {
-            inherit (cfg.gui) user tls theme;
+            inherit (cfg.gui) tls theme;
           };
 
           devices = peerDevices;
