@@ -165,6 +165,17 @@ in
     rtkit.enable = true;
 
     pam = {
+      u2f = {
+        enable = true;
+        control = "sufficient";
+        settings = {
+          cue = true;
+          origin = "pam://gibson";
+          appid = "pam://gibson";
+          authFile = config.sops.secrets."system/pam/yubikeyPub".path;
+        };
+      };
+
       services = {
         login = {
           u2fAuth = true;
@@ -174,13 +185,19 @@ in
           u2fAuth = true;
         };
 
-        hyprlock = {
-          u2fAuth = true;
-        };
-
         sddm = {
           text = ''
-            auth     sufficient    pam_u2f.so  cue   origin=pam://gibson appid=pam://gibson
+            auth     sufficient    pam_u2f.so
+            auth     include       login
+            account  include       login
+            password include       login
+            session  include       login
+          '';
+        };
+
+        hyprlock = {
+          text = ''
+            auth     sufficient    pam_u2f.so
             auth     include       login
             account  include       login
             password include       login
@@ -188,18 +205,8 @@ in
           '';
         };
       };
-
-      u2f = {
-        enable = true;
-        control = "sufficient";
-        settings = {
-          cue = true;
-          authFile = config.sops.secrets."system/pam/yubikeyPub".path;
-        };
-      };
     };
   };
-
   # List services that you want to enable:
 
   services = {
