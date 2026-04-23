@@ -77,8 +77,6 @@
 
 (set-frame-parameter nil 'alpha-background 80)
 (add-to-list 'default-frame-alist '(alpha-background . 80))
-;;(set-frame-parameter (selected-frame) 'alpha '(95))
-;;(add-to-list 'default-frame-alist '(alpha . (95)))
 
 (after! lsp-mode
   (setq lsp-diagnostics-provider :flycheck)
@@ -135,3 +133,12 @@
 (setq mac-option-modifier 'meta
       mac-command-modifier 'super
       mac-right-option-modifier 'none)
+
+;; improve colours for magit; makes them more like github darkmode
+(defun change-magit-diff-faces ()
+(set-face-attribute 'magit-section-highlight nil :background "#1b2330")
+(set-face-attribute 'magit-diff-hunk-heading nil :foreground "#9fb1c1" :background "#1f2a38")
+(set-face-attribute 'magit-diff-hunk-heading-highlight nil :foreground "#dce6f0" :background "#263445")
+(set-face-attribute 'magit-diff-context-highlight nil :background "#1b2330")
+(add-hook 'magit-mode-hook #'change-magit-diff-faces)
+(add-hook 'doom-load-theme-hook #'change-magit-diff-faces)
