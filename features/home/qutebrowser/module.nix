@@ -6,19 +6,31 @@
 let
   inherit (pkgs.stdenv.hostPlatform) isLinux;
 
-  quteRbw = pkgs.writeShellScriptBin "qute-rbw" ''
-    ${pkgs.rbw}/bin/rbw unlocked > /dev/null 2>&1
-    RC="$?"
+  quteRbw = pkgs.writeShellApplication {
+    name = "qute-rbw";
 
-    if [[ "$RC" -eq 1 ]]; then
-      ${pkgs.kitty}/bin/kitty -T "rbw password prompt" \
-        ${pkgs.rbw}/bin/rbw unlock > /dev/null 2>&1 \
-        && ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow qutebrowser \
-        && ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
-    else
-      ${pkgs.rofi-rbw-wayland}/bin/rofi-rbw
-    fi
-  '';
+    runtimeInputs = [
+      pkgs.rbw
+      pkgs.kitty
+      pkgs.rofi-rbw-wayland
+      pkgs.pinentry-curses
+      pkgs.hyprland
+    ];
+
+    text = ''
+      rbw unlocked > /dev/null 2>&1
+      RC="$?"
+
+      if [[ "$RC" -eq 1 ]]; then
+        kitty -T "rbw password prompt" \
+          rbw unlock > /dev/null 2>&1 \
+          && hyprctl dispatch focuswindow qutebrowser \
+          && rofi-rbw
+      else
+        rofi-rbw
+      fi
+    '';
+  };
 in
 {
   home.packages = lib.mkIf isLinux [ quteRbw ];
