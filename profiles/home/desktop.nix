@@ -6,6 +6,7 @@
     inputs.self.modules.homeManager.doomemacs
     inputs.self.modules.homeManager.fuzzel
     inputs.self.modules.homeManager.gaming
+    inputs.self.modules.homeManager.github-cli
     inputs.self.modules.homeManager.gtk-dracula
     inputs.self.modules.homeManager.hypr
     inputs.self.modules.homeManager.kitty
