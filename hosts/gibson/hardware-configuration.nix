@@ -5,7 +5,6 @@
   config,
   lib,
   pkgs,
-  inputs,
   modulesPath,
   system,
   vars,
@@ -120,7 +119,20 @@
       open = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
+      #package = config.boot.kernelPackages.nvidiaPackages.stable;
+
+      # TODO(upstream): remove once NixOS/nixpkgs#514481 reaches nixos-unstable
+      # https://nixpk.gs/pr-tracker.html?pr=514481
+      # Context: NVIDIA driver bump to fix an issue with qtwebengine applications rendering
+      package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
+        version = "595.71.05";
+
+        sha256_64bit = "sha256-NiA7iWC35JyKQva6H1hjzeNKBek9KyS3mK8G3YRva4I=";
+        sha256_aarch64 = "sha256-XzKloS00dFKTd4ATWkTIhm9eG/OzR/Sim6MboNZWPu8=";
+        openSha256 = "sha256-Lfz71QWKM6x/jD2B22SWpUi7/og30HRlXg1kL3EWzEw=";
+        settingsSha256 = "sha256-mXnf3jyvznfB3OfKd657rxv0rYHQb/dX/Riw/+N9EKU=";
+        persistencedSha256 = "sha256-Z/6IvEEa/XfZ5F5qoSIPvXJLGtscYVqjFxHZaN/M2Ts=";
+      };
     };
   };
 
