@@ -146,7 +146,7 @@ in
       NVD_BACKEND = "direct";
       LIBVA_DRIVER_NAME = "nvidia";
       WLR_NO_HARDWARE_CURSORS = "1";
-      QTWEBENGINE_FORCE_USE_GBM = "0";
+      QTWEBENGINE_FORCE_USE_GBM = "1";
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       __GL_MaxFramesAllowed = "1";
       __GL_GSYNC_ALLOWED = "1";
