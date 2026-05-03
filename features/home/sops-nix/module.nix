@@ -31,6 +31,7 @@
 
       ## syncthing
       "services/syncthing/pass" = { };
+      "services/github-cli/token" = { };
 
       syncthing-cert = {
         format = "binary";
