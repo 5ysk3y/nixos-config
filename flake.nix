@@ -21,6 +21,10 @@
     nix-secrets.url = "git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main";
     nix-secrets.flake = false;
 
+    # disko
+    disko.url = "github:nix-community/disko";
+    disko.inputs.nixpkgs.follows = "nixpkgs";
+
     # other stuff
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";

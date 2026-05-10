@@ -18,15 +18,25 @@ in
   ];
 
   networking = {
-    hostName = "${hostname}"; # Define your hostname.
+    hostName = "${hostname}";
     timeServers = [ "192.168.1.1" ];
+
     networkmanager = {
       enable = true;
     };
+
+    bridges = {
+      "br0" = {
+        interfaces = [ "enp7s0" ];
+      };
+    };
+
+    interfaces.br0.useDHCP = true;
+
     nat = {
       enable = true;
       internalInterfaces = [ "ve-pentesting" ];
-      externalInterface = "enp7s0";
+      externalInterface = "br0";
     };
   };
 
