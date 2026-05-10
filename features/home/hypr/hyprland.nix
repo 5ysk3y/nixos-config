@@ -7,7 +7,7 @@
   ...
 }:
 let
-  hyprConfig = vars.flakeSource + "/hosts/${hostname}/applications/hypr/hyprland.conf";
+  hyprConfig = vars.flakeSource + "/systems/linux/${hostname}/applications/hypr/hyprland.conf";
 in
 {
   config =

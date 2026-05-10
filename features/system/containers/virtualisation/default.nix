@@ -1,5 +1,6 @@
 {
   vars,
+  pkgs,
   ...
 }:
 
@@ -13,6 +14,7 @@
 
     libvirtd = {
       enable = true;
+      qemu.vhostUserPackages = [ pkgs.virtiofsd ];
     };
   };
 
