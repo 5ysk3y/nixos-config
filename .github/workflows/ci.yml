@@ -3,23 +3,7 @@ name: Nix CI
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "README.md"
-      - "docs/**"
-      - "**/*.md"
-      - "**/*.png"
-      - "**/*.jpeg"
-      - "**/*.jpg"
-      - "**/*.svg"
   pull_request:
-    paths-ignore:
-      - "README.md"
-      - "docs/**"
-      - "**/*.md"
-      - "**/*.png"
-      - "**/*.jpeg"
-      - "**/*.jpg"
-      - "**/*.svg"
 
 concurrency:
   group: ${{ github.workflow }}:${{ github.ref }}
@@ -30,8 +14,44 @@ defaults:
     shell: bash
 
 jobs:
+  changes:
+    name: detect relevant changes
+    runs-on: ubuntu-latest
+    outputs:
+      ci_relevant: ${{ steps.changed.outputs.ci_relevant }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - id: changed
+        name: Detect whether CI should run
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            files="$(git diff --name-only \
+              "${{ github.event.pull_request.base.sha }}" \
+              "${{ github.event.pull_request.head.sha }}")"
+          else
+            files="$(git diff --name-only \
+              "${{ github.event.before }}" \
+              "${{ github.event.after }}")"
+          fi
+
+          echo "Changed files:"
+          echo "$files"
+
+          if echo "$files" | grep -Ev '^(README\.md|docs/|.*\.(md|png|jpe?g|svg))$' >/dev/null; then
+            echo "ci_relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ci_relevant=false" >> "$GITHUB_OUTPUT"
+          fi
+
   fmt-check:
     name: formatting check
+    needs: changes
+    if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -58,6 +78,8 @@ jobs:
 
   lint-check:
     name: lint check
+    needs: changes
+    if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -76,6 +98,8 @@ jobs:
 
   gitleaks:
     name: gitleaks scan
+    needs: changes
+    if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -95,6 +119,8 @@ jobs:
 
   eval-check:
     name: eval check (linux)
+    needs: changes
+    if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -114,6 +140,8 @@ jobs:
 
   darwin-eval-check:
     name: eval check (darwin)
+    needs: changes
+    if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: macos-latest
     timeout-minutes: 30
     permissions:
@@ -133,7 +161,8 @@ jobs:
 
   flake-secrets-check:
     name: full flake check (with secrets)
-    if: github.actor != 'dependabot[bot]'
+    needs: changes
+    if: needs.changes.outputs.ci_relevant == 'true' && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
