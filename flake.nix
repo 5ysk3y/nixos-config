@@ -29,9 +29,6 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:vic/import-tree";
 
-    nixos-xivlauncher-rb.url = "github:drakon64/nixos-xivlauncher-rb";
-    nixos-xivlauncher-rb.inputs.nixpkgs.follows = "nixpkgs";
-
     emacs-overlay.url = "github:nix-community/emacs-overlay/master";
     sops-nix.url = "github:Mic92/sops-nix";
     wayland-pipewire-idle-inhibit.url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";

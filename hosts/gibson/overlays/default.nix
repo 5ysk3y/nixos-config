@@ -76,5 +76,7 @@
         };
       });
     })
+
+    inputs.self.overlays.default
   ];
 }

@@ -402,26 +402,6 @@
         "url": "ssh://git@github.com/5ysk3y/nix-secrets.git"
       }
     },
-    "nixos-xivlauncher-rb": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1745492941,
-        "narHash": "sha256-NeUlC1jFi2V10sA5Vz3e83hpcFOw1ysaejroeINYuH4=",
-        "owner": "drakon64",
-        "repo": "nixos-xivlauncher-rb",
-        "rev": "a4f5639d8ee17cfd27d09b606cfa37a8f4e31422",
-        "type": "github"
-      },
-      "original": {
-        "owner": "drakon64",
-        "repo": "nixos-xivlauncher-rb",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1780336545,
@@ -704,7 +684,6 @@
         "nix-darwin": "nix-darwin",
         "nix-gaming": "nix-gaming",
         "nix-secrets": "nix-secrets",
-        "nixos-xivlauncher-rb": "nixos-xivlauncher-rb",
         "nixpkgs": "nixpkgs_8",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "qtwebengine-fix": "qtwebengine-fix",
