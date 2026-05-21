@@ -12,7 +12,9 @@
     };
 
     packages = with pkgs; [
+      attic-client
       nixfmt
+      syncthingtray
     ];
   };
 
