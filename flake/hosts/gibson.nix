@@ -6,7 +6,7 @@
 let
   hostname = "gibson";
   system = "x86_64-linux";
-  path = ./../../systems/linux/gibson;
+  path = ./../../hosts/gibson;
 in
 rec {
   kind = "nixos";

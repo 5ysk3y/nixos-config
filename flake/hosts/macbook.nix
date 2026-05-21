@@ -6,7 +6,7 @@
 let
   hostname = "macbook";
   system = "aarch64-darwin";
-  path = ./../../systems/darwin/macbook;
+  path = ./../../hosts/macbook;
 in
 rec {
   kind = "darwin";
