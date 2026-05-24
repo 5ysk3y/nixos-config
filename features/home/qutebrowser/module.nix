@@ -18,16 +18,12 @@ let
     ];
 
     text = ''
-      rbw unlocked > /dev/null 2>&1
-      RC="$?"
-
-      if [[ "$RC" -eq 1 ]]; then
-        kitty -T "rbw password prompt" \
-          rbw unlock > /dev/null 2>&1 \
-          && hyprctl dispatch focuswindow qutebrowser \
-          && rofi-rbw
-      else
+      if rbw unlocked > /dev/null 2>&1; then
         rofi-rbw
+      else
+        kitty -T "rbw password prompt" rbw unlock \
+        && hyprctl dispatch focuswindow qutebrowser \
+        && rofi-rbw
       fi
     '';
   };
