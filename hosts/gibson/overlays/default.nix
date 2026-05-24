@@ -33,7 +33,8 @@
       };
 
       # TODO(upstream): remove once upstream has a fix
-      # https://github.com/NixOS/nixpkgs/issues/513245
+      # https://github.com/NixOS/nixpkgs/issues/513245 - Build failure: lutris-free
+      # https://github.com/NixOS/nixpkgs/issues/514113 - pkgsi686Linux.openldap: test checks won't let it compile on x86_64
       # Context: Prevents build test failures in OpenLDAP as required by Lutris
       lutris = prev.lutris.override {
         # Intercept buildFHSEnv to modify target packages

@@ -18,25 +18,22 @@ in
   ];
 
   networking = {
-    hostName = "${hostname}";
+    useDHCP = false;
+    dhcpcd.enable = false;
+
+    hostName = hostname;
     timeServers = [ "192.168.1.1" ];
 
     networkmanager = {
       enable = true;
     };
 
-    bridges = {
-      "br0" = {
-        interfaces = [ "enp7s0" ];
-      };
-    };
-
-    interfaces.br0.useDHCP = true;
+    interfaces.enp7s0.useDHCP = false;
 
     nat = {
       enable = true;
       internalInterfaces = [ "ve-pentesting" ];
-      externalInterface = "br0";
+      externalInterface = "enp7s0";
     };
   };
 
@@ -406,6 +403,14 @@ in
     bluetooth = {
       enable = true;
       powerOnBoot = true;
+      settings = {
+        ConnectionParameters = {
+          MinInterval = 6;
+          MaxInterval = 9;
+          Latency = 44;
+          Timeout = 216;
+        };
+      };
     };
   };
 
