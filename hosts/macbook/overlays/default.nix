@@ -1,12 +1,24 @@
-_: {
+{
+  inputs,
+  pkgs,
+  ...
+}:
+let
+  system = pkgs.stdenv.hostPlatform.system;
+  qtPinnedPkgs = import inputs.qtwebengine-fix {
+    inherit system;
+    config.allowUnfree = true;
+  };
+in
+{
   nixpkgs.overlays = [
     (final: prev: {
       # Temporary qtwebengine Darwin build fix.
       # Remove once upstream nixpkgs includes https://github.com/NixOS/nixpkgs/pull/515997
       # Changes to these patches will require a rebuild.
-      qt6 = prev.qt6.overrideScope (
+      qt6 = qtPinnedPkgs.qt6.overrideScope (
         _qtFinal: qtPrev: {
-          qtwebengine = qtPrev.qtwebengine.overrideAttrs (old: {
+          qtwebengine = qtPinnedPkgs.qt6.qtwebengine.overrideAttrs (old: {
             patches =
               (old.patches or [ ])
               ++ final.lib.optionals final.stdenv.hostPlatform.isDarwin [

@@ -42,6 +42,8 @@
 
     qute-dracula.url = "github:dracula/qutebrowser";
     qute-dracula.flake = false;
+
+    qtwebengine-fix.url = "github:NixOS/nixpkgs/d233902339c02a9c334e7e593de68855ad26c4cb";
   };
 
   outputs =
