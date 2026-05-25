@@ -638,6 +638,22 @@
         "type": "github"
       }
     },
+    "qtwebengine-fix": {
+      "locked": {
+        "lastModified": 1778869304,
+        "narHash": "sha256-30sZNZoA1cqF5JNO9fVX+wgiQYjB7HJqqJ4ztCDeBZE=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d233902339c02a9c334e7e593de68855ad26c4cb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "d233902339c02a9c334e7e593de68855ad26c4cb",
+        "type": "github"
+      }
+    },
     "qute-dracula": {
       "flake": false,
       "locked": {
@@ -671,6 +687,7 @@
         "nixpkgs-darwin": "nixpkgs-darwin",
         "nixpkgs-old": "nixpkgs-old",
         "nixpkgs-stable": "nixpkgs-stable_2",
+        "qtwebengine-fix": "qtwebengine-fix",
         "qute-dracula": "qute-dracula",
         "sops-nix": "sops-nix",
         "wayland-pipewire-idle-inhibit": "wayland-pipewire-idle-inhibit"
