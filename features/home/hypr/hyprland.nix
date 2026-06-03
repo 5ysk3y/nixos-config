@@ -93,6 +93,7 @@ in
               key_press_enables_dpms = true,
               force_default_wallpaper = 0,
               allow_session_lock_restore = true,
+              initial_workspace_tracking = 0,
             },
 
             group = {
