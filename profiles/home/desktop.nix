@@ -3,6 +3,7 @@
   imports = [
     # Home-Manager
     inputs.wayland-pipewire-idle-inhibit.homeModules.default
+    inputs.self.modules.homeManager.claude-code
     inputs.self.modules.homeManager.doomemacs
     inputs.self.modules.homeManager.fuzzel
     inputs.self.modules.homeManager.gaming

@@ -36,6 +36,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     wayland-pipewire-idle-inhibit.url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
     nix-gaming.url = "github:fufexan/nix-gaming";
+    claude-code-nix.url = "github:sadjow/claude-code-nix";
 
     doomemacs.url = "github:doomemacs/doomemacs";
     doomemacs.flake = false;
