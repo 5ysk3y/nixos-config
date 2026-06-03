@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Stash unstaged changes so formatter only sees what's staged
-git stash --keep-index --include-untracked -q
-
+# Get list of staged .nix files
 staged_nix_files=()
 while IFS= read -r -d '' f; do
   case "$f" in
@@ -13,14 +11,25 @@ done < <(git diff --cached --name-only -z --diff-filter=ACMR)
 
 if (( ${#staged_nix_files[@]} > 0 )); then
   echo "Formatting staged Nix files"
-  nix run nixpkgs#nixfmt -- "${staged_nix_files[@]}"
-  git add -- "${staged_nix_files[@]}"
+
+  for f in "${staged_nix_files[@]}"; do
+    # 1. Extract the staged version of the file into a temp file
+    staged_tmp=$(mktemp /tmp/nixfmt-staged.XXXXXX.nix)
+    git show ":${f}" > "$staged_tmp"
+
+    # 2. Format the staged version in isolation
+    nix run nixpkgs#nixfmt -- "$staged_tmp"
+
+    # 3. Re-inject the formatted content back into the index only
+    #    This leaves the working tree (unstaged changes) untouched
+    new_blob=$(git hash-object -w "$staged_tmp")
+    git update-index --cacheinfo "100644,${new_blob},${f}"
+
+    rm -f "$staged_tmp"
+  done
 else
   echo "No staged Nix files to format"
 fi
 
 echo "Statix"
 nix run nixpkgs#statix -- check .
-
-# Restore unstaged changes
-git stash pop -q || true
