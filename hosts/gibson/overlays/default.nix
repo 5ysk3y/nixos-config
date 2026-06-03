@@ -1,10 +1,15 @@
 {
+  inputs,
   pkgs,
   ...
 }:
 
 {
   nixpkgs.overlays = [
+    # claude-code-nix: must be applied at system level — nixpkgs.overlays set
+    # inside HM modules has no effect when useGlobalPkgs = true.
+    inputs.claude-code-nix.overlays.default
+
     (final: prev: {
       steam = prev.steam.override {
         extraPkgs =
