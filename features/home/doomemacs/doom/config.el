@@ -136,9 +136,13 @@
 
 ;; improve colours for magit; makes them more like github darkmode
 (defun change-magit-diff-faces ()
-(set-face-attribute 'magit-section-highlight nil :background "#1b2330")
-(set-face-attribute 'magit-diff-hunk-heading nil :foreground "#9fb1c1" :background "#1f2a38")
-(set-face-attribute 'magit-diff-hunk-heading-highlight nil :foreground "#dce6f0" :background "#263445")
-(set-face-attribute 'magit-diff-context-highlight nil :background "#1b2330")
+    (set-face-attribute 'magit-section-highlight nil :background "#1b2330")
+    (set-face-attribute 'magit-diff-hunk-heading nil :foreground "#9fb1c1" :background "#1f2a38")
+    (set-face-attribute 'magit-diff-hunk-heading-highlight nil :foreground "#dce6f0" :background "#263445")
+    (set-face-attribute 'magit-diff-context-highlight nil :background "#1b2330"))
+
 (add-hook 'magit-mode-hook #'change-magit-diff-faces)
 (add-hook 'doom-load-theme-hook #'change-magit-diff-faces)
+ 
+;; increase character limit for max summary length
+(setq git-commit-summary-max-length 72)
