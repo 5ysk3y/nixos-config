@@ -18,7 +18,7 @@ let
       specialArgs = {
         inherit inputs;
         inherit (host) hostname system vars;
-        inherit (packages) pkgs-stable pkgs-old;
+        inherit (packages) pkgs-stable;
       };
 
       modules =
@@ -34,7 +34,7 @@ let
             backupFileExtension = "before-nix";
           };
           extraSpecialArgs = {
-            inherit (packages) pkgs-stable pkgs-old;
+            inherit (packages) pkgs-stable;
           };
         };
     };

@@ -3,10 +3,10 @@
 
   inputs = {
     # nixpkgs repos
+    # Primary: used for all NixOS and darwin builds
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Stable: used for selectively pinning packages that need stability
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
-    nixpkgs-old.url = "github:nixos/nixpkgs/nixos-25.11";
-    nixpkgs-darwin.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
     # nix-darwin / mac related
     nix-darwin.url = "github:LnL7/nix-darwin";
@@ -38,12 +38,22 @@
     nix-gaming.url = "github:fufexan/nix-gaming";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
 
+    # Used as a Nix store path in features/home/doomemacs/module.nix for the
+    # rsync-based activation script. The input hash drives the stamp-based
+    # doom sync-skip logic — keeping as a flake input is intentional.
     doomemacs.url = "github:doomemacs/doomemacs";
     doomemacs.flake = false;
 
+    # Used as a store path in features/home/symlinks/module.nix to symlink the
+    # Dracula theme into ~/.qutebrowser and ~/.config/qutebrowser. Keeping as a
+    # flake input so the path is in the Nix store and hash-pinned.
     qute-dracula.url = "github:dracula/qutebrowser";
     qute-dracula.flake = false;
 
+    # Temporary: pins a specific nixpkgs commit to fix qtwebengine on Darwin.
+    # Used only in hosts/macbook/overlays/default.nix.
+    # TODO: remove once https://github.com/NixOS/nixpkgs/pull/515997 lands in
+    # nixos-unstable and the macbook overlay is updated accordingly.
     qtwebengine-fix.url = "github:NixOS/nixpkgs/d233902339c02a9c334e7e593de68855ad26c4cb";
   };
 

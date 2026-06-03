@@ -72,18 +72,11 @@ in
 
   config = {
     _module.args.repoLib = {
+      # pkgsFor provides supplementary package sets passed as specialArgs.
+      # pkgs-stable: for packages that need pinning against the stable channel.
+      # Add further sets here if a new supplementary channel input is introduced.
       pkgsFor = system: {
         pkgs-stable = import inputs.nixpkgs-stable {
-          inherit system;
-          config.allowUnfree = true;
-        };
-
-        pkgs-old = import inputs.nixpkgs-old {
-          inherit system;
-          config.allowUnfree = true;
-        };
-
-        pkgs-darwin = import inputs.nixpkgs-darwin {
           inherit system;
           config.allowUnfree = true;
         };
@@ -114,6 +107,11 @@ in
 
               sharedModules = [
                 inputs.sops-nix.homeManagerModules.sops
+                # Primary nixpkgs is nixos-unstable; home-manager tracks master
+                # which matches unstable. The version mismatch warning fires as a
+                # false positive because pkgs-stable (26.05) is also in scope.
+                # Suppressing here rather than per-host since it applies globally.
+                { home.enableNixpkgsReleaseCheck = false; }
               ];
 
               users.${host.vars.username} = {

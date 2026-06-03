@@ -9,16 +9,12 @@ let
 
   mkDarwinHost =
     host:
-    let
-      packages = repoLib.pkgsFor host.system;
-    in
     inputs.nix-darwin.lib.darwinSystem {
       inherit (host) system;
 
       specialArgs = {
         inherit inputs;
         inherit (host) hostname system vars;
-        inherit (packages) pkgs-darwin;
       };
 
       modules =
