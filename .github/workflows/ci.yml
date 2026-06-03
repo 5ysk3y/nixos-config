@@ -33,10 +33,26 @@ jobs:
             files="$(git diff --name-only \
               "${{ github.event.pull_request.base.sha }}" \
               "${{ github.event.pull_request.head.sha }}")"
+
+          elif [ "${{ github.event.forced }}" = "true" ]; then
+            # Force push: before SHA may not exist in history.
+            # Treat as always relevant so checks don't go stale.
+            echo "Force push detected — marking CI as relevant"
+            echo "ci_relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+
           else
-            files="$(git diff --name-only \
-              "${{ github.event.before }}" \
-              "${{ github.event.after }}")"
+            before="${{ github.event.before }}"
+            after="${{ github.event.after }}"
+
+            # Verify before SHA exists — will be zeroed on first push to new branch
+            if git cat-file -e "${before}^{commit}" 2>/dev/null; then
+              files="$(git diff --name-only "$before" "$after")"
+            else
+              echo "No valid base SHA — marking CI as relevant"
+              echo "ci_relevant=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
           fi
 
           echo "Changed files:"
