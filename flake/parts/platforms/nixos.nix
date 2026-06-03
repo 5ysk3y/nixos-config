@@ -30,6 +30,9 @@ let
         ++ repoLib.mkHomeManagerModule {
           platformModule = inputs.home-manager.nixosModules.home-manager;
           inherit host;
+          hmExtra = {
+            backupFileExtension = "before-nix";
+          };
           extraSpecialArgs = {
             inherit (packages) pkgs-stable pkgs-old;
           };

@@ -5,6 +5,7 @@
     ./../../features/home/core
 
     # home-manager - main modules
+    ./../../features/home/claude-code
     ./../../features/home/doomemacs
     ./../../features/home/fuzzel
     ./../../features/home/gaming
