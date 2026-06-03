@@ -64,6 +64,17 @@
             }
           );
       };
+
+      nvidia-modprobe = prev.nvidia-modprobe.overrideAttrs (_old: {
+        version = "610.43.02";
+
+        src = final.fetchFromGitHub {
+          owner = "NVIDIA";
+          repo = "nvidia-modprobe";
+          rev = "610.43.02";
+          hash = "sha256-4FzxZR85mWvqUh3FNNlzsg1b7yeMCXuVHMII4AeP8RA=";
+        };
+      });
     })
   ];
 }
