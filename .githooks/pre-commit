@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Collect staged .nix files as NUL delimited
+# Stash unstaged changes so formatter only sees what's staged
+git stash --keep-index --include-untracked -q
+
 staged_nix_files=()
 while IFS= read -r -d '' f; do
   case "$f" in
@@ -19,3 +21,6 @@ fi
 
 echo "Statix"
 nix run nixpkgs#statix -- check .
+
+# Restore unstaged changes
+git stash pop -q || true
