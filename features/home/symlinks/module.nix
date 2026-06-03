@@ -9,7 +9,7 @@
 let
   isLinux = pkgs != null && pkgs.stdenv.hostPlatform.isLinux;
   isDarwin = pkgs != null && pkgs.stdenv.hostPlatform.isDarwin;
-  draculaPath = builtins.toString inputs.qute-dracula.outPath;
+  draculaPath = toString inputs.qute-dracula.outPath;
 in
 {
   home.file = {
