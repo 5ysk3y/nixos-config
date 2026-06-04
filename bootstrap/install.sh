@@ -1,4 +1,4 @@
-#!/usr/bin/env -S nix shell nixpkgs#bashInteractive nixpkgs#coreutils nixpkgs#git nixpkgs#openssh nixpkgs#gnupg nixpkgs#pcsclite nixpkgs#age nixpkgs#age-plugin-yubikey --command bash
+#!/usr/bin/env -S nix shell nixpkgs#bashInteractive nixpkgs#coreutils nixpkgs#git nixpkgs#openssh nixpkgs#gnupg nixpkgs#pcsclite nixpkgs#ccid nixpkgs#pinentry-curses nixpkgs#age nixpkgs#age-plugin-yubikey --command bash
 # bootstrap/install.sh — NixOS (Linux) bootstrap
 #
 # Bootstraps a fresh NixOS install:
@@ -19,10 +19,13 @@ set -euo pipefail
 # Phase 1: ensure we are running inside the nix shell tool environment
 # The shebang handles this in normal use; the env var bypass is for tests.
 # ---------------------------------------------------------------------------
+export NIX_CONFIG="experimental-features = nix-command flakes"
+
 if [[ "${_NIXOS_BOOTSTRAP_NIX_SHELL:-0}" != "1" ]]; then
   # When invoked as `bash install.sh` the shebang is skipped but we still
   # need the tool environment. Re-exec under nix shell.
   exec env _NIXOS_BOOTSTRAP_NIX_SHELL=1 \
+    SSH_AUTH_SOCK="" \
     nix shell \
       nixpkgs#bashInteractive \
       nixpkgs#coreutils \
@@ -30,12 +33,14 @@ if [[ "${_NIXOS_BOOTSTRAP_NIX_SHELL:-0}" != "1" ]]; then
       nixpkgs#openssh \
       nixpkgs#gnupg \
       nixpkgs#pcsclite \
+      nixpkgs#ccid \
+      nixpkgs#pinentry-curses \
       nixpkgs#age \
       nixpkgs#age-plugin-yubikey \
       --command bash -- "$0" "$@"
 fi
-
 # ---------------------------------------------------------------------------
+#
 # Phase 2: running inside the tool environment
 # ---------------------------------------------------------------------------
 export PLATFORM="linux"
@@ -116,6 +121,9 @@ resolve_sudo
 echo "=== NixOS bootstrap (YubiKey-first) ==="
 echo "Repo root    : $ROOT_DIR"
 echo "Target       : $TARGET"
+if [[ -n "$DISK" ]]; then
+    echo "Target Disk  : $DISK"
+fi
 echo "User         : $USER_NAME ($USER_UID:$USER_GID)"
 echo "Host         : $HOST"
 echo "Mode         : $MODE"
@@ -127,20 +135,47 @@ echo
 
 [[ -d "$TARGET" ]] || die "Target path does not exist: $TARGET"
 
+DISKO_NIX="$ROOT_DIR/hosts/$HOST/disko.nix"
+if [[ $DO_INSTALL -eq 1 ]] && [[ -f "$DISKO_NIX" ]]; then
+    echo "=== Disko config found for $HOST: Running disko... ==="
+    DISKO_ARGS=("$DISKO_NIX")
+    [[ -n "$DISK" ]] && DISKO_ARGS+=(--argstr disk "$DISK")
+
+    echo -n "temporarypassword" | $SUDO tee /tmp/disko-luks-password > /dev/null
+
+    # Ensure that the drive doesnt have residual LUKS headers
+    sudo dd if=/dev/zero of="$DISK" bs=1M count=1100
+
+    sudo -E NIX_CONFIG="$NIX_CONFIG" nix run nixpkgs#disko -- \
+        --mode destroy,format,mount \
+        --argstr disk "$DISK" "$DISKO_NIX"
+    echo "=== Setting LUKS passphrases ==="
+    sudo cryptsetup luksChangeKey /dev/disk/by-partlabel/disk-main-ROOT \
+        --key-file /tmp/disko-luks-password
+    sudo cryptsetup luksChangeKey /dev/disk/by-partlabel/disk-main-SWAP \
+        --key-file /tmp/disko-luks-password
+    rm -f /tmp/disko-luks-password
+fi
+
 # ---------------------------------------------------------------------------
 # Prepare target directory tree
 # ---------------------------------------------------------------------------
 echo "Preparing target directories..."
 $SUDO mkdir -p "$TARGET/etc/nixos" "$USER_HOME" "$CONFIG_PARENT" \
-               "$TARGET/var/lib" "$AGE_KEYS_DIR"
+               "$TARGET/var/lib" "$AGE_KEYS_DIR" \
+               "$TARGET/tmp"
+$SUDO chmod 1777 "$TARGET/tmp"
 $SUDO chown "$USER_UID:$USER_GID" "$USER_HOME" 2>/dev/null || true
 
 # ---------------------------------------------------------------------------
 # Bootstrap steps
 # ---------------------------------------------------------------------------
 setup_gpg_smartcard
+export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 setup_known_hosts
 check_yubikey_age
+
+export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
 
 clone_or_update_repo "nixos-config" "$NIXOS_CONFIG_ORIGIN" "$CONFIG_DEST"
 clone_or_update_repo "nix-secrets"  "$NIX_SECRETS_ORIGIN"  "$SECRETS_DEST" "$NIX_SECRETS_BRANCH"
@@ -174,16 +209,23 @@ fi
 # ---------------------------------------------------------------------------
 echo "=== Running nixos-install ==="
 [[ -d "$TARGET/etc"      ]] || die "Target sanity check failed: $TARGET/etc missing"
-[[ -f "$AGE_KEYS_FILE"   ]] || die "Age key missing: $AGE_KEYS_FILE"
+$SUDO test -f "$AGE_KEYS_FILE" || die "Age key missing: $AGE_KEYS_FILE"
 [[ -d "$CONFIG_DEST/.git" ]] || die "nixos-config clone missing: $CONFIG_DEST"
 
 # Preserve SSH_AUTH_SOCK so flake SSH inputs (nix-secrets) resolve during install.
+$SUDO git config --system --add safe.directory "$CONFIG_DEST"
+$SUDO git config --system --add safe.directory "$SECRETS_DEST"
+# Pre-cache auth PIN in current TTY context so nixos-install can fetch
+# private flake inputs without needing to prompt for PIN under sudo.
+SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-/run/user/$(id -u)/gnupg/S.gpg-agent.ssh}" \
+ssh -T -o StrictHostKeyChecking=no git@github.com 2>/dev/null || true
 $SUDO env -i \
-  HOME="$HOME" \
-  USER="${USER:-$USER_NAME}" \
+  HOME="/root" \
+  USER="root" \
   PATH="$PATH" \
   SSH_AUTH_SOCK="${SSH_AUTH_SOCK:-}" \
   NIX_CONFIG="${NIX_CONFIG:-}" \
-  nixos-install --root "$TARGET" --flake "$CONFIG_DEST#$HOST"
+  GPG_TTY="$(tty)" \
+  nixos-install --no-root-passwd --root "$TARGET" --flake "$CONFIG_DEST#$HOST"
 
 echo "✅ nixos-install completed."

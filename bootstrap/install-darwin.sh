@@ -190,7 +190,7 @@ echo "=== Activating nix-darwin ==="
 [[ -f "$AGE_KEYS_FILE"    ]] || die "Age key missing: $AGE_KEYS_FILE"
 [[ -d "$CONFIG_DEST/.git" ]] || die "nixos-config clone missing: $CONFIG_DEST"
 
-if command -v darwin-rebuild >/dev/null 2>&1; then
+if darwin-rebuild --version >/dev/null 2>&1; then
   echo "Running darwin-rebuild switch..."
   darwin-rebuild switch --flake "$CONFIG_DEST#$HOST"
 else

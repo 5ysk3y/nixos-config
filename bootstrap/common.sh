@@ -50,7 +50,7 @@ arg_defaults() {
   USER_GID="100"
   DO_INSTALL=0
   CONFIG_DEST=""
-  SECRETS_SUBDIR="secrets"
+  SECRETS_SUBDIR="nix-secrets"
   SECRETS_BLOB_REL="bootstrap/age-keys.txt.age"
 
   if [[ "$PLATFORM" == "darwin" ]]; then
@@ -59,6 +59,7 @@ arg_defaults() {
   else
     HOST="gibson"
     TARGET="/mnt"
+    DISK=""
   fi
 }
 
@@ -77,9 +78,10 @@ Shared options:
   --dry-run             Clone + decrypt secrets, then stop (default)
   --install             Also run the final install step
   --config-dest PATH    Where to clone nixos-config
-  --secrets-subdir DIR  nix-secrets dir relative to config-dest (default: secrets)
+  --secrets-subdir DIR  nix-secrets sibling dir name (default: nix-secrets)
   --secrets-blob PATH   Encrypted age identity blob inside nix-secrets
                         (default: bootstrap/age-keys.txt.age)
+  --disk DEVICE         Target disk device for disko (e.g. /dev/sda)
   --help | -h           Show this help
 EOF
 }
@@ -100,6 +102,7 @@ parse_common_args() {
       --config-dest)    CONFIG_DEST="$2";      shift 2 ;;
       --secrets-subdir) SECRETS_SUBDIR="$2";   shift 2 ;;
       --secrets-blob)   SECRETS_BLOB_REL="$2"; shift 2 ;;
+      --disk)           DISK="$2";             shift 2 ;;
       --help|-h)        usage; exit 0 ;;
       *)                REMAINING_ARGS+=("$1"); shift ;;
     esac
@@ -121,77 +124,86 @@ resolve_sudo() {
 # ---------------------------------------------------------------------------
 # GPG / smartcard setup
 #
-# Handles the full chain required on a fresh system:
+# Order matters:
+#   1. Write scdaemon/gpg-agent config BEFORE starting any daemons
+#   2. Start pcscd FIRST so it claims the card via CCID
+#   3. Kill and restart gpg-agent AFTER pcscd is running so scdaemon
+#      starts with disable-ccid already set and yields to pcscd
+#   4. Import GPG public key so gpg can associate the card
+#   5. Wake card with gpg --card-status
+#   6. Force agent to learn card slots via gpg-connect-agent
+#   7. Export SSH_AUTH_SOCK after agent has fully loaded the card
 #
-#   1. scdaemon disable-ccid — prevents the CCID driver competing with pcscd
-#      for exclusive USB access to the YubiKey. Without this one daemon wins
-#      the device and the other fails silently.
-#
-#   2. gpg-agent SSH support — enables the agent to serve SSH keys from the
-#      YubiKey's OpenPGP auth slot and exports SSH_AUTH_SOCK so git can use it.
-#
-#   3. GPG public key import — fetches the public key from GitHub so gpg
-#      knows about the key and can associate it with the physical card.
-#      Required on a fresh system (e.g. NixOS live ISO) where the keyring is
-#      empty. Skipped if the key is already present.
-#
-#   4. pcscd restart — ensures the smartcard daemon is running and has a clean
-#      connection to the card. Linux only; macOS PCSC is launchd-managed.
-#
-#   5. gpg --card-status — wakes the YubiKey and forces gpg to associate the
-#      card with the imported public key. Required before SSH auth will work.
-#
-# On Darwin: pcscd is skipped; everything else applies.
+# On Darwin: pcscd is skipped; macOS PCSC (com.apple.ifdreader) is
+#            launchd-managed and always present.
 # ---------------------------------------------------------------------------
 setup_gpg_smartcard() {
   local gnupg_home="${GNUPGHOME:-$HOME/.gnupg}"
   mkdir -p "$gnupg_home"
   chmod 700 "$gnupg_home"
 
-  # 1. scdaemon: disable-ccid
+  export GPG_TTY=$(tty)
+
+  # 1. Write config files before any daemon starts so they take effect
+  #    on first start rather than requiring a restart.
   local scdaemon_conf="$gnupg_home/scdaemon.conf"
   if ! grep -qx 'disable-ccid' "$scdaemon_conf" 2>/dev/null; then
-    echo "Configuring scdaemon: disable-ccid (prevents CCID/PCSC conflict)..."
+    echo "Configuring scdaemon: disable-ccid (yields card access to pcscd)..."
     echo "disable-ccid" >> "$scdaemon_conf"
   fi
 
-  # 2. gpg-agent: enable SSH support
   local agent_conf="$gnupg_home/gpg-agent.conf"
   if ! grep -qx 'enable-ssh-support' "$agent_conf" 2>/dev/null; then
     echo "Enabling gpg-agent SSH support..."
     echo "enable-ssh-support" >> "$agent_conf"
   fi
 
-  # Restart agent so config changes take effect
+  if ! grep -q 'pinentry-program' "$agent_conf" 2>/dev/null; then
+    echo "pinentry-program $(command -v pinentry-curses)" >> "$agent_conf"
+  fi
+
+  # 2. Start pcscd first (Linux only) so it claims the card via CCID
+  #    before scdaemon starts. On a NixOS live ISO we need to symlink
+  #    the ccid bundle into pcscd's compiled-in driver directory first.
+  if [[ "$PLATFORM" == "linux" ]]; then
+    if command -v systemctl >/dev/null 2>&1 && systemctl is-system-running --quiet 2>/dev/null; then
+      if ! $SUDO systemctl restart pcscd >/dev/null 2>&1; then
+        # pcscd not available as a systemd service (e.g. NixOS live ISO)
+        $SUDO pkill -x pcscd >/dev/null 2>&1 || true
+        sleep 1
+        local ccid_bundle
+        ccid_bundle="$(find /nix/store -maxdepth 4 -name 'ifd-ccid.bundle' 2>/dev/null | head -1 || true)"
+        if [[ -n "$ccid_bundle" ]]; then
+          $SUDO mkdir -p /var/lib/pcsc/drivers
+          $SUDO ln -sf "$ccid_bundle" /var/lib/pcsc/drivers/
+        fi
+        $SUDO pcscd --foreground &>/dev/null &
+        sleep 3
+      fi
+    else
+      # Non-systemd / NixOS live ISO
+      $SUDO pkill -x pcscd >/dev/null 2>&1 || true
+      sleep 1
+      local ccid_bundle
+      ccid_bundle="$(find /nix/store -maxdepth 4 -name 'ifd-ccid.bundle' 2>/dev/null | head -1 || true)"
+      if [[ -n "$ccid_bundle" ]]; then
+        $SUDO mkdir -p /var/lib/pcsc/drivers
+        $SUDO ln -sf "$ccid_bundle" /var/lib/pcsc/drivers/
+      fi
+      $SUDO pcscd --foreground &>/dev/null &
+      sleep 3
+    fi
+  fi
+  # Darwin: com.apple.ifdreader is launchd-managed; no action needed.
+
+  # 3. Kill and restart gpg-agent / scdaemon AFTER pcscd is running.
+  #    scdaemon will now start with disable-ccid set and yield to pcscd.
   echo "Restarting gpg-agent / scdaemon..."
   gpgconf --kill scdaemon  >/dev/null 2>&1 || true
   gpgconf --kill gpg-agent >/dev/null 2>&1 || true
+  gpg-agent --daemon --enable-ssh-support >/dev/null 2>&1 || true
 
-  # 3. pcscd (Linux only)
-  if [[ "$PLATFORM" == "linux" ]]; then
-    if command -v systemctl >/dev/null 2>&1 && systemctl is-system-running --quiet 2>/dev/null; then
-      $SUDO systemctl restart pcscd >/dev/null 2>&1 || true
-    else
-      # Non-systemd or systemd not yet running (e.g. NixOS live ISO)
-      $SUDO pkill -x pcscd >/dev/null 2>&1 || true
-      sleep 1
-      $SUDO pcscd --foreground &>/dev/null &
-      sleep 1
-    fi
-  fi
-  # Darwin: com.apple.ifdreader is launchd-managed; killing scdaemon is sufficient.
-
-  # 4. Export SSH_AUTH_SOCK so git can use the YubiKey for SSH auth.
-  #    gpgconf --list-dirs agent-ssh-socket gives the correct path regardless
-  #    of whether the agent was just started or was already running.
-  local ssh_sock
-  ssh_sock="$(gpgconf --list-dirs agent-ssh-socket 2>/dev/null || true)"
-  if [[ -n "$ssh_sock" ]]; then
-    export SSH_AUTH_SOCK="$ssh_sock"
-  fi
-
-  # 5. Import GPG public key if not already in keyring.
-  #    gpg --list-keys exits non-zero if the key is absent.
+  # 4. Import GPG public key if not already in keyring.
   echo "Checking GPG keyring..."
   if ! gpg --list-keys "$GPG_KEY_URL" >/dev/null 2>&1; then
     echo "Importing GPG public key from ${GPG_KEY_URL}..."
@@ -199,10 +211,28 @@ setup_gpg_smartcard() {
       || die "Failed to fetch GPG public key from ${GPG_KEY_URL} — is the network up?"
   fi
 
-  # 6. Wake the YubiKey and associate the card with the imported key.
+  # 5. Wake the YubiKey and verify it is detected.
   echo "Waking YubiKey smartcard..."
   gpg --card-status >/dev/null 2>&1 \
     || die "YubiKey not detected — is it plugged in? (gpg --card-status)"
+
+  # 6. Force gpg-agent to learn the card's key slots so it can serve
+  #    SSH signing operations. Without this the agent sees the card but
+  #    refuses to sign ("agent refused operation").
+  echo "Loading card key slots into gpg-agent..."
+  gpg-connect-agent "scd serialno" "learn --force" /bye >/dev/null 2>&1 || true
+  echo "bootstrap-pin-cache" | gpg --sign --default-key 7D73BA8CF10F7F67 --output /tmp/bootstrap-pin-cache.gpg
+  rm -f /tmp/bootstrap-pin-cache.gpg
+
+  # 7. gpgconf --list-dirs agent-ssh-socket can return empty in nix shell environments.
+  # Construct the socket path directly — gpg-agent always uses this location.
+  local gpg_agent_sock="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
+  if [[ -S "$gpg_agent_sock" ]]; then
+    export SSH_AUTH_SOCK="$gpg_agent_sock"
+  elif [[ -S "${GNUPGHOME:-$HOME/.gnupg}/S.gpg-agent.ssh" ]]; then
+    export SSH_AUTH_SOCK="${GNUPGHOME:-$HOME/.gnupg}/S.gpg-agent.ssh"
+  fi
+
 }
 
 # ---------------------------------------------------------------------------
@@ -250,6 +280,8 @@ check_yubikey_age() {
 # ---------------------------------------------------------------------------
 clone_or_update_repo() {
   local label="$1" origin="$2" dest="$3" branch="${4:-}"
+  local effective_sock="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
+  export SSH_AUTH_SOCK="$effective_sock"
 
   if [[ -d "$dest/.git" ]]; then
     echo "${label}: already cloned at ${dest}, updating..."

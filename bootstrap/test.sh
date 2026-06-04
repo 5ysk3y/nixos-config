@@ -41,11 +41,11 @@ it() {
   if [[ -n "$FILTER" ]] && [[ "$name" != *"$FILTER"* ]]; then
     (( _SKIP++ )) || true; return
   fi
-  [[ $VERBOSE -eq 1 ]] && echo "  ▶ $name"
+  [[ $VERBOSE -eq 1 ]] && echo "  .... $name"
   if "$@" >/dev/null 2>&1; then
-    (( _PASS++ )) || true; echo "  ✅ $name"
+    (( _PASS++ )) || true; echo "  PASS: $name"
   else
-    (( _FAIL++ )) || true; echo "  ❌ $name"
+    (( _FAIL++ )) || true; echo "  FAIL: $name"
     "$@" 2>&1 | sed 's/^/      /' || true
   fi
 }
@@ -632,11 +632,10 @@ _t_darwin_nix_run_cmd() {
   local BIN="$T/bin"; mkdir -p "$BIN"; _common_stubs "$BIN"
   # Provide a nix stub that records its arguments
   printf '#!/usr/bin/env bash\necho "nix: $*"\n' > "$BIN/nix"; chmod +x "$BIN/nix"
-  # Use PATH="$BIN" only (no system PATH) so the real darwin-rebuild cannot be
-  # found — this forces the script into the first-time activation (nix run) branch.
-  # We still need bash and basic coreutils so add them explicitly.
-  local SAFE_PATH="$BIN:/usr/bin:/bin"
-  local out; out="$(PATH="$SAFE_PATH" HOME="$T" GNUPGHOME="$T/.gnupg" \
+  # Stub darwin-rebuild to exit 1 — install-darwin.sh checks with
+  # `darwin-rebuild --version` so a failing stub forces the nix run branch.
+  printf '#!/usr/bin/env bash\nexit 1\n' > "$BIN/darwin-rebuild"; chmod +x "$BIN/darwin-rebuild"
+  local out; out="$(PATH="$BIN:$PATH" HOME="$T" GNUPGHOME="$T/.gnupg" \
     _DARWIN_BOOTSTRAP_NIX_SHELL=1 \
     bash "$INSTALL_DARWIN" --config-dest "$T/config" --install 2>&1 || true)"
   # Verify the correct first-time activation command was used
