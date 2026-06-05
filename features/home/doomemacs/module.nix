@@ -27,6 +27,7 @@ let
     (pkgs.emacsPackagesFor emacs).emacsWithPackages (epkgs: [
       epkgs.nix-mode
       epkgs.lsp-mode
+      epkgs.vterm
     ]);
 
   emacsPkg =

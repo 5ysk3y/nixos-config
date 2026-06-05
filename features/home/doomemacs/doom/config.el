@@ -146,3 +146,24 @@
  
 ;; increase character limit for max summary length
 (setq git-commit-summary-max-length 72)
+
+;; TRAMP Stuffs
+(setq tramp-default-method "ssh")          ; faster than the default scp
+(setq remote-file-name-inhibit-cache nil)  ; cache aggressively
+(setq tramp-completion-reread-directory-timeout nil)
+
+(defun my/open-control-node ()
+  (interactive)
+  (find-file "/ssh:ansiblePrime.home.arpa:/home/ansible/ansible"))
+
+(map! :leader
+      :desc "Control node files" "o a" #'my/open-control-node)
+
+(after! vterm
+  (defun my/control-node-vterm ()
+    (interactive)
+    (let ((default-directory "/ssh:ansiblePrime.home.arpa:/home/ansible/ansible"))
+      (vterm "*ansible-prime*")))
+
+  (map! :leader
+        :desc "Control node terminal" "o t" #'my/control-node-vterm))
