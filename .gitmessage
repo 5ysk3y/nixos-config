@@ -1,0 +1,11 @@
+# <type>(<scope>): <description>  [max 72 chars]
+# Valid types: feat fix refactor chore docs test revert
+# Scopes: e.g - gibson darwin sops yubikey bootstrap flake pkgs
+
+# Why: (motivation — what was wrong or needed)
+
+# What:
+# -
+# -
+
+# Notes: (caveats, follow-ups, nixos-specific gotchas)

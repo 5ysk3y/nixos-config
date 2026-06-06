@@ -19,7 +19,10 @@ _: {
       };
 
       branch.autoSetupMerge = true;
-      commit.gpgsign = true;
+      commit = {
+        gpgsign = true;
+        template = ".gitmessage";
+      };
     };
 
     includes = [
