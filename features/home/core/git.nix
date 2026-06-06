@@ -32,6 +32,10 @@ _: {
       }
     ];
 
+    hooks = {
+      commit-msg = ./git_hooks/commit-msg;
+    };
+
     signing.format = "openpgp";
   };
 }
