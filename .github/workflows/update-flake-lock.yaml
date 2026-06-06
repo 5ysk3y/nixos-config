@@ -39,7 +39,7 @@ jobs:
       - name: Compute PR title 
         id: prtitle
         run: |
-          echo "title=flake: system updates ($(date -u +'%d/%m/%y'))" >> "$GITHUB_OUTPUT"
+          echo "title=chore(flake): weekly update ($(date -u +'%d/%m/%y'))" >> "$GITHUB_OUTPUT"
 
       - name: Update flake.lock (create PR)
         id: update
@@ -49,7 +49,7 @@ jobs:
 
           pr-title: ${{ steps.prtitle.outputs.title }}          
           pr-body: |
-            Automated `flake.lock` update.
+            Automated weekly `flake.lock` update.
 
             {{ env.GIT_COMMIT_MESSAGE }}
           pr-labels: |
