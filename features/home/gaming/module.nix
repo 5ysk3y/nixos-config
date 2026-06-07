@@ -13,7 +13,7 @@
 
   home.packages = with pkgs; [
     inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.game-cleanup
-    (inputs.nixos-xivlauncher-rb.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+    (pkgs.xivlauncher-rb.override {
       useGameMode = true;
     })
     heroic
