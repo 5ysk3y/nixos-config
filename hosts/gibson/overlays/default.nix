@@ -75,6 +75,13 @@
           hash = "sha256-4FzxZR85mWvqUh3FNNlzsg1b7yeMCXuVHMII4AeP8RA=";
         };
       });
+
+      # upstream nixpkgs issue - remove when bitwarden-desktop bumps electron
+      # TODO: Monitor this for upstream: https://github.com/NixOS/nixpkgs/issues/526914
+      # Also remove permittedInsecurePackages from hosts/gibson/system.nix
+      bitwarden-desktop = prev.bitwarden-desktop.override {
+        electron_39 = final.electron_39-bin;
+      };
     })
 
     inputs.self.overlays.default
