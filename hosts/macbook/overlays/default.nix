@@ -12,12 +12,12 @@ let
 in
 {
   nixpkgs.overlays = [
-    (final: prev: {
+    (final: _prev: {
       # Temporary qtwebengine Darwin build fix.
       # Remove once upstream nixpkgs includes https://github.com/NixOS/nixpkgs/pull/515997
       # Changes to these patches will require a rebuild.
       qt6 = qtPinnedPkgs.qt6.overrideScope (
-        _qtFinal: qtPrev: {
+        _qtFinal: _qtPrev: {
           qtwebengine = qtPinnedPkgs.qt6.qtwebengine.overrideAttrs (old: {
             patches =
               (old.patches or [ ])

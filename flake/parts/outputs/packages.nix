@@ -11,7 +11,7 @@
       };
     };
 
-  flake.overlays.default = final: prev: {
+  flake.overlays.default = final: _prev: {
     xivlauncher-rb = final.callPackage ./../../../pkgs/nixos-xivlauncher-rb { };
   };
 }
