@@ -1,7 +1,4 @@
-{
-  inputs,
-  ...
-}:
+_:
 
 {
   # Note: the claude-code-nix overlay is applied at the NixOS system level in

@@ -1,10 +1,8 @@
 {
-  config,
   lib,
   pkgs,
   vars,
   hostname,
-  inputs,
   ...
 }:
 let
