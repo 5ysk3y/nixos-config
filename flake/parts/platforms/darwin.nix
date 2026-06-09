@@ -18,7 +18,6 @@ let
       specialArgs = {
         inherit inputs;
         inherit (host) hostname system vars;
-        inherit (packages) pkgs-unstable;
       };
 
       modules =
@@ -30,9 +29,6 @@ let
           inherit host;
           hmExtra = {
             backupFileExtension = "before-nix";
-          };
-          extraSpecialArgs = {
-            inherit (packages) pkgs-unstable;
           };
         };
     };
