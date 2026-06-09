@@ -2,6 +2,7 @@
 {
   imports = [
     inputs.mac-app-util.homeManagerModules.default
+    inputs.self.modules.homeManager.claude-code
     inputs.self.modules.homeManager.doomemacs
     inputs.self.modules.homeManager.ghostty
     inputs.self.modules.homeManager.github-cli
