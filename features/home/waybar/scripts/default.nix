@@ -35,7 +35,7 @@
       cache_dir="''${XDG_RUNTIME_DIR:-/tmp}/waybar-mouse-battery"
       cache_file="$cache_dir/status.json"
       lock_file="$cache_dir/lock"
-      cache_ttl=20
+      cache_ttl=8
 
       alt_for_pct() {
         local p="$1"
