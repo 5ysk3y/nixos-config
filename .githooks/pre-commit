@@ -1,7 +1,9 @@
+echo "Statix"
+nix run nixpkgs#statix -- check .
+
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Get list of staged .nix files
 staged_nix_files=()
 while IFS= read -r -d '' f; do
   case "$f" in
@@ -11,21 +13,27 @@ done < <(git diff --cached --name-only -z --diff-filter=ACMR)
 
 if (( ${#staged_nix_files[@]} > 0 )); then
   echo "Formatting staged Nix files"
-
   for f in "${staged_nix_files[@]}"; do
-    # 1. Extract the staged version of the file into a temp file
     staged_tmp=$(mktemp /tmp/nixfmt-staged.XXXXXX.nix)
-    git show ":${f}" > "$staged_tmp"
+    original_tmp=$(mktemp /tmp/nixfmt-original.XXXXXX.nix)
+    workdir_tmp=$(mktemp /tmp/nixfmt-workdir.XXXXXX.nix)
 
-    # 2. Format the staged version in isolation
+    git show ":${f}" > "$staged_tmp"
+    cp "$staged_tmp" "$original_tmp"   # snapshot pre-format staged content
+    cp -- "$f" "$workdir_tmp"          # snapshot working tree
+
     nix run nixpkgs#nixfmt -- "$staged_tmp"
 
-    # 3. Re-inject the formatted content back into the index only
-    #    This leaves the working tree (unstaged changes) untouched
     new_blob=$(git hash-object -w "$staged_tmp")
     git update-index --cacheinfo "100644,${new_blob},${f}"
 
-    rm -f "$staged_tmp"
+    # Working tree matched pre-format staged content → no real unstaged changes
+    # → safe to sync working tree to the formatted version
+    if cmp -s "$workdir_tmp" "$original_tmp"; then
+      cp -- "$staged_tmp" "$f"
+    fi
+
+    rm -f "$staged_tmp" "$original_tmp" "$workdir_tmp"
   done
 else
   echo "No staged Nix files to format"
