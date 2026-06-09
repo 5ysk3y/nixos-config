@@ -145,7 +145,9 @@
 (add-hook 'doom-load-theme-hook #'change-magit-diff-faces)
  
 ;; increase character limit for max summary length
-(setq git-commit-summary-max-length 72)
+(after! git-commit
+  (setq git-commit-summary-max-length 72
+        git-commit-fill-column 72))
 
 ;; TRAMP Stuffs
 (setq tramp-default-method "ssh")          ; faster than the default scp
