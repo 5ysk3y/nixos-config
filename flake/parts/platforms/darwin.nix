@@ -9,22 +9,30 @@ let
 
   mkDarwinHost =
     host:
+    let
+      packages = repoLib.pkgsFor host.system;
+    in
     inputs.nix-darwin.lib.darwinSystem {
       inherit (host) system;
 
       specialArgs = {
         inherit inputs;
         inherit (host) hostname system vars;
+        inherit (packages) pkgs-unstable;
       };
 
       modules =
         host.systemProfiles
         ++ host.modules
+        ++ [ { nixpkgs.config.allowUnfree = true; } ]
         ++ repoLib.mkHomeManagerModule {
           platformModule = inputs.home-manager.darwinModules.home-manager;
           inherit host;
           hmExtra = {
             backupFileExtension = "before-nix";
+          };
+          extraSpecialArgs = {
+            inherit (packages) pkgs-unstable;
           };
         };
     };
