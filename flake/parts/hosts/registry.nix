@@ -80,6 +80,10 @@ in
           inherit system;
           config.allowUnfree = true;
         };
+        pkgs-unstable = import inputs.nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
       };
 
       filterHosts = kind: hosts: lib.filterAttrs (_: v: v.kind == kind) hosts;

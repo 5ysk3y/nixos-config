@@ -24,6 +24,7 @@ let
       modules =
         host.systemProfiles
         ++ host.modules
+        ++ [ { nixpkgs.config.allowUnfree = true; } ]
         ++ [
           inputs.sops-nix.nixosModules.sops
         ]
