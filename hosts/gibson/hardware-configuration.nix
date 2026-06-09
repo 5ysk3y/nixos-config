@@ -55,7 +55,7 @@ in
       timeout = 0;
       systemd-boot = {
         enable = true;
-        configurationLimit = 5;
+        configurationLimit = 20;
       };
       efi.canTouchEfiVariables = true;
     };
@@ -65,16 +65,22 @@ in
           "rootfs" = {
             device = "/dev/disk/by-label/ROOT";
             preLVM = true;
-            crypttabExtraOpts = [ "fido2-device=auto" ];
+            crypttabExtraOpts = [
+              "fido2-device=auto"
+              "token-timeout=30"
+            ];
           };
           "swap" = {
             device = "/dev/disk/by-label/SWAP";
             preLVM = true;
             allowDiscards = true;
-            crypttabExtraOpts = [ "fido2-device=auto" ];
-            keyFile = null;
+            crypttabExtraOpts = [ "keyfile-timeout=10s" ];
+            keyFile = "/swap.key";
           };
         };
+      };
+      secrets = {
+        "/swap.key" = "/etc/secrets/swap.key";
       };
       systemd.enable = true;
       availableKernelModules = [
