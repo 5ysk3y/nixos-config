@@ -82,6 +82,17 @@
       bitwarden-desktop = prev.bitwarden-desktop.override {
         electron_39 = final.electron_39-bin;
       };
+
+      # TODO: Monitor new waybar package releases
+      # Associated PR is merged; requires a new release.
+      waybar = prev.waybar.overrideAttrs (old: {
+        src = inputs.waybar-patched;
+        version = "git-0594574";
+        mesonFlags = (builtins.filter (f: f != "-Dcava=enabled") (old.mesonFlags or [ ])) ++ [
+          "-Dcava=disabled"
+        ];
+        doInstallCheck = false;
+      });
     })
 
     inputs.self.overlays.default

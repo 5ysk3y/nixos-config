@@ -689,6 +689,7 @@
         "qtwebengine-fix": "qtwebengine-fix",
         "qute-dracula": "qute-dracula",
         "sops-nix": "sops-nix",
+        "waybar-patched": "waybar-patched",
         "wayland-pipewire-idle-inhibit": "wayland-pipewire-idle-inhibit"
       }
     },
@@ -824,6 +825,23 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "waybar-patched": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1777929458,
+        "narHash": "sha256-51R3mIt8cLNvh/X5qe9vOqeJCj0U9KRyemVE5y+OhiU=",
+        "owner": "Alexays",
+        "repo": "Waybar",
+        "rev": "05945748dccce28bf96d26d8f64a9e69a8dd49ba",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Alexays",
+        "ref": "0594574",
+        "repo": "Waybar",
         "type": "github"
       }
     },
