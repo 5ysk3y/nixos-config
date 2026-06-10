@@ -9,12 +9,12 @@
     with lib;
     mkIf pkgs.stdenv.hostPlatform.isLinux {
       services = {
-        hypridle = with pkgs; {
+        hypridle = {
           enable = true;
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock";
-              after_sleep_cmd = "hyprctl --batch 'dispatch exec makoctl mode -s default; dispatch exec sleep 1; dispatch dpms on'; wtype -k escape; openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp;";
+              after_sleep_cmd = "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'; wtype -k escape; openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp;";
               on_unlock_cmd = "wtype -k escape";
             };
 
@@ -29,8 +29,8 @@
               }
               {
                 timeout = 600;
-                on-timeout = "sleep 1 && hyprctl dispatch dpms off";
-                on-resume = "sleep 1 && hyprctl --batch 'dispatch dpms on'";
+                on-timeout = "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"disable\" })'";
+                on-resume = "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'";
               }
               {
                 timeout = 900;
