@@ -184,33 +184,10 @@ in
       };
 
       services = {
-        login = {
-          u2fAuth = true;
-        };
-
-        sudo = {
-          u2fAuth = true;
-        };
-
-        sddm = {
-          text = ''
-            auth     sufficient    pam_u2f.so
-            auth     include       login
-            account  include       login
-            password include       login
-            session  include       login
-          '';
-        };
-
-        hyprlock = {
-          text = ''
-            auth     sufficient    pam_u2f.so
-            auth     include       login
-            account  include       login
-            password include       login
-            session  include       login
-          '';
-        };
+        login.u2fAuth = true;
+        sudo.u2fAuth = true;
+        sddm.u2fAuth = true;
+        hyprlock.u2fAuth = true;
       };
     };
   };
