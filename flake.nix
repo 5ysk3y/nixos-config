@@ -38,8 +38,10 @@
     # Used as a Nix store path in features/home/doomemacs/module.nix for the
     # rsync-based activation script. The input hash drives the stamp-based
     # doom sync-skip logic — keeping as a flake input is intentional.
-    doomemacs.url = "github:doomemacs/doomemacs";
+    doomemacs.url = "github:doomemacs/core";
     doomemacs.flake = false;
+    doomemacs-modules.url = "github:doomemacs/modules";
+    doomemacs-modules.flake = false;
 
     # Used as a store path in features/home/symlinks/module.nix to symlink the
     # Dracula theme into ~/.qutebrowser and ~/.config/qutebrowser. Keeping as a
