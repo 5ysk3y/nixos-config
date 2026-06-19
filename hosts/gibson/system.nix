@@ -103,7 +103,7 @@ in
       ];
     };
     services = {
-      "nix-daemon" = {
+      nix-daemon = {
         environment = {
           TMPDIR = "/nix/tmp";
         };
@@ -116,6 +116,20 @@ in
           config.environment.etc."nix/nix.conf".source
         ];
         after = [ "local-fs.target" ];
+      };
+      pcscd = {
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig.Restart = "always";
+      };
+      pcscd-resume = {
+        description = "Restart pcscd after hibernate resume";
+        wantedBy = [ "post-resume.target" ];
+        after = [ "post-resume.target" ];
+        script = ''
+          sleep 3
+          ${pkgs.systemd}/bin/systemctl restart pcscd
+        '';
+        serviceConfig.Type = "oneshot";
       };
     };
   };
@@ -238,7 +252,11 @@ in
       };
     };
 
-    pcscd.enable = true;
+    pcscd = {
+      enable = true;
+      plugins = [ pkgs.ccid ];
+    };
+
     upower.enable = true;
 
     dbus = {

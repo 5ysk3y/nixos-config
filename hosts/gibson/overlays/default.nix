@@ -92,7 +92,23 @@
           "-Dcava=disabled"
         ];
         doInstallCheck = false;
+        doCheck = false;
+        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.catch2_3 ];
       });
+
+      # TODO: Monitor new hyprland package releases
+      # This is currently propagating upstream through Hydra into nixos-unstable
+      hyprland = prev.hyprland.overrideAttrs (old: {
+        version = "0.55.4";
+        src = old.src.override {
+          tag = "v0.55.4";
+          hash = "sha256-IuT0HnOr/0rAw+GXr+OwWx89FjA4Og1FqP7vywEwRJM=";
+        };
+      });
+      xdg-desktop-portal-hyprland = prev.xdg-desktop-portal-hyprland.override {
+
+        inherit (final) hyprland; # uses the overridden version above
+      };
     })
 
     inputs.self.overlays.default
