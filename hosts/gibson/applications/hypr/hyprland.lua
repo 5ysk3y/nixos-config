@@ -155,6 +155,7 @@ return function(WS)
   hl.window_rule({ match = { class = "^(explorer.exe)$" }, move = { 1945, 1072 }, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { class = "^(gamescope)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { title = "^(007 First Light)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
+  hl.window_rule({ match = { class = "^(steam_app_0)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
 
   hl.window_rule({ match = { class = "^(spicy)$" }, workspace = "name:" .. WS.WS4, fullscreen = true, idle_inhibit = "fullscreen" })
   hl.window_rule({ match = { class = "^(virt-manager)$" }, workspace = "name:" .. WS.WS4, float = true, center = true, size = { 970, 560 } })
