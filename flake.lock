@@ -63,16 +63,32 @@
     "doomemacs": {
       "flake": false,
       "locked": {
-        "lastModified": 1781423724,
-        "narHash": "sha256-oz+XeMjYgzcNq6r5VSzjb5VkEKhFdcj/rNROwxhDlFI=",
+        "lastModified": 1781777132,
+        "narHash": "sha256-ui3i68gfI70gbCHm3z6LGU/nLkhRZ65DNtp6zlQ1g+0=",
         "owner": "doomemacs",
-        "repo": "doomemacs",
-        "rev": "3806055a09a44243287a6ae9e7bd5a6cbe03dbbd",
+        "repo": "core",
+        "rev": "dce7f1d376cc21619cf161d288cc34512a211445",
         "type": "github"
       },
       "original": {
         "owner": "doomemacs",
-        "repo": "doomemacs",
+        "repo": "core",
+        "type": "github"
+      }
+    },
+    "doomemacs-modules": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781507079,
+        "narHash": "sha256-Ya4yEQ35bGEdDOVpitjJVzyUwvE/02UbiypiEW10rk0=",
+        "owner": "doomemacs",
+        "repo": "modules",
+        "rev": "8966104447d0a3131a232187bde148f58b32a322",
+        "type": "github"
+      },
+      "original": {
+        "owner": "doomemacs",
+        "repo": "modules",
         "type": "github"
       }
     },
@@ -676,6 +692,7 @@
         "claude-code-nix": "claude-code-nix",
         "disko": "disko",
         "doomemacs": "doomemacs",
+        "doomemacs-modules": "doomemacs-modules",
         "emacs-overlay": "emacs-overlay",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",

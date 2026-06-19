@@ -69,8 +69,13 @@ mkMerge [
           --chmod=D2755,F744 ${rsyncChown} \
           ${inputs.doomemacs}/ "$EMACSDIR/"
 
+        mkdir -p "$EMACSDIR/sources/doom+"
+        ${pkgs.rsync}/bin/rsync -ogav --delete \
+          --chmod=D2755,F744 ${rsyncChown} \
+          ${inputs.doomemacs-modules}/ "$EMACSDIR/sources/doom+/"
+
         stamp="${config.xdg.stateHome}/doom/sync-stamp"
-        key="${emacsPkg}|${inputs.doomemacs}"
+        key="${emacsPkg}|${inputs.doomemacs}|${inputs.doomemacs-modules}"
 
         if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ]; then
           echo "doom: inputs changed, running doom sync -u --force"
