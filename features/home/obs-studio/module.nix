@@ -11,6 +11,7 @@
       obs-studio-plugins.obs-scale-to-sound
       obs-studio-plugins.obs-vkcapture
       obs-studio-plugins.obs-gstreamer
+      obs-studio-plugins.obs-backgroundremoval
     ];
   };
 
