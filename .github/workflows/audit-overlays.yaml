@@ -1,0 +1,318 @@
+name: Audit temporary overlays
+
+on:
+  # Run after the weekly flake lock update so nix eval reflects freshest nixpkgs
+  workflow_run:
+    workflows: ["Update flake.lock"]
+    types: [completed]
+  # Allow manual trigger for ad-hoc checks
+  workflow_dispatch: {}
+
+jobs:
+  audit:
+    name: Check overlay obsolescence
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
+
+      - name: Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      # Required for private flake inputs (nix-secrets etc.) during nix eval
+      - name: Start ssh-agent and add deploy read-only key
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
+
+      - name: Add GitHub to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Force git to use known_hosts
+        run: |
+          echo "GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$HOME/.ssh/known_hosts" >> "$GITHUB_ENV"
+
+      - name: Import GPG key for signed commits
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Run overlay audit
+        id: audit
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
+        run: |
+          set -euo pipefail
+
+          OBSOLETE_IDS=()
+          REPORT_LINES=()
+
+          # ----------------------------------------------------------------
+          # version_gte: returns 0 if $1 >= $2, 1 otherwise.
+          # Uses GNU sort -V (coreutils, available on ubuntu-latest).
+          # Handles dot-separated version strings including NVIDIA-style
+          # three-component versions (610.43.02).
+          # ----------------------------------------------------------------
+          version_gte() {
+            local a="$1" b="$2"
+            [ "$(printf '%s\n%s' "$a" "$b" | sort -V | head -n1)" = "$b" ]
+          }
+
+          # ----------------------------------------------------------------
+          # check_nixpkgs_version: evaluates nixpkgs#legacyPackages.<system>.<attr>
+          # and compares against threshold.
+          # Returns: 0 = obsolete, 1 = still needed, 2 = eval failed
+          # Prints the resolved current version to stdout on success.
+          # ----------------------------------------------------------------
+          check_nixpkgs_version() {
+            local attr="$1" threshold="$2" system="$3"
+            local current
+
+            echo "    nix eval nixpkgs#legacyPackages.${system}.${attr} ..." >&2
+            current=$(nix eval --raw "nixpkgs#legacyPackages.${system}.${attr}" 2>/dev/null) || {
+              echo "    WARNING: eval failed" >&2
+              return 2
+            }
+            echo "    result: ${current}  (threshold: ${threshold})" >&2
+            echo "$current"
+            version_gte "$current" "$threshold"
+          }
+
+          # ----------------------------------------------------------------
+          # check_github_items: checks state of issues or PRs via REST API.
+          # item_type: "issue" or "pull"
+          # Prints summary lines to stdout.
+          # Returns: 0 if ALL items are resolved, 1 otherwise.
+          # ----------------------------------------------------------------
+          check_github_items() {
+            local items_json="$1" item_type="$2"
+            local all_done=true
+
+            while IFS= read -r item; do
+              local repo number state merged
+
+              repo=$(echo "$item" | jq -r '.repo')
+              number=$(echo "$item" | jq -r '.number')
+
+              echo "    Checking ${repo}#${number} ..." >&2
+              local api_response
+              api_response=$(curl -fsSL \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${GH_TOKEN}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                "https://api.github.com/repos/${repo}/${item_type}s/${number}")
+
+              if [ "$item_type" = "pull" ]; then
+                merged=$(echo "$api_response" | jq -r '.merged')
+                state=$([ "$merged" = "true" ] && echo "merged" || echo "$(echo "$api_response" | jq -r '.state')")
+              else
+                state=$(echo "$api_response" | jq -r '.state')
+              fi
+
+              echo "    ${repo}#${number}: ${state}" >&2
+              echo "[${repo}#${number}](https://github.com/${repo}/${item_type}s/${number}): \`${state}\`"
+
+              if [ "$item_type" = "pull" ] && [ "$state" != "merged" ]; then
+                all_done=false
+              elif [ "$item_type" = "issue" ] && [ "$state" != "closed" ]; then
+                all_done=false
+              fi
+            done < <(echo "$items_json" | jq -c '.[]')
+
+            [ "$all_done" = true ]
+          }
+
+          # ----------------------------------------------------------------
+          # Main loop — read audit metadata from flake output.
+          # Uses process substitution throughout to avoid subshell variable
+          # scope issues that would prevent OBSOLETE_IDS/REPORT_LINES from
+          # accumulating correctly.
+          # ----------------------------------------------------------------
+          echo "Evaluating flake.overlayAudits ..."
+          AUDIT_JSON=$(nix eval .#overlayAudits --json)
+
+          while IFS= read -r host_key; do
+            echo ""
+            echo "=== ${host_key} ==="
+
+            while IFS= read -r id; do
+              entry=$(echo "$AUDIT_JSON" | jq -c --arg h "$host_key" --arg id "$id" '.[$h][$id]')
+              strategy=$(echo "$entry" | jq -r '.strategy')
+              description=$(echo "$entry" | jq -r '.description')
+              notes=$(echo "$entry" | jq -r '.notes // empty')
+
+              echo ""
+              echo "  [${id}] ${strategy}: ${description}"
+
+              is_obsolete=false
+
+              case "$strategy" in
+                nixpkgs-version)
+                  attr=$(echo "$entry" | jq -r '.attr')
+                  threshold=$(echo "$entry" | jq -r '.threshold')
+                  all_met=true
+                  version_lines=()
+
+                  while IFS= read -r system; do
+                    current=""
+                    rc=0
+                    current=$(check_nixpkgs_version "$attr" "$threshold" "$system") || rc=$?
+
+                    case $rc in
+                      0) version_lines+=("  ✅ \`${system}\`: \`${attr} = ${current}\` >= \`${threshold}\`") ;;
+                      1) version_lines+=("  ⏳ \`${system}\`: \`${attr} = ${current}\` < \`${threshold}\`")
+                         all_met=false ;;
+                      2) version_lines+=("  ⚠️  \`${system}\`: eval of \`${attr}\` failed — manual check required")
+                         all_met=false ;;
+                    esac
+                  done < <(echo "$entry" | jq -r '.systems[]')
+
+                  if [ "$all_met" = true ]; then
+                    is_obsolete=true
+                    REPORT_LINES+=("✅ **${host_key} / ${id}**: nixpkgs meets threshold \`>= ${threshold}\` on all declared systems")
+                  else
+                    REPORT_LINES+=("⏳ **${host_key} / ${id}**: threshold \`${threshold}\` not yet reached on all systems")
+                  fi
+                  for line in "${version_lines[@]}"; do
+                    REPORT_LINES+=("$line")
+                  done
+                  ;;
+
+                nixpkgs-issue)
+                  items_json=$(echo "$entry" | jq -c '.trackingIssues')
+                  issue_output=""
+                  rc=0
+                  issue_output=$(check_github_items "$items_json" "issue") || rc=$?
+                  summary=$(echo "$issue_output" | paste -sd ', ')
+                  if [ $rc -eq 0 ]; then
+                    is_obsolete=true
+                    REPORT_LINES+=("✅ **${host_key} / ${id}**: all tracking issues closed — ${summary}")
+                  else
+                    REPORT_LINES+=("⏳ **${host_key} / ${id}**: tracking issue(s) still open — ${summary}")
+                  fi
+                  ;;
+
+                nixpkgs-pr)
+                  items_json=$(echo "$entry" | jq -c '.trackingPRs')
+                  pr_output=""
+                  rc=0
+                  pr_output=$(check_github_items "$items_json" "pull") || rc=$?
+                  summary=$(echo "$pr_output" | paste -sd ', ')
+                  if [ $rc -eq 0 ]; then
+                    is_obsolete=true
+                    REPORT_LINES+=("✅ **${host_key} / ${id}**: all tracking PRs merged — ${summary}")
+                  else
+                    REPORT_LINES+=("⏳ **${host_key} / ${id}**: tracking PR(s) not yet merged — ${summary}")
+                  fi
+                  ;;
+
+                *)
+                  echo "  WARNING: unknown strategy '${strategy}'"
+                  REPORT_LINES+=("⚠️  **${host_key} / ${id}**: unknown strategy \`${strategy}\` — update audit.nix")
+                  ;;
+              esac
+
+              if [ "$is_obsolete" = true ]; then
+                OBSOLETE_IDS+=("${host_key}::${id}")
+                if [ -n "$notes" ]; then
+                  REPORT_LINES+=("   > 📎 **Note:** ${notes}")
+                fi
+              fi
+
+            done < <(echo "$AUDIT_JSON" | jq -r --arg h "$host_key" '.[$h] | keys[]')
+          done < <(echo "$AUDIT_JSON" | jq -r 'keys[]')
+
+          # ----------------------------------------------------------------
+          # Emit outputs
+          # ----------------------------------------------------------------
+          echo ""
+          echo "Obsolete: ${OBSOLETE_IDS[*]:-none}"
+
+          REPORT_FILE="$(mktemp)"
+          printf '%s\n' "${REPORT_LINES[@]}" > "$REPORT_FILE"
+
+          {
+            echo "obsolete_count=${#OBSOLETE_IDS[@]}"
+            echo "obsolete_ids=${OBSOLETE_IDS[*]:-}"
+            echo "report_file=${REPORT_FILE}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open PR for obsolete overlays
+        if: steps.audit.outputs.obsolete_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
+          GIT_AUTHOR_NAME: ${{ steps.import-gpg.outputs.name }}
+          GIT_AUTHOR_EMAIL: ${{ steps.import-gpg.outputs.email }}
+          GIT_COMMITTER_NAME: ${{ steps.import-gpg.outputs.name }}
+          GIT_COMMITTER_EMAIL: ${{ steps.import-gpg.outputs.email }}
+        run: |
+          set -euo pipefail
+
+          BRANCH="chore/overlay-audit-$(date -u +'%Y%m%d')"
+          REPORT_FILE="${{ steps.audit.outputs.report_file }}"
+          OBSOLETE_IDS="${{ steps.audit.outputs.obsolete_ids }}"
+
+          existing=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || true)
+          if [ -n "$existing" ]; then
+            echo "PR already exists for branch ${BRANCH} (#${existing}) — skipping"
+            exit 0
+          fi
+
+          git checkout -b "$BRANCH"
+
+          SENTINEL=".overlay-audit/$(date -u +'%Y%m%d').md"
+          mkdir -p .overlay-audit
+          printf '# Overlay audit — %s\n\nFlagged: %s\n\nFor each flagged overlay:\n- Remove the block from the relevant overlays/default.nix\n- Remove the corresponding entry from overlays/audit.nix in the same directory\n- Action any coupled removals described in the notes field\n- Run a local build to verify before merging\n' \
+            "$(date -u +'%Y-%m-%d')" \
+            "$OBSOLETE_IDS" \
+            > "$SENTINEL"
+
+          git add "$SENTINEL"
+          git commit -m "chore(overlays): audit flag $(date -u +'%Y-%m-%d') — ${OBSOLETE_IDS}"
+          git push origin "$BRANCH"
+
+          PR_BODY_FILE="$(mktemp)"
+          {
+            printf '## Overlay audit — %s\n\n' "$(date -u +'%Y-%m-%d')"
+            printf 'The automated overlay audit detected **%s** overlay(s) that appear to be obsolete based on current nixpkgs state.\n\n' "${{ steps.audit.outputs.obsolete_count }}"
+            printf '### Results\n\n'
+            cat "$REPORT_FILE"
+            printf '\n### What to do\n\n'
+            printf 'For each ✅ entry above:\n\n'
+            printf -- '- Remove the overlay block from the relevant `overlays/default.nix`\n'
+            printf -- '- Remove the corresponding entry from `overlays/audit.nix` in the same directory\n'
+            printf -- '- Action any coupled removals described in the 📎 notes (flake inputs, hardware-configuration.nix, system.nix entries)\n'
+            printf -- '- Run `nixos-rebuild build --flake .#gibson` and/or `darwin-rebuild build --flake .#macbook` locally to confirm clean build\n'
+            printf -- '- Commit, push to this branch, then merge\n'
+            printf '\n> ⚠️ Do not auto-merge this PR. Manual verification of each removal is required.\n\n'
+            printf -- '---\n*Generated by [audit-overlays workflow](https://github.com/%s/actions/workflows/audit-overlays.yaml)*\n' "${{ github.repository }}"
+          } > "$PR_BODY_FILE"
+
+          gh pr create \
+            --title "chore(overlays): audit flagged obsolete overlays ($(date -u +'%d/%m/%y'))" \
+            --body-file "$PR_BODY_FILE" \
+            --label "dependencies,automated" \
+            --head "$BRANCH" \
+            --base main
+
+          echo "PR created for branch ${BRANCH}"
+
+      - name: No obsolete overlays found
+        if: steps.audit.outputs.obsolete_count == '0'
+        run: |
+          echo "All audited overlays are still required. No PR needed."
+          cat "${{ steps.audit.outputs.report_file }}"
