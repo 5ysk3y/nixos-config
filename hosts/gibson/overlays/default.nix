@@ -1,3 +1,6 @@
+# Place overlays in the relevant section based on comment headers
+# Ensure all major packages have accompanying entries in ./audit.nix
+# Use  "# audit-exempt" comment to items that are coupled with tracked/audited overlays
 {
   inputs,
   pkgs,
@@ -9,8 +12,10 @@
     # claude-code-nix: must be applied at system level — nixpkgs.overlays set
     # inside HM modules has no effect when useGlobalPkgs = true.
     inputs.claude-code-nix.overlays.default
+    inputs.self.overlays.default
 
     (final: prev: {
+      # ── Permanent overlays ─────────────────────────────────────────
       steam = prev.steam.override {
         extraPkgs =
           pkgs: with pkgs; [
@@ -27,6 +32,9 @@
           ];
       };
 
+      # ── Temporary overlays ─────────────────────────────────────────
+      # TODO: Monitor new mpv package releases
+      # Associated PR is merged; requires a new release.
       mpv-unwrapped = prev.mpv-unwrapped.overrideAttrs (old: {
         patches = (old.patches or [ ]) ++ [
           ./patches/mpv-fence-leak.patch
@@ -34,6 +42,7 @@
       });
 
       mpv = prev.mpv.override {
+        # audit-exempt
         inherit (final) mpv-unwrapped;
       };
 
@@ -67,11 +76,10 @@
         };
       });
       xdg-desktop-portal-hyprland = prev.xdg-desktop-portal-hyprland.override {
-
+        # audit-exempt
         inherit (final) hyprland; # uses the overridden version above
       };
     })
 
-    inputs.self.overlays.default
   ];
 }
