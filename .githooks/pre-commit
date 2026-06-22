@@ -1,6 +1,3 @@
-echo "Statix"
-nix run nixpkgs#statix -- check .
-
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -41,3 +38,145 @@ fi
 
 echo "Statix"
 nix run nixpkgs#statix -- check .
+
+# ── Overlay audit consistency check ────────────────────────────────────────
+# If any overlays/default.nix file is staged, verify that every key defined
+# in the temporary overlays section has a corresponding entry in audit.nix,
+# and that every key in audit.nix still exists in default.nix.
+#
+# Temporary overlays are identified by their position after the divider:
+#   # ── Temporary overlays
+
+check_overlay_audit_consistency() {
+  local default_nix="$1"
+  local dir
+  dir="$(dirname "$default_nix")"
+  local audit_nix="${dir}/audit.nix"
+
+  # Extract staged content for default.nix so we check what's being committed,
+  # not the working tree state.
+  local staged_default
+  staged_default=$(git show ":${default_nix}" 2>/dev/null) || {
+    # File is being deleted — skip consistency check
+    return 0
+  }
+
+  # Find the temporary overlays divider line and extract attribute names
+  # defined after it. Matches lines of the form:
+  #   <identifier> = ...
+  # at exactly 6-space indent (top-level keys inside the overlay attrset).
+  # Uses [[:space:]] and [[:alnum:]] for POSIX compatibility with BSD sed/grep
+  # on macOS as well as GNU on Linux.
+  local temp_keys=()
+  local in_temp_section=false
+  local pending_key=""
+  while IFS= read -r line; do
+    if echo "$line" | grep -q '# ── Temporary overlays'; then
+      in_temp_section=true
+      continue
+    fi
+    if [ "$in_temp_section" = true ]; then
+      if echo "$line" | grep -qE '^[[:space:]]{6}[a-zA-Z][a-zA-Z0-9_-]+ ='; then
+        # Flush any previously pending key that wasn't exempted
+        if [ -n "${pending_key:-}" ]; then
+          temp_keys+=("$pending_key")
+        fi
+        pending_key=$(echo "$line" | sed -E 's/^[[:space:]]+([a-zA-Z][a-zA-Z0-9_-]+)[[:space:]]=.*/\1/')
+      elif [ -n "${pending_key:-}" ] && echo "$line" | grep -q '# audit-exempt'; then
+        # First content line inside the block is an audit-exempt marker — discard key
+        pending_key=""
+      fi
+    fi
+  done <<< "$staged_default"
+
+  # Flush final pending key if not exempted
+  if [ -n "${pending_key:-}" ]; then
+    temp_keys+=("$pending_key")
+  fi
+
+  if (( ${#temp_keys[@]} == 0 )); then
+    # No temporary overlays section found or section is empty — skip
+    return 0
+  fi
+
+  # Read audit.nix keys — use staged version if it's also being committed,
+  # otherwise fall back to the working tree version.
+  local audit_content=""
+  if git diff --cached --name-only | grep -q "^${audit_nix}$"; then
+    audit_content=$(git show ":${audit_nix}" 2>/dev/null) || true
+  elif [ -f "$audit_nix" ]; then
+    audit_content=$(cat "$audit_nix")
+  fi
+
+  # Extract top-level keys from audit.nix: lines of the form:
+  #   <identifier> = {
+  # at exactly 2-space indent.
+  local audit_keys=()
+  if [ -n "$audit_content" ]; then
+    while IFS= read -r line; do
+      if echo "$line" | grep -qE '^[[:space:]]{2}[a-zA-Z][a-zA-Z0-9_-]+[[:space:]]=[[:space:]]\{'; then
+        key=$(echo "$line" | sed -E 's/^[[:space:]]+([a-zA-Z][a-zA-Z0-9_-]+)[[:space:]]=.*/\1/')
+        audit_keys+=("$key")
+      fi
+    done <<< "$audit_content"
+  fi
+
+  local errors=()
+
+  # Check: every temporary overlay key must exist in audit.nix
+  for key in "${temp_keys[@]}"; do
+    local found=false
+    for audit_key in "${audit_keys[@]}"; do
+      if [ "$key" = "$audit_key" ]; then
+        found=true
+        break
+      fi
+    done
+    if [ "$found" = false ]; then
+      errors+=("  MISSING from audit.nix: '${key}' (defined in ${default_nix})")
+    fi
+  done
+
+  # Check: every audit.nix key must exist in the temporary overlays section
+  for audit_key in "${audit_keys[@]}"; do
+    local found=false
+    for key in "${temp_keys[@]}"; do
+      if [ "$audit_key" = "$key" ]; then
+        found=true
+        break
+      fi
+    done
+    if [ "$found" = false ]; then
+      errors+=("  STALE in audit.nix: '${audit_key}' (not found in temporary overlays section of ${default_nix})")
+    fi
+  done
+
+  if (( ${#errors[@]} > 0 )); then
+    echo ""
+    echo "Overlay audit consistency error: ${default_nix}"
+    for err in "${errors[@]}"; do
+      echo "$err"
+    done
+    echo ""
+    echo "Either update ${audit_nix} to match, or move the overlay"
+    echo "above the '# ── Temporary overlays' divider if it is permanent."
+    return 1
+  fi
+
+  echo "  ${default_nix}: audit.nix consistent ✓"
+  return 0
+}
+
+overlay_errors=false
+for f in "${staged_nix_files[@]}"; do
+  case "$f" in
+    */overlays/default.nix)
+      echo "Checking overlay audit consistency: ${f}"
+      check_overlay_audit_consistency "$f" || overlay_errors=true
+      ;;
+  esac
+done
+
+if [ "$overlay_errors" = true ]; then
+  exit 1
+fi
