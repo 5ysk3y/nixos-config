@@ -1,6 +1,9 @@
-# Audit metadata for temporary overlays — managed by flake/parts/exports/overlay-audits.nix
-# Do not use owner/repo#number syntax anywhere in this file — see audit-overlays.yaml for why.
-#
+# Temporary overlay audit metadata — read by flake/parts/exports/overlay-audits.nix.
+# Keys must match overlay identifiers in default.nix. No owner/repo#N refs (backlinks).
+# Strategies: nixpkgs-version (attr+threshold), nixpkgs-issue (trackingIssues), nixpkgs-pr (trackingPRs).
+# Required fields for all: strategy, description, systems. Optional: notes (coupled removals etc).
+# Coupled overlays with no independent removal condition: add `# audit-exempt` inside their block in default.nix.
+
 {
   bitwarden-desktop = {
     description = "Override electron_39 with electron_39-bin to unblock bitwarden-desktop build";
