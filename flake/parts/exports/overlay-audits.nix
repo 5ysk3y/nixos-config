@@ -2,19 +2,55 @@
 let
   inherit (config.repo) hosts;
 
+  # Validate strategy-specific required fields at eval time.
+  # This means `nix eval .#overlayAudits` fails loudly with a clear message
+  # if an audit.nix entry is structurally wrong, rather than silently producing
+  # a bad result that only surfaces when CI runs.
+  validateEntry =
+    hostKey: id: entry:
+    let
+      inherit (entry) strategy;
+      loc = "${hostKey} / ${id}";
+
+      assertVersionFields = lib.assertMsg (
+        entry.threshold != null
+      ) "overlayAudits: ${loc} uses nixpkgs-version but is missing required field 'threshold'";
+
+      assertIssueFields = lib.assertMsg (
+        entry.trackingIssues != [ ]
+      ) "overlayAudits: ${loc} uses nixpkgs-issue but 'trackingIssues' is empty";
+
+      assertPRFields = lib.assertMsg (
+        entry.trackingPRs != [ ]
+      ) "overlayAudits: ${loc} uses nixpkgs-pr but 'trackingPRs' is empty";
+
+      valid =
+        if strategy == "nixpkgs-version" then
+          assertVersionFields
+        else if strategy == "nixpkgs-issue" then
+          assertIssueFields
+        else if strategy == "nixpkgs-pr" then
+          assertPRFields
+        else
+          true;
+    in
+    assert valid;
+    entry;
+
   # Read audit.nix from a host's overlays directory if it exists.
   # host.overlaysModule is the directory path (e.g. hosts/gibson/overlays),
   # so we append /audit.nix to get the sibling file.
   readHostAudits =
-    host:
+    hostKey: host:
     let
       auditFile = host.overlaysModule + "/audit.nix";
+      raw = if builtins.pathExists auditFile then import auditFile else { };
     in
-    if builtins.pathExists auditFile then import auditFile else { };
+    lib.mapAttrs (id: entry: validateEntry hostKey id entry) raw;
 
   # Aggregate per-host audit metadata across all hosts.
   # Keyed by hostname so the CI script can report which host each overlay belongs to.
-  hostAudits = lib.mapAttrs (_name: readHostAudits) hosts;
+  hostAudits = lib.mapAttrs readHostAudits hosts;
 
   # Hook for the system-wide overlay at features/system/core/overlays.nix.
   # This file is imported transitively via systemProfiles and is not reachable
@@ -23,7 +59,12 @@ let
   systemAuditFile = ./../../../features/system/core/overlays/audit.nix;
   systemAudits =
     if builtins.pathExists systemAuditFile then
-      { "features/system/core/overlays" = import systemAuditFile; }
+      let
+        raw = import systemAuditFile;
+      in
+      {
+        "features/system/core/overlays" = lib.mapAttrs (id: entry: validateEntry "system" id entry) raw;
+      }
     else
       { };
 
@@ -56,13 +97,17 @@ in
             attr = lib.mkOption {
               type = lib.types.nullOr lib.types.str;
               default = null;
-              description = "nixpkgs legacyPackages attribute path for version eval (nixpkgs-version only).";
+              description = ''
+                nixpkgs legacyPackages attribute path for version eval (nixpkgs-version only).
+                Defaults to <id>.version if unset — only specify when non-standard
+                (e.g. linuxPackages.nvidiaPackages.new_feature.version).
+              '';
             };
 
             threshold = lib.mkOption {
               type = lib.types.nullOr lib.types.str;
               default = null;
-              description = "Minimum version for the overlay to be considered obsolete (nixpkgs-version only).";
+              description = "Minimum version to consider overlay obsolete (nixpkgs-version only).";
             };
 
             trackingIssues = lib.mkOption {

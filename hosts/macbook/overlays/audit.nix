@@ -1,7 +1,9 @@
-# Audit metadata for temporary overlays in hosts/macbook/overlays/default.nix.
-# Each key must match the overlay identifier used in default.nix.
-# Read by flake/parts/exports/overlay-audits.nix and consumed by the
-# audit-overlays CI workflow. See flake.overlayAudits for option definitions.
+# Temporary overlay audit metadata — read by flake/parts/exports/overlay-audits.nix.
+# Keys must match overlay identifiers in default.nix. No owner/repo#N refs (backlinks).
+# Strategies: nixpkgs-version (attr+threshold), nixpkgs-issue (trackingIssues), nixpkgs-pr (trackingPRs).
+# Required fields for all: strategy, description, systems. Optional: notes (coupled removals etc).
+# Coupled overlays with no independent removal condition: add `# audit-exempt` inside their block in default.nix.
+
 {
   qtwebengine = {
     strategy = "nixpkgs-pr";

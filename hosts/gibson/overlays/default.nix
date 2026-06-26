@@ -3,7 +3,6 @@
 # Use  "# audit-exempt" comment to items that are coupled with tracked/audited overlays
 {
   inputs,
-  pkgs,
   ...
 }:
 

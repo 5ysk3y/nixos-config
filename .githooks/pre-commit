@@ -168,14 +168,35 @@ check_overlay_audit_consistency() {
 }
 
 overlay_errors=false
+audit_nix_staged=false
+
 for f in "${staged_nix_files[@]}"; do
   case "$f" in
     */overlays/default.nix)
       echo "Checking overlay audit consistency: ${f}"
       check_overlay_audit_consistency "$f" || overlay_errors=true
       ;;
+    */overlays/audit.nix)
+      audit_nix_staged=true
+      ;;
   esac
 done
+
+# If any audit.nix was staged, validate the full overlayAudits flake output.
+# This catches missing required fields per strategy and type errors via the
+# module system assertions in flake/parts/exports/overlay-audits.nix.
+if [ "$audit_nix_staged" = true ]; then
+  echo "Validating flake.overlayAudits (audit.nix staged) ..."
+  if ! nix eval .#overlayAudits --json > /dev/null 2>&1; then
+    echo ""
+    echo "flake.overlayAudits eval failed — audit.nix has invalid or missing fields."
+    echo "Run: nix eval .#overlayAudits --json"
+    echo "to see the full error."
+    overlay_errors=true
+  else
+    echo "  flake.overlayAudits: valid ✓"
+  fi
+fi
 
 if [ "$overlay_errors" = true ]; then
   exit 1

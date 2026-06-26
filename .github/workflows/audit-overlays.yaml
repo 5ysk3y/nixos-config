@@ -163,7 +163,12 @@ jobs:
 
               case "$strategy" in
                 nixpkgs-version)
-                  attr=$(echo "$entry" | jq -r '.attr')
+                  attr=$(echo "$entry" | jq -r '.attr // empty')
+                  # Default attr to <id>.version when not explicitly set
+                  if [ -z "$attr" ]; then
+                    attr="${id}.version"
+                    echo "    attr not set — defaulting to ${attr}"
+                  fi
                   threshold=$(echo "$entry" | jq -r '.threshold')
                   all_met=true
                   version_lines=()
