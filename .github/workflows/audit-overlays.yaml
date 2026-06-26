@@ -278,7 +278,10 @@ jobs:
             2>/dev/null | head -n1 || true)
 
           if [ -n "$existing" ]; then
-            echo "Open audit issue already exists (#${existing}) — skipping"
+            echo "Updating existing audit issue #${existing} ..."
+            gh issue edit "$existing" \
+              --body-file "$ISSUE_BODY_FILE"
+            echo "Issue #${existing} updated"
             exit 0
           fi
 

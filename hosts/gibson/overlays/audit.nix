@@ -19,7 +19,6 @@
   };
 
   hyprland = {
-    attr = "hyprland.version";
     description = "Pin hyprland to 0.55.4 while nixpkgs-unstable propagates via Hydra";
     notes = "xdg-desktop-portal-hyprland override is a coupled removal — remove both blocks together.";
     strategy = "nixpkgs-version";
@@ -28,7 +27,6 @@
   };
 
   mpv-unwrapped = {
-    attr = "mpv-unwrapped.version";
     description = "Backport fence-sync fix milestoned for mpv 0.42.0";
     notes = "mpv override is a coupled removal — remove both blocks together.";
     strategy = "nixpkgs-version";
@@ -37,7 +35,6 @@
   };
 
   waybar = {
-    attr = "waybar.version";
     description = "Pin waybar to git-0594574 pending next tagged release";
     notes = "Also remove waybar-patched flake input from flake.nix. Release cadence has been strictly minor bumps since 0.11.0.";
     strategy = "nixpkgs-version";
