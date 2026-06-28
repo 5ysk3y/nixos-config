@@ -73,7 +73,7 @@ jobs:
             local current
 
             echo "    nix eval nixpkgs#legacyPackages.${system}.${attr} ..." >&2
-            current=$(nix eval --raw "nixpkgs#legacyPackages.${system}.${attr}" 2>/dev/null) || {
+            current=$(nix eval --raw --inputs-from . "nixpkgs#legacyPackages.${system}.${attr}" 2>/dev/null) || {
               echo "    WARNING: eval failed" >&2
               return 2
             }
