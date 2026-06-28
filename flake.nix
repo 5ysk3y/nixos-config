@@ -54,8 +54,15 @@
     # TODO: remove once https://github.com/NixOS/nixpkgs/pull/515997 lands in
     # nixos-unstable and the macbook overlay is updated accordingly.
     qtwebengine-fix.url = "github:NixOS/nixpkgs/d233902339c02a9c334e7e593de68855ad26c4cb";
+    qtwebengine-fix.flake = false;
     waybar-patched.url = "github:Alexays/Waybar/0594574";
     waybar-patched.flake = false;
+    #
+    # Temporary: pins a specific nixpkgs commit to fix zen kernel on Linux.
+    # Used in hosts/gibson/hardware-configuration.nix
+    # TODO: remove once something emerges from https://github.com/NixOS/nixpkgs/issues/535850
+    zen-kernel-fix.url = "github:NixOS/nixpkgs/567a49d1913ce81ac6e9582e3553dd90a955875f";
+    zen-kernel-fix.flake = false;
   };
 
   outputs =
