@@ -7,6 +7,7 @@
   modulesPath,
   system,
   vars,
+  inputs,
   ...
 }:
 
@@ -16,7 +17,13 @@
   ];
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_zen;
+    #kernelPackages = pkgs.linuxPackages_zen;
+    kernelPackages =
+      (import inputs.zen-kernel-fix {
+        inherit system;
+        inherit (pkgs) config;
+      }).linuxPackages_zen;
+
     kernelModules = [
       "nvidia"
       "nvidia_modeset"
