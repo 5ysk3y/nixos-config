@@ -18,14 +18,6 @@
     ];
   };
 
-  hyprland = {
-    description = "Pin hyprland to 0.55.4 while nixpkgs-unstable propagates via Hydra";
-    notes = "xdg-desktop-portal-hyprland override is a coupled removal — remove both blocks together.";
-    strategy = "nixpkgs-version";
-    systems = [ "x86_64-linux" ];
-    threshold = "0.55.4";
-  };
-
   mpv-unwrapped = {
     description = "Backport fence-sync fix milestoned for mpv 0.42.0";
     notes = "mpv override is a coupled removal — remove both blocks together.";
