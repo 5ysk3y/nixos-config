@@ -166,7 +166,7 @@ return function(WS)
   hl.window_rule({ match = { class = "^(discord)(.*)" }, workspace = "name:" .. WS.WS5 })
   hl.window_rule({ match = { class = "^(signal)$" }, workspace = "name:" .. WS.WS5 })
 
-  hl.window_rule({ match = { class = "^(Cider)$" }, workspace = "name:" .. WS.WS6 })
+  hl.window_rule({ match = { class = "^(cider)$" }, workspace = "name:" .. WS.WS6 })
   hl.window_rule({ match = { class = "^(.*)(mpv)(.*)$" }, workspace = "name:" .. WS.WS6, fullscreen = true })
   hl.window_rule({ match = { class = "^(.*)(org.jellyfin.JellyfinDesktop)(.*)$" }, workspace = "name:" .. WS.WS6 })
 
@@ -176,13 +176,13 @@ return function(WS)
 
   hl.window_rule({ match = { class = "^(XIVLauncher.Core|heroic|stream|steam_app|battle.net)" }, tag = "+game_launcher" })
   hl.window_rule({ match = { class = "^(discord|signal|Webcord)$" }, tag = "+social" })
-  hl.window_rule({ match = { class = "^(Cider|org.jellyfin.JellyfinDesktop)" }, tag = "+media" })
+  hl.window_rule({ match = { class = "^(cider|org.jellyfin.JellyfinDesktop)" }, tag = "+media" })
   hl.window_rule({ match = { class = "^(burp-StartBurp|firefox)$" }, tag = "+h4x0r" })
   hl.window_rule({ match = { title = "^(Heroic Games Launcher)" }, tag = "+game_launcher" })
 
   hl.window_rule({ match = { class = "^(discord)$" }, group = "set lock always" })
   hl.window_rule({ match = { class = "^(signal)$" }, group = "invade always" })
-  hl.window_rule({ match = { class = "^(Cider)$" }, group = "set lock always" })
+  hl.window_rule({ match = { class = "^(cider)$" }, group = "set lock always" })
   hl.window_rule({ match = { class = "^(org.jellyfin.JellyfinDesktop)$" }, group = "invade always" })
 
   hl.on("hyprland.start", function()
