@@ -4,7 +4,12 @@
 }:
 {
   imports = [
-    inputs.self.nixosModules.core
-    inputs.self.nixosModules.containers
+    inputs.self.modules.nixos.editor
+    inputs.self.modules.nixos.locale
+    inputs.self.modules.nixos.nix-settings
+    inputs.self.modules.nixos.overlays
+    inputs.self.modules.nixos.security
+    inputs.self.modules.nixos.containers-pentesting
+    inputs.self.modules.nixos.containers-virtualisation
   ];
 }
