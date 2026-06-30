@@ -4,6 +4,10 @@
 }:
 {
   imports = [
-    inputs.self.darwinModules.core
+    inputs.self.modules.darwin.editor
+    inputs.self.modules.darwin.locale
+    inputs.self.modules.darwin.nix-settings
+    inputs.self.modules.darwin.overlays
+    inputs.self.modules.darwin.security
   ];
 }
