@@ -121,16 +121,6 @@ in
         wantedBy = [ "multi-user.target" ];
         serviceConfig.Restart = "always";
       };
-      pcscd-resume = {
-        description = "Restart pcscd after hibernate resume";
-        wantedBy = [ "post-resume.target" ];
-        after = [ "post-resume.target" ];
-        script = ''
-          sleep 3
-          ${pkgs.systemd}/bin/systemctl restart pcscd
-        '';
-        serviceConfig.Type = "oneshot";
-      };
     };
   };
 
@@ -184,29 +174,9 @@ in
   security = {
     polkit.enable = true;
     rtkit.enable = true;
-
-    pam = {
-      u2f = {
-        enable = true;
-        control = "sufficient";
-        settings = {
-          cue = true;
-          origin = "pam://gibson";
-          appid = "pam://gibson";
-          authFile = config.sops.secrets."system/pam/yubikeyPub".path;
-        };
-      };
-
-      services = {
-        login.u2fAuth = true;
-        sudo.u2fAuth = true;
-        sddm.u2fAuth = true;
-        hyprlock.u2fAuth = true;
-      };
-    };
   };
-  # List services that you want to enable:
 
+  # List services that you want to enable:
   services = {
     pipewire = {
       enable = true;
@@ -252,11 +222,6 @@ in
       };
     };
 
-    pcscd = {
-      enable = true;
-      plugins = [ pkgs.ccid ];
-    };
-
     upower.enable = true;
 
     dbus = {
@@ -268,11 +233,6 @@ in
 
     udev = {
       enable = true;
-      packages = with pkgs; [
-        yubikey-manager
-        yubikey-personalization
-        libu2f-host
-      ];
       extraRules = ''
         # SteelSeries Aerox 5
         SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1850", MODE="0666"
@@ -417,12 +377,6 @@ in
     defaultSopsFormat = "yaml";
 
     secrets = {
-
-      # Yubikey
-      "system/pam/yubikeyPub" = {
-        owner = "${vars.username}";
-      };
-
       # System
       "system/gibson_user_pass" = {
         neededForUsers = true;
