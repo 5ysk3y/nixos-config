@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.doomemacs = ./module.nix;
+  flake.modules.homeManager.doomemacs = ./_module.nix;
 }

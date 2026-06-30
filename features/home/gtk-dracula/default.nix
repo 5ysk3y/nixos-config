@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.gtk-dracula = ./module.nix;
+  flake.modules.homeManager.gtk-dracula = ./_module.nix;
 }

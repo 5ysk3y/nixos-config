@@ -5,8 +5,8 @@
 }:
 let
   scripts = {
-    waybar = import ./scripts { inherit pkgs; };
-    scroll_mpris = import ./scripts/scroll-mpris { inherit pkgs; };
+    waybar = import ./_scripts { inherit pkgs; };
+    scroll_mpris = import ./_scripts/scroll-mpris { inherit pkgs; };
   };
 in
 lib.mkIf pkgs.stdenv.hostPlatform.isLinux {

@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.playerctld = ./module.nix;
+  flake.modules.homeManager.playerctld = ./_module.nix;
 }

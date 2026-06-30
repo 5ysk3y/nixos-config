@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.claude-code = ./module.nix;
+  flake.modules.homeManager.claude-code = ./_module.nix;
 }

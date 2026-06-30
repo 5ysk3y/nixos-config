@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.nix-settings = ./module.nix;
+  flake.modules.homeManager.nix-settings = ./_module.nix;
 }

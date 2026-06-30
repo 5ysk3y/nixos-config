@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.hypr = ./module.nix;
+  flake.modules.homeManager.hypr = ./_module.nix;
 }

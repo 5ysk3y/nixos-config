@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.github-cli = ./module.nix;
+  flake.modules.homeManager.github-cli = ./_module.nix;
 }

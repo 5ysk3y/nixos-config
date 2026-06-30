@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.fuzzel = ./module.nix;
+  flake.modules.homeManager.fuzzel = ./_module.nix;
 }

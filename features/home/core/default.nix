@@ -1,9 +1,9 @@
 _: {
   flake.modules.homeManager = {
-    base = ./base.nix;
-    git = ./git.nix;
-    gpg = ./gpg.nix;
-    zoxide = ./zoxide.nix;
-    zsh = ./zsh.nix;
+    base = ./_base.nix;
+    git = ./_git.nix;
+    gpg = ./_gpg.nix;
+    zoxide = ./_zoxide.nix;
+    zsh = ./_zsh.nix;
   };
 }

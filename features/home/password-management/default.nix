@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.password-management = ./module.nix;
+  flake.modules.homeManager.password-management = ./_module.nix;
 }
