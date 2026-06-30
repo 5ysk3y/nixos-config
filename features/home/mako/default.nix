@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.mako = ./module.nix;
+  flake.modules.homeManager.mako = ./_module.nix;
 }

@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.ghostty = ./module.nix;
+  flake.modules.homeManager.ghostty = ./_module.nix;
 }

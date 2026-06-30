@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.gaming = ./module.nix;
+  flake.modules.homeManager.gaming = ./_module.nix;
 }

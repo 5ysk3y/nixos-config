@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.symlinks = ./module.nix;
+  flake.modules.homeManager.symlinks = ./_module.nix;
 }

@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.waybar = ./module.nix;
+  flake.modules.homeManager.waybar = ./_module.nix;
 }

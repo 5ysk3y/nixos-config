@@ -19,7 +19,7 @@ let
     nameValuePair
     ;
 
-  topology = import ./topology.nix;
+  topology = import ./_topology.nix;
 
   cfg = config.features.home.syncthing;
 
@@ -61,7 +61,7 @@ in
 {
 
   imports = [
-    ./linux-bootstrap.nix
+    ./_linux-bootstrap.nix
   ];
 
   options.features.home.syncthing = {

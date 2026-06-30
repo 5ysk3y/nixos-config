@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.syncthing = ./module.nix;
+  flake.modules.homeManager.syncthing = ./_module.nix;
 }

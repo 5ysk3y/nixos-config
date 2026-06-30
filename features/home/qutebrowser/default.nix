@@ -1,3 +1,3 @@
 _: {
-  flake.modules.homeManager.qutebrowser = ./module.nix;
+  flake.modules.homeManager.qutebrowser = ./_module.nix;
 }
