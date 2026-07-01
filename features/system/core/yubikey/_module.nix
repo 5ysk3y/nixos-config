@@ -33,10 +33,10 @@
 
   systemd.services.pcscd-resume = {
     description = "Restart pcscd after hibernate resume";
-    wantedBy = [ "post-resume.target" ];
-    after = [ "post-resume.target" ];
+    wantedBy = [ "hibernate.target" ];
+    after = [ "hibernate.target" ];
     script = ''
-      sleep 3
+      sleep 1
       ${pkgs.systemd}/bin/systemctl restart pcscd
     '';
     serviceConfig.Type = "oneshot";
