@@ -10,3 +10,6 @@ updates:
       github-actions:
         patterns:
           - "*"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
