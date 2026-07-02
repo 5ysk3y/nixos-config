@@ -2,7 +2,7 @@
 MSG=$(cat "$1")
 PATTERN='^(feat|fix|refactor|chore|docs|test|revert)(\([a-z0-9_-]+\))?: .{1,72}$'
 
-if ! echo "$MSG" | head -1 | grep -Pq "$PATTERN"; then
+if ! echo "$MSG" | head -1 | grep -Eq "$PATTERN"; then
   echo "✗ Commit title doesn't match convention:"
   echo "  <type>(<scope>): <description>"
   echo "  Example types: feat fix refactor repo chore docs test revert"
