@@ -16,14 +16,13 @@
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
 
-  boot = {
-    #kernelPackages = pkgs.linuxPackages_zen;
-    kernelPackages =
-      (import inputs.zen-kernel-fix {
-        inherit system;
-        inherit (pkgs) config;
-      }).linuxPackages_zen;
+  # Temporary: fix zen kernel builds on Linux.
+  # https://nixpk.gs/pr-tracker.html?pr=536173 - can be removed post flake lock update
+  # TODO: remove once https://github.com/NixOS/nixpkgs/pull/536173 merges upstream
+  system.boot.loader.kernelFile = "vmlinuz";
 
+  boot = {
+    kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [
       "nvidia"
       "nvidia_modeset"

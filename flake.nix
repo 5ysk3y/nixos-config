@@ -57,12 +57,6 @@
     qtwebengine-fix.flake = false;
     waybar-patched.url = "github:Alexays/Waybar/0594574";
     waybar-patched.flake = false;
-    #
-    # Temporary: pins a specific nixpkgs commit to fix zen kernel on Linux.
-    # Used in hosts/gibson/hardware-configuration.nix
-    # TODO: remove once something emerges from https://github.com/NixOS/nixpkgs/issues/535850
-    zen-kernel-fix.url = "github:NixOS/nixpkgs/567a49d1913ce81ac6e9582e3553dd90a955875f";
-    zen-kernel-fix.flake = false;
   };
 
   outputs =
