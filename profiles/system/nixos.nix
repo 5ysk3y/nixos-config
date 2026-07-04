@@ -4,6 +4,7 @@
 }:
 {
   imports = [
+    inputs.self.modules.nixos.attic-client
     inputs.self.modules.nixos.editor
     inputs.self.modules.nixos.locale
     inputs.self.modules.nixos.nix-settings

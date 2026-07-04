@@ -4,6 +4,7 @@
 }:
 {
   imports = [
+    inputs.self.modules.darwin.attic-client
     inputs.self.modules.darwin.editor
     inputs.self.modules.darwin.locale
     inputs.self.modules.darwin.nix-settings
