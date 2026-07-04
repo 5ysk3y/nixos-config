@@ -24,6 +24,9 @@ let
         host.systemProfiles
         ++ host.modules
         ++ [ { nixpkgs.config.allowUnfree = true; } ]
+        ++ [
+          inputs.sops-nix.darwinModules.sops
+        ]
         ++ repoLib.mkHomeManagerModule {
           platformModule = inputs.home-manager.darwinModules.home-manager;
           inherit host;
