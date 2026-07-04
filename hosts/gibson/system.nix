@@ -35,6 +35,11 @@ in
       internalInterfaces = [ "ve-pentesting" ];
       externalInterface = "enp7s0";
     };
+
+    firewall = {
+      trustedInterfaces = [ config.services.tailscale.interfaceName ];
+      allowedUDPPorts = [ config.services.tailscale.port ];
+    };
   };
 
   # Select internationalisation properties.
