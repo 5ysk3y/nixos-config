@@ -3,7 +3,7 @@ name: Update flake.lock
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 7 * * 0"
+    - cron: "37 4 * * 0"
 
 jobs:
   update-flake-lock:
