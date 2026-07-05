@@ -1,4 +1,4 @@
-name: Nix CI
+name: Nix CI — Checks
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  group: checks-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 defaults:
@@ -35,8 +35,6 @@ jobs:
               "${{ github.event.pull_request.head.sha }}")"
 
           elif [ "${{ github.event.forced }}" = "true" ]; then
-            # Force push: before SHA may not exist in history.
-            # Treat as always relevant so checks don't go stale.
             echo "Force push detected — marking CI as relevant"
             echo "ci_relevant=true" >> "$GITHUB_OUTPUT"
             exit 0
@@ -45,7 +43,6 @@ jobs:
             before="${{ github.event.before }}"
             after="${{ github.event.after }}"
 
-            # Verify before SHA exists — will be zeroed on first push to new branch
             if git cat-file -e "${before}^{commit}" 2>/dev/null; then
               files="$(git diff --name-only "$before" "$after")"
             else
@@ -75,10 +72,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
       - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
       - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
-
       - name: Nix format check (nix fmt)
         run: |
           set -euo pipefail
@@ -103,10 +98,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
       - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
       - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
-
       - name: statix
         run: |
           set -euo pipefail
@@ -124,56 +117,12 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
-
       - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
       - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
-
       - name: Run gitleaks (native)
         run: |
           set -euo pipefail
           nix run nixpkgs#gitleaks -- detect --source . --redact
-
-  eval-check:
-    name: eval check (linux)
-    needs: changes
-    if: needs.changes.outputs.ci_relevant == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
-      - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
-      - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
-
-      - name: Basic flake shape checks, no secrets
-        run: |
-          set -euo pipefail
-          nix flake show --no-write-lock-file
-          nix eval .#nixosConfigurations.gibson.pkgs.stdenv.hostPlatform.system --no-write-lock-file >/dev/null
-
-  darwin-eval-check:
-    name: eval check (darwin)
-    needs: changes
-    if: needs.changes.outputs.ci_relevant == 'true'
-    runs-on: macos-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
-      - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
-      - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
-
-      - name: Basic flake shape checks (darwin)
-        run: |
-          set -euo pipefail
-          nix flake show --no-write-lock-file
-          nix eval .#darwinConfigurations.macbook.pkgs.stdenv.hostPlatform.system --no-write-lock-file >/dev/null
 
   flake-secrets-check:
     name: full flake check (with secrets)
@@ -186,31 +135,23 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
-
       - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
       - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
-
       - name: Free up disk space
         run: |
           set -euo pipefail
           df -h
-          sudo rm -rf /usr/share/dotnet \
-                      /opt/ghc \
-                      /opt/hostedtoolcache \
-                      /usr/local/lib/android
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
           df -h
-
       - name: Start ssh-agent and add deploy key
         uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
-
       - name: Add GitHub to known_hosts
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
           ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
-
       - name: Prepare age key in runner temp
         run: |
           set -euo pipefail
@@ -218,7 +159,6 @@ jobs:
           printf "%s" "${{ secrets.SOPS_AGE_KEY }}" > "$RUNNER_TEMP/age/keys.txt"
           chmod 0600 "$RUNNER_TEMP/age/keys.txt"
           echo "SOPS_AGE_KEY_FILE=$RUNNER_TEMP/age/keys.txt" >> "$GITHUB_ENV"
-
       - name: Flake check
         run: |
           set -euo pipefail

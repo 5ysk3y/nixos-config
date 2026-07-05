@@ -1,0 +1,152 @@
+name: Nix CI — Full Build
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      force_full_build:
+        description: 'Force full build regardless of flake.lock changes'
+        type: boolean
+        default: false
+
+concurrency:
+  group: full-build-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  changes:
+    name: detect lockfile changes
+    runs-on: ubuntu-latest
+    outputs:
+      lockfile_changed: ${{ steps.changed.outputs.lockfile_changed }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+      - id: changed
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.force_full_build }}" = "true" ]; then
+              echo "lockfile_changed=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "lockfile_changed=false" >> "$GITHUB_OUTPUT"
+            fi
+            exit 0
+          fi
+          files="$(git diff --name-only \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}")"
+          echo "Changed files:"
+          echo "$files"
+          if echo "$files" | grep -qx 'flake.lock'; then
+            echo "lockfile_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "lockfile_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  eval-check:
+    name: full build check (linux)
+    needs: changes
+    if: needs.changes.outputs.lockfile_changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - name: Free up disk space
+        run: |
+          set -euo pipefail
+          df -h
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
+          df -h
+      - name: Setup tailscale
+        uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+      - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
+        with:
+          extra-conf: |
+            extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
+            extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
+      - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
+      - name: Start ssh-agent and add deploy key
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
+        with:
+          ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
+      - name: Add GitHub to known_hosts
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
+      - name: Prepare age key in runner temp
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/age"
+          printf "%s" "${{ secrets.SOPS_AGE_KEY }}" > "$RUNNER_TEMP/age/keys.txt"
+          chmod 0600 "$RUNNER_TEMP/age/keys.txt"
+          echo "SOPS_AGE_KEY_FILE=$RUNNER_TEMP/age/keys.txt" >> "$GITHUB_ENV"
+      - name: Full build test
+        run: |
+          set -euo pipefail
+          nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file
+
+  darwin-eval-check:
+    name: full build check (darwin)
+    needs: changes
+    if: needs.changes.outputs.lockfile_changed == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - name: Free up disk space
+        run: |
+          set -euo pipefail
+          df -h
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
+          df -h
+      - name: Setup tailscale
+        uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
+      - uses: DeterminateSystems/determinate-nix-action@629b284231c2a82554b724e357e47fc6020833c8
+        with:
+          extra-conf: |
+            extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
+            extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
+      - uses: DeterminateSystems/flakehub-cache-action@9926dde74484ccb2224835b80531de64ed4336ef
+      - name: Start ssh-agent and add deploy key
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
+        with:
+          ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
+      - name: Free up disk space
+        run: |
+          set -euo pipefail
+          df -h
+          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
+          df -h
+      - name: Add GitHub to known_hosts
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
+      - name: Prepare age key in runner temp
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/age"
+          printf "%s" "${{ secrets.SOPS_AGE_KEY }}" > "$RUNNER_TEMP/age/keys.txt"
+          chmod 0600 "$RUNNER_TEMP/age/keys.txt"
+          echo "SOPS_AGE_KEY_FILE=$RUNNER_TEMP/age/keys.txt" >> "$GITHUB_ENV"
+      - name: Full build test
+        run: |
+          set -euo pipefail
+          nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file
