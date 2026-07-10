@@ -96,6 +96,12 @@ jobs:
         run: |
           set -euo pipefail
           nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file
+      - name: Push built closure to attic
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+          nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   darwin-eval-check:
     name: full build check (darwin)
@@ -150,3 +156,9 @@ jobs:
         run: |
           set -euo pipefail
           nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file
+      - name: Push built closure to attic
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+          nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
