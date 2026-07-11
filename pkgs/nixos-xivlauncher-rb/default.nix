@@ -19,7 +19,7 @@
 }:
 
 let
-  tag = "1.4.0.7";
+  tag = "1.4.0.8";
 in
 buildDotnetModule rec {
   pname = "xivlauncher-rb";
