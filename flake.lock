@@ -460,6 +460,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-setuptools-pin": {
+      "locked": {
+        "lastModified": 1775781922,
+        "narHash": "sha256-CcqiN6UcbqTHr3j6rPEKCf/vuw3JF8xpisPnjov8P14=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "bc69cb503d4a70df1f12ea9fad63366ed6f62b3c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "bc69cb503d4a70df1f12ea9fad63366ed6f62b3c",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1783148766,
@@ -684,6 +700,7 @@
         "nix-gaming": "nix-gaming",
         "nix-secrets": "nix-secrets",
         "nixpkgs": "nixpkgs_8",
+        "nixpkgs-setuptools-pin": "nixpkgs-setuptools-pin",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "qtwebengine-fix": "qtwebengine-fix",
         "qute-dracula": "qute-dracula",
