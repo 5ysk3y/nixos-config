@@ -70,12 +70,12 @@ jobs:
         uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-      - uses: DeterminateSystems/determinate-nix-action@c70cb8ae92d68c66953db28a26a63db1665bc837
+      - uses: DeterminateSystems/determinate-nix-action@2a0be2498974c2b6327e19780488744384637d88
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@8ceb5534cc3f9ba4f1083af0ab4ce21b6c19217f
+      - uses: DeterminateSystems/flakehub-cache-action@3be0931021788e3bb4df65f59a555039c2fa2d46
         with:
           github-actions-cache: disabled
       - name: Start ssh-agent and add deploy key
@@ -126,12 +126,12 @@ jobs:
         uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-      - uses: DeterminateSystems/determinate-nix-action@c70cb8ae92d68c66953db28a26a63db1665bc837
+      - uses: DeterminateSystems/determinate-nix-action@2a0be2498974c2b6327e19780488744384637d88
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@8ceb5534cc3f9ba4f1083af0ab4ce21b6c19217f
+      - uses: DeterminateSystems/flakehub-cache-action@3be0931021788e3bb4df65f59a555039c2fa2d46
         with:
           github-actions-cache: disabled
       - name: Start ssh-agent and add deploy key
