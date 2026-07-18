@@ -75,7 +75,8 @@ mkMerge [
           ${inputs.doomemacs-modules}/ "$EMACSDIR/sources/doom+/"
 
         stamp="${config.xdg.stateHome}/doom/sync-stamp"
-        key="${emacsPkg}|${inputs.doomemacs}|${inputs.doomemacs-modules}"
+        doomcfg_hash=$(find "${config.xdg.configHome}/doom" -type f | sort | xargs sha256sum | sha256sum | cut -d' ' -f1)
+        key="${emacsPkg}|${inputs.doomemacs}|${inputs.doomemacs-modules}|$doomcfg_hash"
 
         if [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ]; then
           echo "doom: inputs changed, running doom sync -u --force"
