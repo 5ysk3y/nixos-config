@@ -85,6 +85,69 @@ jobs:
             version_gte "$current" "$threshold"
           }
 
+          # ------------------------------------------------------------------
+          # check_landed_in_nixpkgs: given a commit SHA from NixOS/nixpkgs,
+          # checks whether it's already an ancestor of the locked nixpkgs rev
+          # (i.e. actually present in what a system builds against, not
+          # just merged somewhere upstream).
+          # Returns 0 if landed, 1 if not.
+          # ------------------------------------------------------------------
+          check_landed_in_nixpkgs() {
+            local commit_sha="$1"
+            local cmp_status
+            cmp_status=$(curl -fsSL \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/NixOS/nixpkgs/compare/${LOCKED_NIXPKGS_REV}...${commit_sha}" \
+              | jq -r '.status')
+
+            echo "    compare ${LOCKED_NIXPKGS_REV}...${commit_sha}: ${cmp_status}" >&2
+            case "$cmp_status" in
+              identical|behind) return 0 ;;
+              *) return 1 ;;
+            esac
+          }
+
+          # ------------------------------------------------------------------
+          # find_closing_commit: uses the closedByPullRequestsReferences
+          # GraphQL field to find the merge commit of the PR that closed this
+          # issue. This is more reliable than the REST timeline API's `closed`
+          # event, which only carries a commit_id for issues closed via
+          # "Fixes #N" keyword syntax — not for manual closure with a linked
+          # PR (GitHub's "closed this as completed in #N" UI action).
+          # Prints the merge commit SHA to stdout if found, empty otherwise.
+          # ------------------------------------------------------------------
+          find_closing_commit() {
+            local repo="$1" number="$2"
+            local owner_part repo_part gql_response commit
+
+            owner_part="${repo%%/*}"
+            repo_part="${repo##*/}"
+
+            gql_response=$(gh api graphql \
+              -F owner="${owner_part}" \
+              -F repo="${repo_part}" \
+              -F issue="${number}" \
+              -f query='
+                query ($owner: String!, $repo: String!, $issue: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $issue) {
+                      closedByPullRequestsReferences(first: 10) {
+                        nodes { merged mergeCommit { oid } }
+                      }
+                    }
+                  }
+                }')
+
+            commit=$(printf '%s' "$gql_response" | jq -r '[.data.repository.issue.closedByPullRequestsReferences.nodes[] | select(.merged == true) | .mergeCommit.oid] | last // empty')
+
+            if [ -z "$commit" ]; then
+              echo "    no merged closing PR found via closedByPullRequestsReferences" >&2
+            fi
+            echo "$commit"
+          }
+
           # ----------------------------------------------------------------
           # check_github_items: checks state of issues or PRs via REST API.
           # item_type: "issue" or "pull"
@@ -104,7 +167,7 @@ jobs:
             local all_done=true
 
             while IFS= read -r item; do
-              local repo number state merged api_response repo_short
+              local repo number state merged merge_commit_sha api_response repo_short landed closing_commit reached_terminal_state
 
               repo=$(echo "$item" | jq -r '.repo')
               number=$(echo "$item" | jq -r '.number')
@@ -120,19 +183,60 @@ jobs:
               if [ "$item_type" = "pull" ]; then
                 merged=$(echo "$api_response" | jq -r '.merged')
                 state=$([ "$merged" = "true" ] && echo "merged" || echo "$(echo "$api_response" | jq -r '.state')")
+                merge_commit_sha=$(echo "$api_response" | jq -r '.merge_commit_sha // empty')
               else
                 state=$(echo "$api_response" | jq -r '.state')
               fi
 
               echo "    state: ${state}" >&2
 
+              landed=""
+              if [ "$item_type" = "pull" ] && [ "$state" = "merged" ] && [ "$repo" = "NixOS/nixpkgs" ] && [ -n "${merge_commit_sha:-}" ]; then
+                if check_landed_in_nixpkgs "$merge_commit_sha"; then
+                  landed="yes"
+                else
+                  landed="no"
+                fi
+              elif [ "$item_type" = "issue" ] && [ "$state" = "closed" ] && [ "$repo" = "NixOS/nixpkgs" ]; then
+                closing_commit=$(find_closing_commit "$repo" "$number")
+                if [ -n "$closing_commit" ]; then
+                  if check_landed_in_nixpkgs "$closing_commit"; then
+                    landed="yes"
+                  else
+                    landed="no"
+                  fi
+                fi
+              fi
+
+              # Only append a landed-status suffix when the item has actually
+              # reached closed/merged — otherwise the base state alone is the
+              # correct, complete signal (nothing to verify yet).
+              reached_terminal_state=false
+              if [ "$item_type" = "pull" ] && [ "$state" = "merged" ]; then
+                reached_terminal_state=true
+              elif [ "$item_type" = "issue" ] && [ "$state" = "closed" ]; then
+                reached_terminal_state=true
+              fi
+
               # stdout only — this line is captured into REPORT_LINES via $()
               # Uses redirect.github.com (no backlink) and plain link text (no owner/repo#N)
-              echo "[${repo_short} ${item_type} ${number}](https://redirect.github.com/${repo}/${item_type}s/${number}): \`${state}\`"
+              case "$landed" in
+                yes) echo "[${repo_short} ${item_type} ${number}](https://redirect.github.com/${repo}/${item_type}s/${number}): \`${state}\` — landed in locked nixpkgs" ;;
+                no)  echo "[${repo_short} ${item_type} ${number}](https://redirect.github.com/${repo}/${item_type}s/${number}): \`${state}\` — NOT yet landed in locked nixpkgs" ;;
+                *)
+                  if [ "$reached_terminal_state" = true ]; then
+                    echo "[${repo_short} ${item_type} ${number}](https://redirect.github.com/${repo}/${item_type}s/${number}): \`${state}\` — landing status unverified"
+                  else
+                    echo "[${repo_short} ${item_type} ${number}](https://redirect.github.com/${repo}/${item_type}s/${number}): \`${state}\`"
+                  fi
+                  ;;
+              esac
 
               if [ "$item_type" = "pull" ] && [ "$state" != "merged" ]; then
                 all_done=false
               elif [ "$item_type" = "issue" ] && [ "$state" != "closed" ]; then
+                all_done=false
+              elif [ "$repo" = "NixOS/nixpkgs" ] && [ "$landed" != "yes" ]; then
                 all_done=false
               fi
             done < <(echo "$items_json" | jq -c '.[]')
@@ -148,6 +252,10 @@ jobs:
           # ----------------------------------------------------------------
           echo "Evaluating flake.overlayAudits ..."
           AUDIT_JSON=$(nix eval .#overlayAudits --json)
+
+          echo "Resolving locked nixpkgs revision ..."
+          LOCKED_NIXPKGS_REV=$(nix flake metadata --json | jq -r '.locks.nodes.nixpkgs.locked.rev')
+          echo "Locked nixpkgs rev: ${LOCKED_NIXPKGS_REV}"
 
           while IFS= read -r host_key; do
             echo ""
@@ -306,8 +414,8 @@ jobs:
           gh issue create \
             --title "chore(overlays): audit flagged obsolete overlays ($(date -u +'%d/%m/%y'))" \
             --body-file "$ISSUE_BODY_FILE" \
-            --label "dependencies,automated"
-
+            --label "dependencies" \
+            --label "automated"
           echo "Issue created"
 
       - name: No obsolete overlays found
