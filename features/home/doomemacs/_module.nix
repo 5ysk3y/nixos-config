@@ -47,6 +47,8 @@ mkMerge [
         imagemagick
         fd
         zstd
+        cmake
+        gnumake
       ];
 
       file."${config.xdg.configHome}/doom" = {
