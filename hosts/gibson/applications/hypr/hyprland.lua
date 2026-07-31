@@ -178,7 +178,7 @@ return function(WS)
   hl.window_rule({ match = { class = "^(gamescope)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { title = "^(007 First Light)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { class = "^(steam_app_0)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
-  hl.window_rule({ match = { content = "game", fullscreen = true }, confine_pointer = true })
+  hl.window_rule({ match = { tag = "game", fullscreen = true }, confine_pointer = true })
 
   ------------------------------------------------------------------------
   -- WINDOW RULES: idle inhibit
