@@ -79,21 +79,13 @@
 (add-to-list 'default-frame-alist '(alpha-background . 80))
 
 (after! lsp-mode
-  (setq lsp-diagnostics-provider :flycheck)
-
-  (lsp-register-client
-   (make-lsp-client
-    :new-connection (lsp-stdio-connection "nixd")
-    :major-modes '(nix-mode)
-    :priority 1
-    :server-id 'nixd)))
+  (setq lsp-diagnostics-provider :flycheck))
 
 (after! flycheck
   (flycheck-add-mode 'statix 'nix-mode))
 
 (after! nix-mode
   (add-hook 'nix-mode-hook #'lsp-deferred)
-
   (add-hook 'nix-mode-hook
             (lambda ()
               (add-to-list 'flycheck-disabled-checkers 'nix)
@@ -101,23 +93,22 @@
 
 (after! lsp-nix
   (let* ((repo (or (getenv "NIXOS_CONFIG")
-                   (expand-file-name "~/nixos-config")))
+                    (expand-file-name "~/nixos-config")))
          (flake (format "(builtins.getFlake \"%s\")" repo))
-         (is-darwin (eq system-type 'darwin)))
+         (is-darwin (eq system-type 'darwin))
+         (system (if is-darwin "aarch64-darwin" "x86_64-linux")))
     (setq lsp-nix-nixd-server-path "nixd"
-          lsp-nix-nixd-formatting-command [ "nixfmt" ]
-          lsp-nix-nixd-nixpkgs-expr "import <nixpkgs> { }"
+          lsp-nix-nixd-formatting-command ["nixfmt"]
+          lsp-nix-nixd-nixpkgs-expr (format "%s.legacyPackages.%s" flake system) 
           lsp-disabled-clients '((nix-mode . nix-nil))
-
           lsp-nix-nixd-nixos-options-expr
           (if is-darwin
               (format "%s.darwinConfigurations.macbook.options" flake)
             (format "%s.nixosConfigurations.gibson.options" flake))
-
           lsp-nix-nixd-home-manager-options-expr
           (if is-darwin
-              (format "%s.darwinConfigurations.macbook.config.home-manager.users.rickie.home.options" flake)
-            (format "%s.nixosConfigurations.gibson.config.home-manager.users.rickie.home.options" flake)))))
+              (format "%s.darwinConfigurations.macbook.options.home-manager.users.type.getSubOptions []" flake)
+            (format "%s.nixosConfigurations.gibson.options.home-manager.users.type.getSubOptions []" flake)))))
 
 (remove-hook 'markdown-mode-hook #'pretty-symbols-mode)
 (set-fontset-font t 'unicode "Noto Color Emoji" nil 'append)
@@ -169,3 +160,14 @@
 
   (map! :leader
         :desc "Control node terminal" "o t" #'my/control-node-vterm))
+
+(after! clipetty
+  (define-advice clipetty-cut (:around (orig-fn string &rest args) +my/only-explicit-yank-a)
+    "Only forward kills to the system clipboard (via OSC 52) for an
+explicit evil yank (y, yy, visual y). Deletes/changes still populate
+evil's unnamed register locally but no longer touch the clipboard."
+    (when (eq this-command 'evil-yank)
+      (apply orig-fn string args))))
+
+(after! (:and company nix-mode)
+  (set-company-backend! 'nix-mode 'company-capf))
