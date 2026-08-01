@@ -45,6 +45,7 @@
         volume = 90;
 
         vd-lavc-dr = "no";
+        target-colorspace-hint-mode = "source";
       };
 
       profiles.wallpaper = {
