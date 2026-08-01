@@ -31,6 +31,16 @@
           ];
       };
 
+      # TODO: Monitor new bitwarden package releases
+      # Upstream issue has no permanent fix yet:
+      # https://github.com/bitwarden/clients/issues/21661
+      bitwarden-desktop = prev.bitwarden-desktop.overrideAttrs (old: {
+        postFixup = (old.postFixup or "") + ''
+          wrapProgram $out/bin/bitwarden \
+            --set SECURE_KEY_CONTAINER_BACKEND keyctl
+        '';
+      });
+
       # ── Temporary overlays ─────────────────────────────────────────
       # TODO: Monitor new mpv package releases
       # Associated PR is merged; requires a new release.
@@ -58,6 +68,5 @@
         nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.catch2_3 ];
       });
     })
-
   ];
 }

@@ -153,7 +153,7 @@ return function(WS)
   hl.window_rule({ match = { class = "^(cider)$" }, workspace = "name:" .. WS.WS6 })
   hl.window_rule({ match = { class = "^(.*)(mpv)(.*)$" }, workspace = "name:" .. WS.WS6, fullscreen = true })
   hl.window_rule({ match = { class = "^(.*)(org.jellyfin.JellyfinDesktop)(.*)$" }, workspace = "name:" .. WS.WS6 })
-  hl.window_rule({ match = { class = "^(Bitwarden)$" }, workspace = "name:" .. WS.WS7 })
+  hl.window_rule({ match = { class = "^(bitwarden)$" }, workspace = "name:" .. WS.WS7 })
   hl.window_rule({ match = { class = "^(.*)(obs)(.*)$" }, workspace = "name:" .. WS.WS8 })
 
   ------------------------------------------------------------------------
