@@ -13,13 +13,7 @@
   home = {
     homeDirectory = "/home/${vars.username}";
 
-    pointerCursor = {
-      enable = true;
-      gtk.enable = true;
-      package = pkgs.bibata-cursors;
-      name = "Bibata-Modern-Classic";
-      size = 22;
-    };
+    pointerCursor.enable = true;
 
     sessionVariables = {
       NIXOS_OZONE_WL = 1;
@@ -29,7 +23,6 @@
     packages = with pkgs; [
       bitwarden-desktop
       discord
-      dracula-theme
       fontconfig
       grimblast
       hyprpolkitagent

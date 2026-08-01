@@ -36,31 +36,19 @@ in
       enable = true;
 
       extraConfig = ''
-        import dracula.draw
-
         # Load existing settings made via :set
         config.load_autoconfig(False)
-
-        dracula.draw.blood(c, {
-            'spacing': {
-                'vertical': 6,
-                'horizontal': 8
-            }
-        })
 
         c.auto_save.session = True
 
         c.fonts.default_family = ["Hack"]
         c.fonts.default_size = '8pt'
 
-        c.colors.downloads.start.bg = "#282a36"
-        c.colors.downloads.start.fg = "#f8f8f2"
         c.colors.webpage.bg = "light grey"
         c.colors.webpage.darkmode.algorithm = "lightness-cielab"
         c.colors.webpage.darkmode.enabled = True
         c.colors.webpage.darkmode.policy.images = "never"
         c.colors.webpage.darkmode.threshold.background = 150
-        c.colors.webpage.preferred_color_scheme = "dark"
 
         c.content.autoplay = False
         c.content.cookies.accept = "no-3rdparty"
