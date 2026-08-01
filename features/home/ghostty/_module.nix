@@ -10,8 +10,6 @@
       enableZshIntegration = true;
       installVimSyntax = true;
       settings = {
-        theme = "dracula";
-        font-size = 14;
         macos-option-as-alt = "left";
       };
     };
