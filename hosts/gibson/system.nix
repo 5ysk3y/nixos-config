@@ -139,7 +139,6 @@ in
       libmodule
       linux-firmware
       lm_sensors
-      lutris
       nixos-container
       nix-prefetch-github
       openssl
