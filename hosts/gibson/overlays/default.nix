@@ -45,13 +45,6 @@
         inherit (final) mpv-unwrapped;
       };
 
-      # upstream nixpkgs issue - remove when bitwarden-desktop bumps electron
-      # TODO: Monitor this for upstream: https://github.com/NixOS/nixpkgs/issues/526914
-      # Also remove permittedInsecurePackages from hosts/gibson/system.nix
-      bitwarden-desktop = prev.bitwarden-desktop.override {
-        electron_39 = final.electron_39-bin;
-      };
-
       # TODO: Monitor new waybar package releases
       # Associated PR is merged; requires a new release.
       waybar = prev.waybar.overrideAttrs (old: {
