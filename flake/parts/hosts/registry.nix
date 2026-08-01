@@ -111,7 +111,10 @@ in
                 # which matches unstable. The version mismatch warning fires as a
                 # false positive because pkgs-stable (26.05) is also in scope.
                 # Suppressing here rather than per-host since it applies globally.
-                { home.enableNixpkgsReleaseCheck = false; }
+                {
+                  home.enableNixpkgsReleaseCheck = false;
+                  stylix.overlays.enable = lib.mkForce false;
+                }
               ];
 
               users.${host.vars.username} = {
