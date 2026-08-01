@@ -17,7 +17,6 @@ jobs:
       issues: write
       id-token: write
       contents: read
-
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -52,6 +51,7 @@ jobs:
           set -euo pipefail
 
           OBSOLETE_IDS=()
+          BROKEN_IDS=()
           REPORT_LINES=()
 
           # ----------------------------------------------------------------
@@ -74,7 +74,6 @@ jobs:
           check_nixpkgs_version() {
             local attr="$1" threshold="$2" system="$3"
             local current
-
             echo "    nix eval nixpkgs#legacyPackages.${system}.${attr} ..." >&2
             current=$(nix eval --raw --inputs-from . "nixpkgs#legacyPackages.${system}.${attr}" 2>/dev/null) || {
               echo "    WARNING: eval failed" >&2
@@ -101,7 +100,6 @@ jobs:
               -H "X-GitHub-Api-Version: 2022-11-28" \
               "https://api.github.com/repos/NixOS/nixpkgs/compare/${LOCKED_NIXPKGS_REV}...${commit_sha}" \
               | jq -r '.status')
-
             echo "    compare ${LOCKED_NIXPKGS_REV}...${commit_sha}: ${cmp_status}" >&2
             case "$cmp_status" in
               identical|behind) return 0 ;;
@@ -121,10 +119,8 @@ jobs:
           find_closing_commit() {
             local repo="$1" number="$2"
             local owner_part repo_part gql_response commit
-
             owner_part="${repo%%/*}"
             repo_part="${repo##*/}"
-
             gql_response=$(gh api graphql \
               -F owner="${owner_part}" \
               -F repo="${repo_part}" \
@@ -139,9 +135,7 @@ jobs:
                     }
                   }
                 }')
-
             commit=$(printf '%s' "$gql_response" | jq -r '[.data.repository.issue.closedByPullRequestsReferences.nodes[] | select(.merged == true) | .mergeCommit.oid] | last // empty')
-
             if [ -z "$commit" ]; then
               echo "    no merged closing PR found via closedByPullRequestsReferences" >&2
             fi
@@ -165,21 +159,17 @@ jobs:
           check_github_items() {
             local items_json="$1" item_type="$2"
             local all_done=true
-
             while IFS= read -r item; do
               local repo number state merged merge_commit_sha api_response repo_short landed closing_commit reached_terminal_state
-
               repo=$(echo "$item" | jq -r '.repo')
               number=$(echo "$item" | jq -r '.number')
               repo_short="${repo##*/}"
-
               echo "    Checking ${repo} ${item_type} ${number} ..." >&2
               api_response=$(curl -fsSL \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer ${GH_TOKEN}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 "https://api.github.com/repos/${repo}/${item_type}s/${number}")
-
               if [ "$item_type" = "pull" ]; then
                 merged=$(echo "$api_response" | jq -r '.merged')
                 state=$([ "$merged" = "true" ] && echo "merged" || echo "$(echo "$api_response" | jq -r '.state')")
@@ -187,9 +177,7 @@ jobs:
               else
                 state=$(echo "$api_response" | jq -r '.state')
               fi
-
               echo "    state: ${state}" >&2
-
               landed=""
               if [ "$item_type" = "pull" ] && [ "$state" = "merged" ] && [ "$repo" = "NixOS/nixpkgs" ] && [ -n "${merge_commit_sha:-}" ]; then
                 if check_landed_in_nixpkgs "$merge_commit_sha"; then
@@ -207,7 +195,6 @@ jobs:
                   fi
                 fi
               fi
-
               # Only append a landed-status suffix when the item has actually
               # reached closed/merged — otherwise the base state alone is the
               # correct, complete signal (nothing to verify yet).
@@ -217,7 +204,6 @@ jobs:
               elif [ "$item_type" = "issue" ] && [ "$state" = "closed" ]; then
                 reached_terminal_state=true
               fi
-
               # stdout only — this line is captured into REPORT_LINES via $()
               # Uses redirect.github.com (no backlink) and plain link text (no owner/repo#N)
               case "$landed" in
@@ -231,7 +217,6 @@ jobs:
                   fi
                   ;;
               esac
-
               if [ "$item_type" = "pull" ] && [ "$state" != "merged" ]; then
                 all_done=false
               elif [ "$item_type" = "issue" ] && [ "$state" != "closed" ]; then
@@ -240,15 +225,56 @@ jobs:
                 all_done=false
               fi
             done < <(echo "$items_json" | jq -c '.[]')
-
             [ "$all_done" = true ]
+          }
+
+          # ------------------------------------------------------------------
+          # resolve_config_namespace: determines whether a host_key lives under
+          # nixosConfigurations or darwinConfigurations, by probing both.
+          # Prints the namespace to stdout, empty if neither matches.
+          # ------------------------------------------------------------------
+          resolve_config_namespace() {
+            local host="$1"
+            if nix eval --json ".#nixosConfigurations.${host}" --apply 'x: true' >/dev/null 2>&1; then
+              echo "nixosConfigurations"
+            elif nix eval --json ".#darwinConfigurations.${host}" --apply 'x: true' >/dev/null 2>&1; then
+              echo "darwinConfigurations"
+            else
+              echo ""
+            fi
+          }
+
+          # ------------------------------------------------------------------
+          # check_override_evaluates: attempts to force derivation construction
+          # for the overridden package, independent of tracking-issue status.
+          # This catches breakage like a renamed .override argument that a
+          # closed upstream issue would never surface — e.g. a package's
+          # .override call referencing an argument name that no longer exists
+          # after an unrelated upstream rename.
+          # Returns 0 = still evaluates fine, 1 = broken, prints error tail on failure.
+          # ------------------------------------------------------------------
+          check_override_evaluates() {
+            local config_ns="$1" host="$2" eval_attr="$3"
+            local err_log
+            err_log="$(mktemp)"
+            echo "    nix eval .#${config_ns}.${host}.pkgs.${eval_attr}.drvPath ..." >&2
+            if nix eval --raw --inputs-from . \
+                ".#${config_ns}.${host}.pkgs.${eval_attr}.drvPath" \
+                >/dev/null 2>"$err_log"; then
+              rm -f "$err_log"
+              return 0
+            else
+              tail -n 6 "$err_log" | tr '\n' ' ' | sed 's/  */ /g'
+              rm -f "$err_log"
+              return 1
+            fi
           }
 
           # ----------------------------------------------------------------
           # Main loop — read audit metadata from flake output.
-          # Uses process substitution throughout to keep OBSOLETE_IDS and
-          # REPORT_LINES in the current shell (pipe-into-while runs a subshell
-          # and would silently discard all accumulated values).
+          # Uses process substitution throughout to keep OBSOLETE_IDS,
+          # BROKEN_IDS and REPORT_LINES in the current shell (pipe-into-while
+          # runs a subshell and would silently discard all accumulated values).
           # ----------------------------------------------------------------
           echo "Evaluating flake.overlayAudits ..."
           AUDIT_JSON=$(nix eval .#overlayAudits --json)
@@ -261,17 +287,22 @@ jobs:
             echo ""
             echo "=== ${host_key} ==="
 
+            CONFIG_NS=$(resolve_config_namespace "$host_key")
+            if [ -z "$CONFIG_NS" ]; then
+              echo "  WARNING: could not resolve nixosConfigurations/darwinConfigurations for ${host_key}"
+            else
+              echo "  Config namespace: ${CONFIG_NS}"
+            fi
+
             while IFS= read -r id; do
               entry=$(echo "$AUDIT_JSON" | jq -c --arg h "$host_key" --arg id "$id" '.[$h][$id]')
               strategy=$(echo "$entry" | jq -r '.strategy')
               description=$(echo "$entry" | jq -r '.description')
               notes=$(echo "$entry" | jq -r '.notes // empty')
-
               echo ""
               echo "  [${id}] ${strategy}: ${description}"
 
               is_obsolete=false
-
               case "$strategy" in
                 nixpkgs-version)
                   attr=$(echo "$entry" | jq -r '.attr // empty')
@@ -283,12 +314,10 @@ jobs:
                   threshold=$(echo "$entry" | jq -r '.threshold')
                   all_met=true
                   version_lines=()
-
                   while IFS= read -r system; do
                     current=""
                     rc=0
                     current=$(check_nixpkgs_version "$attr" "$threshold" "$system") || rc=$?
-
                     case $rc in
                       0) version_lines+=("- ✅ \`${system}\`: \`${attr} = ${current}\` >= \`${threshold}\`") ;;
                       1) version_lines+=("- ⏳ \`${system}\`: \`${attr} = ${current}\` < \`${threshold}\`")
@@ -297,7 +326,6 @@ jobs:
                          all_met=false ;;
                     esac
                   done < <(echo "$entry" | jq -r '.systems[]')
-
                   if [ "$all_met" = true ]; then
                     is_obsolete=true
                     REPORT_LINES+=("✅ **${host_key} / ${id}**: nixpkgs meets threshold \`>= ${threshold}\` on all declared systems")
@@ -308,7 +336,6 @@ jobs:
                     REPORT_LINES+=("$line")
                   done
                   ;;
-
                 nixpkgs-issue)
                   items_json=$(echo "$entry" | jq -c '.trackingIssues')
                   issue_output=""
@@ -322,7 +349,6 @@ jobs:
                     REPORT_LINES+=("⏳ **${host_key} / ${id}**: tracking issue(s) still open — ${summary}")
                   fi
                   ;;
-
                 nixpkgs-pr)
                   items_json=$(echo "$entry" | jq -c '.trackingPRs')
                   pr_output=""
@@ -336,12 +362,33 @@ jobs:
                     REPORT_LINES+=("⏳ **${host_key} / ${id}**: tracking PR(s) not yet merged — ${summary}")
                   fi
                   ;;
-
                 *)
                   echo "  WARNING: unknown strategy '${strategy}'"
                   REPORT_LINES+=("⚠️  **${host_key} / ${id}**: unknown strategy \`${strategy}\` — update audit.nix")
                   ;;
               esac
+
+              # -- Liveness check: does the override still evaluate at all? --
+              # Runs unconditionally, independent of the strategy result above.
+              # This is what catches a renamed .override argument, a removed
+              # attribute, or any other breakage a tracking-issue/version check
+              # would never see — because the underlying tracked problem can be
+              # completely unrelated to why the override itself stopped working.
+              if [ -n "$CONFIG_NS" ]; then
+                eval_attr=$(echo "$entry" | jq -r '.evalAttr // empty')
+                if [ -z "$eval_attr" ]; then
+                  eval_attr="$id"
+                  echo "    evalAttr not set — defaulting to ${eval_attr}"
+                fi
+                eval_error=""
+                if ! eval_error=$(check_override_evaluates "$CONFIG_NS" "$host_key" "$eval_attr"); then
+                  BROKEN_IDS+=("${host_key}::${id}")
+                  REPORT_LINES+=("🔴 **${host_key} / ${id}**: OVERRIDE BROKEN — evaluation fails against current locked nixpkgs, regardless of tracking status")
+                  REPORT_LINES+=("  \`\`\`")
+                  REPORT_LINES+=("  ${eval_error}")
+                  REPORT_LINES+=("  \`\`\`")
+                fi
+              fi
 
               if [ "$is_obsolete" = true ]; then
                 OBSOLETE_IDS+=("${host_key}::${id}")
@@ -349,9 +396,9 @@ jobs:
                   REPORT_LINES+=("  📎 **Note:** ${notes}")
                 fi
               fi
+
               # Blank line between overlay entries for Markdown paragraph separation
               REPORT_LINES+=("")
-
             done < <(echo "$AUDIT_JSON" | jq -r --arg h "$host_key" '.[$h] | keys[]')
           done < <(echo "$AUDIT_JSON" | jq -r 'keys[]')
 
@@ -360,6 +407,7 @@ jobs:
           # ----------------------------------------------------------------
           echo ""
           echo "Obsolete: ${OBSOLETE_IDS[*]:-none}"
+          echo "Broken: ${BROKEN_IDS[*]:-none}"
 
           REPORT_FILE="$(mktemp)"
           printf '%s\n' "${REPORT_LINES[@]}" > "$REPORT_FILE"
@@ -367,26 +415,38 @@ jobs:
           {
             echo "obsolete_count=${#OBSOLETE_IDS[@]}"
             echo "obsolete_ids=${OBSOLETE_IDS[*]:-}"
+            echo "broken_count=${#BROKEN_IDS[@]}"
+            echo "broken_ids=${BROKEN_IDS[*]:-}"
             echo "report_file=${REPORT_FILE}"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Open issue for obsolete overlays
-        if: steps.audit.outputs.obsolete_count != '0'
+      - name: Open issue for obsolete or broken overlays
+        if: steps.audit.outputs.obsolete_count != '0' || steps.audit.outputs.broken_count != '0'
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_FOR_UPDATES }}
         run: |
           set -euo pipefail
-
           REPORT_FILE="${{ steps.audit.outputs.report_file }}"
-
           ISSUE_BODY_FILE="$(mktemp)"
           {
             printf '## Overlay audit — %s\n\n' "$(date -u +'%Y-%m-%d')"
-            printf 'The automated overlay audit detected **%s** overlay(s) that appear to be obsolete based on current nixpkgs state.\n\n' "${{ steps.audit.outputs.obsolete_count }}"
+
+            if [ "${{ steps.audit.outputs.broken_count }}" != '0' ]; then
+              printf '### ⚠️ Broken overrides — action needed now\n\n'
+              printf 'These overlays fail to evaluate against the current locked nixpkgs. This is independent of whether their tracking issue/PR has resolved — the override itself needs fixing or removing immediately, or your next flake.lock bump will fail CI on this exact package.\n\n'
+            fi
+
+            printf 'The automated overlay audit detected **%s** overlay(s) that appear to be obsolete, and **%s** that are actively broken, based on current nixpkgs state.\n\n' \
+              "${{ steps.audit.outputs.obsolete_count }}" "${{ steps.audit.outputs.broken_count }}"
             printf '### Results\n\n'
             cat "$REPORT_FILE"
             printf '\n### What to do\n\n'
-            printf 'For each ✅ entry above:\n\n'
+            printf 'For each 🔴 **broken** entry above:\n\n'
+            printf -- '- Update or remove the overlay block in `overlays/default.nix` so it evaluates against current nixpkgs (check the error text above — often an argument/attribute rename)\n'
+            printf -- '- If removing entirely, also remove the corresponding entry from `overlays/audit.nix`\n'
+            printf -- '- Run `nixos-rebuild build --flake .#gibson` and/or `darwin-rebuild build --flake .#macbook` locally to confirm clean build\n'
+            printf -- '- Raise a PR linked to this issue and merge as soon as practical — this is blocking, not routine cleanup\n\n'
+            printf 'For each ✅ **obsolete** entry above:\n\n'
             printf -- '- Remove the overlay block from `overlays/default.nix` in the relevant host directory\n'
             printf -- '- Remove the corresponding entry from `overlays/audit.nix` in the same directory\n'
             printf -- '- Action any coupled removals described in the 📎 notes above\n'
@@ -412,14 +472,14 @@ jobs:
           fi
 
           gh issue create \
-            --title "chore(overlays): audit flagged obsolete overlays ($(date -u +'%d/%m/%y'))" \
+            --title "chore(overlays): audit flagged obsolete/broken overlays ($(date -u +'%d/%m/%y'))" \
             --body-file "$ISSUE_BODY_FILE" \
             --label "dependencies" \
             --label "automated"
           echo "Issue created"
 
-      - name: No obsolete overlays found
-        if: steps.audit.outputs.obsolete_count == '0'
+      - name: No obsolete or broken overlays found
+        if: steps.audit.outputs.obsolete_count == '0' && steps.audit.outputs.broken_count == '0'
         run: |
-          echo "All audited overlays are still required. No PR needed."
+          echo "All audited overlays are still required and evaluate cleanly. No PR needed."
           cat "${{ steps.audit.outputs.report_file }}"
