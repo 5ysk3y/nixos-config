@@ -43,11 +43,9 @@
     doomemacs-modules.url = "github:doomemacs/modules";
     doomemacs-modules.flake = false;
 
-    # Used as a store path in features/home/symlinks/module.nix to symlink the
-    # Dracula theme into ~/.qutebrowser and ~/.config/qutebrowser. Keeping as a
-    # flake input so the path is in the Nix store and hash-pinned.
-    qute-dracula.url = "github:dracula/qutebrowser";
-    qute-dracula.flake = false;
+    # Add in stylix for management of GTK theming.
+    stylix.url = "github:nix-community/stylix";
+    stylix.inputs.nixpkgs.follows = "nixpkgs";
 
     # Temporary: pins a specific nixpkgs commit to fix qtwebengine on Darwin.
     # Used only in hosts/macbook/overlays/default.nix.

@@ -156,7 +156,6 @@ in
       DOCKER_HOST = "unix://\${XDG_RUNTIME_DIR}/podman/podman.sock";
       ENABLE_DPMS = "1";
       ENABLE_DDC = "1";
-      GTK_THEME = "Dracula:dark";
       GSETTINGS_BACKEND = "keyfile";
       GBM_BACKEND = "nvidia-drm";
       NVD_BACKEND = "direct";

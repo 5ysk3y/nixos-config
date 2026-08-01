@@ -9,7 +9,6 @@
 let
   isLinux = pkgs != null && pkgs.stdenv.hostPlatform.isLinux;
   isDarwin = pkgs != null && pkgs.stdenv.hostPlatform.isDarwin;
-  draculaPath = toString inputs.qute-dracula.outPath;
 in
 {
   home.file = {
@@ -24,11 +23,6 @@ in
 
     ".ssh" = {
       source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Private/Keys";
-      recursive = true;
-    };
-
-    ".qutebrowser/dracula" = lib.mkIf config.programs.qutebrowser.enable {
-      source = draculaPath;
       recursive = true;
     };
   };
@@ -55,15 +49,6 @@ in
     "WebCord" = lib.mkIf isLinux {
       source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/WebCord";
       recursive = true;
-    };
-
-    "qutebrowser/dracula" = lib.mkIf isLinux {
-      source = draculaPath;
-      recursive = true;
-    };
-
-    "rofi/config.rasi" = lib.mkIf isLinux {
-      text = builtins.readFile ./files/rofi/config.rasi;
     };
 
     "OpenRGB/OpenRGB.json" = lib.mkIf isLinux {
