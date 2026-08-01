@@ -31,7 +31,6 @@
       libnotify
       fastfetch
       rivalcfg
-      rofi-rbw-wayland
       signal-desktop
       spice-gtk
       wl-clipboard

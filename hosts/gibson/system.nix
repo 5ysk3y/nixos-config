@@ -155,13 +155,12 @@ in
       DOCKER_HOST = "unix://\${XDG_RUNTIME_DIR}/podman/podman.sock";
       ENABLE_DPMS = "1";
       ENABLE_DDC = "1";
-      GSETTINGS_BACKEND = "keyfile";
       GBM_BACKEND = "nvidia-drm";
-      NVD_BACKEND = "direct";
+      GSETTINGS_BACKEND = "keyfile";
       GTK_THEME = "adw-gtk3:dark";
       LIBVA_DRIVER_NAME = "nvidia";
+      NVD_BACKEND = "direct";
       WLR_NO_HARDWARE_CURSORS = "1";
-      QTWEBENGINE_FORCE_USE_GBM = "1";
       __GLX_VENDOR_LIBRARY_NAME = "nvidia";
       __GL_MaxFramesAllowed = "1";
       __GL_GSYNC_ALLOWED = "1";
