@@ -32,22 +32,38 @@
 
     opacity.terminal = 0.87;
 
-    targets = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-      gtk.enable = true;
-      kitty = {
-        enable = true;
-        fonts.override = {
-          monospace = {
-            package = pkgs.hack-font;
-            name = "Hack";
+    targets = lib.mkMerge [
+      (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+        ghostty = {
+          colors.override = {
+            base05 = "d8e2ec";
+          };
+          fonts.override = {
+            monospace = {
+              package = pkgs.hack-font;
+              name = "Hack";
+            };
+            sizes.terminal = 11;
           };
         };
-      };
-      rofi.enable = true;
-      mako.enable = true;
-      fuzzel.enable = false;
-      hyprlock.enable = false;
-      waybar.enable = false;
-    };
+      })
+      (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+        gtk.enable = true;
+        kitty = {
+          enable = true;
+          fonts.override = {
+            monospace = {
+              package = pkgs.hack-font;
+              name = "Hack";
+            };
+          };
+        };
+        rofi.enable = true;
+        mako.enable = true;
+        fuzzel.enable = false;
+        hyprlock.enable = false;
+        waybar.enable = false;
+      })
+    ];
   };
 }
