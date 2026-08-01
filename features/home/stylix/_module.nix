@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   lib,
   ...
@@ -33,6 +34,17 @@
     opacity.terminal = 0.87;
 
     targets = lib.mkMerge [
+      (lib.mkIf config.programs.qutebrowser.enable {
+        qutebrowser = {
+          fonts.override = {
+            sansSerif = {
+              package = pkgs.hack-font;
+              name = "Hack";
+            };
+          };
+        };
+      })
+
       (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
         ghostty = {
           colors.override = {
@@ -47,6 +59,7 @@
           };
         };
       })
+
       (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         gtk.enable = true;
         kitty = {
