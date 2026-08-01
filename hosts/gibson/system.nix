@@ -158,6 +158,7 @@ in
       GSETTINGS_BACKEND = "keyfile";
       GBM_BACKEND = "nvidia-drm";
       NVD_BACKEND = "direct";
+      GTK_THEME = "adw-gtk3:dark";
       LIBVA_DRIVER_NAME = "nvidia";
       WLR_NO_HARDWARE_CURSORS = "1";
       QTWEBENGINE_FORCE_USE_GBM = "1";
