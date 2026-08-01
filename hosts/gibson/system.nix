@@ -268,23 +268,10 @@ in
       defaultSession = "hyprland";
       sddm = {
         enable = true;
+        wayland.enable = true;
         package = pkgs.kdePackages.sddm;
         extraPackages = with pkgs; [ kdePackages.qtmultimedia ];
         theme = "sddm-astronaut-theme";
-        wayland = {
-          enable = false;
-        };
-        settings = {
-          X11 = {
-            DisplayCommand = "${pkgs.writeShellScript "sddm-xsetup" ''
-              #!/bin/sh
-              ${pkgs.xrandr}/bin/xrandr \
-                --output DP-1 --primary --auto \
-                --output HDMI-A-1 --off \
-                --output DP-2 --off
-            ''}";
-          };
-        };
       };
     };
 
