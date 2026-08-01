@@ -8,6 +8,6 @@ pkgs.writeShellApplication {
   ];
   text = ''
     # shellcheck disable=SC2009
-    for i in $(ps aux | grep -i "wine\|gamescope\|lutris-wrapper\|defunct\|\.exe" | grep -iv grep | awk '{print $2}'); do kill -9 "$i"; done
+    for i in $(ps aux | grep -i "wine\|gamescope\|defunct\|\.exe" | grep -iv grep | awk '{print $2}'); do kill -9 "$i"; done
   '';
 }
