@@ -1,13 +1,14 @@
 {
   pkgs,
+  lib,
   ...
 }:
 
 {
   stylix = {
     enable = true;
-    autoEnable = false;
-    base16Scheme = "${pkgs.base16-schemes}/share/themes/dracula.yaml";
+    autoEnable = true;
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
     polarity = "dark";
 
     cursor = {
@@ -21,16 +22,32 @@
         package = pkgs.noto-fonts;
         name = "Noto Sans Mono";
       };
-      sizes.terminal = 10;
+      sizes = {
+        terminal = 10; # already set
+        applications = 12; # qutebrowser UI — bump if 12pt is still too small for you
+        desktop = 13; # waybar — raise from the 10pt default
+        popups = 12; # mako, rofi
+      };
     };
 
     opacity.terminal = 0.87;
 
-    targets = {
+    targets = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
       gtk.enable = true;
-      qutebrowser.enable = true;
-      kitty.enable = true;
+      kitty = {
+        enable = true;
+        fonts.override = {
+          monospace = {
+            package = pkgs.hack-font;
+            name = "Hack";
+          };
+        };
+      };
       rofi.enable = true;
+      mako.enable = true;
+      fuzzel.enable = false;
+      hyprlock.enable = false;
+      waybar.enable = false;
     };
   };
 }

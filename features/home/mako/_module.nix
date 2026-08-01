@@ -20,10 +20,7 @@ in
     services.mako = {
       enable = true;
       settings = {
-        background-color = "#282A36";
-        text-color = "#FFFFFF";
         padding = "10";
-        font = "Tamzen 12";
         layer = "overlay";
         anchor = "top-right";
         margin = "11";
@@ -34,17 +31,11 @@ in
         height = 170;
         max-icon-size = 32;
 
-        "urgency=low" = {
-          border-color = "#BD93F9";
-        };
-
         "urgency=normal" = {
-          border-color = "#BD93F9";
           on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
         };
 
-        "urgency=high" = {
-          border-color = "#FF5555";
+        "urgency=critical" = {
           on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
         };
 
