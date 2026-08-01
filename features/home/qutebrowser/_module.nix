@@ -39,37 +39,8 @@ in
         # Load existing settings made via :set
         config.load_autoconfig(False)
 
-        c.auto_save.session = True
-
-        c.fonts.default_family = ["Hack"]
-        c.fonts.default_size = '8pt'
-
-        c.colors.webpage.bg = "light grey"
-        c.colors.webpage.darkmode.algorithm = "lightness-cielab"
-        c.colors.webpage.darkmode.enabled = True
-        c.colors.webpage.darkmode.policy.images = "never"
-        c.colors.webpage.darkmode.threshold.background = 150
-
-        c.content.autoplay = False
-        c.content.cookies.accept = "no-3rdparty"
-        c.content.fullscreen.window = False
-        c.content.geolocation = False
-        c.content.headers.user_agent = "Mozilla/5.0 ({os_info}) AppleWebKit/{webkit_version} (KHTML, like Gecko) {qt_key}/{qt_version} {upstream_browser_key}/{upstream_browser_version} Safari/{webkit_version}"
-        c.content.xss_auditing = True
-
-        c.downloads.remove_finished = 300000
-        c.qt.chromium.process_model = "process-per-site"
-        c.scrolling.smooth = True
-        c.statusbar.show = "in-mode"
         c.statusbar.padding = {"bottom": 6, "left": 8, "right": 8, "top": 6}
-
-        c.tabs.background = True
-        c.tabs.new_position.related = "last"
-        c.tabs.pinned.frozen = False
-        c.tabs.title.format = "{index}: {current_title}"
         c.tabs.padding = {"bottom": 6, "left": 8, "right": 8, "top": 6}
-
-        c.window.title_format = "qutebrowser"
 
         c.qt.args = (c.qt.args or []) + [
           "--site-per-process",
@@ -105,6 +76,52 @@ in
 
         passthrough = {
           "<Ctrl+x>" = "mode-leave";
+        };
+      };
+
+      settings = {
+
+        downloads.remove_finished = 300000;
+        fonts.default_size = lib.mkForce "8pt";
+        qt.chromium.process_model = "process-per-site";
+        scrolling.smooth = true;
+        statusbar.show = "in-mode";
+        url.default_page = "https://search.brave.com/";
+
+        auto_save = {
+          session = true;
+        };
+
+        colors = {
+          webpage = {
+            bg = "light grey";
+            darkmode = {
+              algorithm = "lightness-cielab";
+              enabled = true;
+              policy.images = "never";
+              threshold.background = 150;
+            };
+          };
+        };
+
+        content = {
+          autoplay = false;
+          cookies.accept = "no-3rdparty";
+          fullscreen.window = false;
+          geolocation = false;
+          headers.user_agent = "Mozilla/5.0 ({os_info}) AppleWebKit/{webkit_version} (KHTML, like Gecko) {qt_key}/{qt_version} {upstream_browser_key}/{upstream_browser_version} Safari/{webkit_version}";
+          xss_auditing = true;
+        };
+
+        tabs = {
+          background = true;
+          new_position.related = "last";
+          pinned.frozen = false;
+          title.format = "{index}: {current_title}";
+        };
+
+        window = {
+          title_format = "qutebrowser";
         };
       };
 
