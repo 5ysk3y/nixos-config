@@ -369,24 +369,20 @@ jobs:
               esac
 
               # -- Liveness check: does the override still evaluate at all? --
-              # Runs unconditionally, independent of the strategy result above.
-              # This is what catches a renamed .override argument, a removed
-              # attribute, or any other breakage a tracking-issue/version check
-              # would never see — because the underlying tracked problem can be
-              # completely unrelated to why the override itself stopped working.
               if [ -n "$CONFIG_NS" ]; then
                 eval_attr=$(echo "$entry" | jq -r '.evalAttr // empty')
                 if [ -z "$eval_attr" ]; then
-                  eval_attr="$id"
-                  echo "    evalAttr not set — defaulting to ${eval_attr}"
-                fi
-                eval_error=""
-                if ! eval_error=$(check_override_evaluates "$CONFIG_NS" "$host_key" "$eval_attr"); then
-                  BROKEN_IDS+=("${host_key}::${id}")
-                  REPORT_LINES+=("🔴 **${host_key} / ${id}**: OVERRIDE BROKEN — evaluation fails against current locked nixpkgs, regardless of tracking status")
-                  REPORT_LINES+=("  \`\`\`")
-                  REPORT_LINES+=("  ${eval_error}")
-                  REPORT_LINES+=("  \`\`\`")
+                  echo "  ERROR: evalAttr not set for ${host_key}/${id} — cannot verify liveness"
+                  REPORT_LINES+=("⚠️  **${host_key} / ${id}**: \`evalAttr\` not set in audit.nix — liveness check skipped, add it to enable")
+                else
+                  eval_error=""
+                  if ! eval_error=$(check_override_evaluates "$CONFIG_NS" "$host_key" "$eval_attr"); then
+                    BROKEN_IDS+=("${host_key}::${id}")
+                    REPORT_LINES+=("🔴 **${host_key} / ${id}**: OVERRIDE BROKEN — evaluation fails against current locked nixpkgs, regardless of tracking status")
+                    REPORT_LINES+=("  \`\`\`")
+                    REPORT_LINES+=("  ${eval_error}")
+                    REPORT_LINES+=("  \`\`\`")
+                  fi
                 fi
               fi
 
