@@ -15,6 +15,8 @@ in
       # Shared hyprland configuration
       xdg.configFile."hypr/${hostname}.lua".source = hyprConfig;
 
+      home.packages = with pkgs; [ hyprshutdown ];
+
       wayland.windowManager.hyprland = {
         enable = true;
         sourceFirst = false;

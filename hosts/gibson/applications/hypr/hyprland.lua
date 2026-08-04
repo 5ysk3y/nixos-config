@@ -61,7 +61,7 @@ return function(WS)
   hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
   hl.bind("SUPER + F", hl.dsp.window.fullscreen())
   hl.bind("SUPER + SHIFT + Q", hl.dsp.window.close())
-  hl.bind("SUPER + SHIFT + C", hl.dsp.exit())
+  hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown --vt 1 || hyprctl dispatch 'hl.dsp.exit()'"))
   hl.bind("SUPER + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
 
   hl.bind("SUPER + h", hl.dsp.focus({ direction = "l" }))

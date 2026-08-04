@@ -170,6 +170,17 @@
   security = {
     polkit.enable = true;
     rtkit.enable = true;
+    sudo.extraRules = [
+      {
+        users = [ vars.username ];
+        commands = [
+          {
+            command = "/run/current-system/sw/bin/chvt";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
   };
 
   # List services that you want to enable:
