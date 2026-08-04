@@ -3,6 +3,7 @@
   pkgs,
   vars,
   hostname,
+  lib,
   ...
 }:
 {
@@ -31,15 +32,20 @@
     plugins = [ pkgs.ccid ];
   };
 
-  systemd.services.pcscd-resume = {
-    description = "Restart pcscd after hibernate resume";
-    wantedBy = [ "hibernate.target" ];
-    after = [ "hibernate.target" ];
-    script = ''
-      sleep 1
-      ${pkgs.systemd}/bin/systemctl restart pcscd
-    '';
-    serviceConfig.Type = "oneshot";
+  systemd = {
+    services = {
+      pcscd-resume = {
+        description = "Restart pcscd after hibernate resume";
+        wantedBy = [ "hibernate.target" ];
+        after = [ "hibernate.target" ];
+        script = ''
+          sleep 1
+          ${pkgs.systemd}/bin/systemctl restart pcscd
+        '';
+        serviceConfig.Type = "oneshot";
+      };
+      pcscd.serviceConfig.Restart = lib.mkForce "no";
+    };
   };
 
   services.udev.packages = with pkgs; [
