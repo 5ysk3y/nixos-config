@@ -7,11 +7,6 @@
   vars,
   ...
 }:
-let
-  sddmTheme = inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.sddm-astronaut-theme.override {
-    theme = "post-apocalyptic_hacker";
-  };
-in
 {
   imports = [
     ./hardware-configuration.nix
@@ -90,7 +85,6 @@ in
     tamzen
     font-awesome
     material-design-icons
-    (toString sddmTheme + "/share/fonts")
 
     (google-fonts.override {
       fonts = [
@@ -143,7 +137,6 @@ in
       nix-prefetch-github
       openssl
       pulseaudio
-      sddmTheme
       v4l-utils
       vim
       xdg-utils
@@ -266,13 +259,6 @@ in
 
     displayManager = {
       defaultSession = "hyprland";
-      sddm = {
-        enable = true;
-        wayland.enable = true;
-        package = pkgs.kdePackages.sddm;
-        extraPackages = with pkgs; [ kdePackages.qtmultimedia ];
-        theme = "sddm-astronaut-theme";
-      };
     };
 
     xserver = {
@@ -366,5 +352,11 @@ in
     };
 
   };
+
+  features.system.sddm = {
+    theme = "post-apocalyptic_hacker";
+    kwinOutputConfig = ./applications/sddm/kwinoutputconfig.json;
+  };
+
   system.stateVersion = "23.11"; # Did you read the comment?
 }
