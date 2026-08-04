@@ -72,7 +72,15 @@
           };
         };
         rofi.enable = true;
-        mako.enable = true;
+        mako = {
+          enable = true;
+          fonts.override = {
+            sansSerif = {
+              package = pkgs.tamzen;
+              name = "Tamzen";
+            };
+          };
+        };
         fuzzel.enable = false;
         hyprlock.enable = false;
         waybar.enable = false;
