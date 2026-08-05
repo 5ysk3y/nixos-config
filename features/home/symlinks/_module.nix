@@ -2,7 +2,6 @@
   vars,
   pkgs,
   lib,
-  inputs,
   config,
   ...
 }:

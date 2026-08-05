@@ -7,7 +7,6 @@
   modulesPath,
   system,
   vars,
-  inputs,
   ...
 }:
 
