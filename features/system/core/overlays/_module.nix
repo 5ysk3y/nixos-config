@@ -3,7 +3,7 @@ _:
 {
   nixpkgs.overlays = [
     (_final: _prev: {
-      qutebrowser = _prev.qutebrowser.overrideAttrs (old: {
+      qutebrowser = _prev.qutebrowser.overrideAttrs (_old: {
         version = "unstable-2026-08-04";
         src = _final.fetchFromGitHub {
           owner = "coderkun";
