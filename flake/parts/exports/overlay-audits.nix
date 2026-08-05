@@ -56,7 +56,7 @@ let
   # This file is imported transitively via systemProfiles and is not reachable
   # through host.overlaysModule. Wire it explicitly here so it gets the same
   # treatment when populated.
-  systemAuditFile = ./../../../features/system/core/overlays/audit.nix;
+  systemAuditFile = ./../../../features/system/core/overlays/_audit.nix;
   systemAudits =
     if builtins.pathExists systemAuditFile then
       let
