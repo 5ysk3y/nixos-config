@@ -31,71 +31,74 @@ fi
 echo "Statix"
 nix run nixpkgs#statix -- check .
 # ── Overlay audit consistency check ────────────────────────────────────────
-# If any overlays/default.nix file is staged, verify that every key defined
-# in the temporary overlays section has a corresponding entry in audit.nix,
-# and that every key in audit.nix still exists in default.nix.
+# For every overlays/ directory touched by a staged .nix change, verify that
+# every key defined in the temporary overlays section (across ALL *.nix files
+# in that directory — not just default.nix, since the system-level overlay
+# module puts wiring in default.nix and actual overlay content in _module.nix)
+# has a corresponding entry in that directory's audit file, and vice versa.
+#
+# The audit file may be named `audit.nix` (hosts) or `_audit.nix`
+# (underscore-prefixed to keep it out of import-tree's flake-parts module
+# discovery, per the dendritic convention). Whichever exists is used.
 #
 # Temporary overlays are identified by their position after the divider:
 #   # ── Temporary overlays
 check_overlay_audit_consistency() {
-  local default_nix="$1"
-  local dir
-  dir="$(dirname "$default_nix")"
-  local audit_nix="${dir}/audit.nix"
-  # Extract staged content for default.nix so we check what's being committed,
-  # not the working tree state.
-  local staged_default
-  staged_default=$(git show ":${default_nix}" 2>/dev/null) || {
-    # File is being deleted — skip consistency check
-    return 0
-  }
-  # Find the temporary overlays divider line and extract attribute names
-  # defined after it. Matches lines of the form:
-  #   <identifier> = ...
-  # at exactly 6-space indent (top-level keys inside the overlay attrset).
-  # Uses [[:space:]] and [[:alnum:]] for POSIX compatibility with BSD sed/grep
-  # on macOS as well as GNU on Linux.
+  local dir="$1"
+
+  # Resolve the audit-metadata sibling file.
+  local audit_nix=""
+  for candidate in "${dir}/audit.nix" "${dir}/_audit.nix"; do
+    if git show ":${candidate}" > /dev/null 2>&1 || [ -f "$candidate" ]; then
+      audit_nix="$candidate"
+      break
+    fi
+  done
+
+  # Every *.nix file in this directory except the resolved audit file is a
+  # candidate overlay-definition file. Uses the staged version if staged,
+  # otherwise falls back to the working-tree version.
+  local def_files=()
+  while IFS= read -r -d '' df; do
+    [ "$df" = "$audit_nix" ] && continue
+    def_files+=("$df")
+  done < <(find "$dir" -maxdepth 1 -name '*.nix' -print0 2>/dev/null)
+
   local temp_keys=()
-  local in_temp_section=false
-  local pending_key=""
-  while IFS= read -r line; do
-    if echo "$line" | grep -q '# ── Temporary overlays'; then
-      in_temp_section=true
-      continue
-    fi
-    if [ "$in_temp_section" = true ]; then
-      if echo "$line" | grep -qE '^[[:space:]]{6}[a-zA-Z][a-zA-Z0-9_-]+ ='; then
-        # Flush any previously pending key that wasn't exempted
-        if [ -n "${pending_key:-}" ]; then
-          temp_keys+=("$pending_key")
-        fi
-        pending_key=$(echo "$line" | sed -E 's/^[[:space:]]+([a-zA-Z][a-zA-Z0-9_-]+)[[:space:]]=.*/\1/')
-      elif [ -n "${pending_key:-}" ] && echo "$line" | grep -q '# audit-exempt'; then
-        # First content line inside the block is an audit-exempt marker — discard key
-        pending_key=""
+  for def_file in "${def_files[@]}"; do
+    local content
+    content=$(git show ":${def_file}" 2>/dev/null) || content=$(cat "$def_file" 2>/dev/null) || continue
+    local in_temp_section=false
+    local pending_key=""
+    while IFS= read -r line; do
+      if echo "$line" | grep -q '# ── Temporary overlays'; then
+        in_temp_section=true
+        continue
       fi
+      if [ "$in_temp_section" = true ]; then
+        if echo "$line" | grep -qE '^[[:space:]]{6}[a-zA-Z][a-zA-Z0-9_-]+ ='; then
+          if [ -n "${pending_key:-}" ]; then
+            temp_keys+=("$pending_key")
+          fi
+          pending_key=$(echo "$line" | sed -E 's/^[[:space:]]+([a-zA-Z][a-zA-Z0-9_-]+)[[:space:]]=.*/\1/')
+        elif [ -n "${pending_key:-}" ] && echo "$line" | grep -q '# audit-exempt'; then
+          pending_key=""
+        fi
+      fi
+    done <<< "$content"
+    if [ -n "${pending_key:-}" ]; then
+      temp_keys+=("$pending_key")
     fi
-  done <<< "$staged_default"
-  # Flush final pending key if not exempted
-  if [ -n "${pending_key:-}" ]; then
-    temp_keys+=("$pending_key")
-  fi
-  # Read audit.nix keys — use staged version if it's also being committed,
-  # otherwise fall back to the working tree version.
-  # NOTE: this must happen BEFORE the empty-check below, so that a missing
-  # or empty temporary-overlays section in default.nix doesn't cause us to
-  # skip past stale entries left behind in audit.nix (this was the bug:
-  # a default.nix with no divider at all silently short-circuited the whole
-  # check, so removing an overlay without updating audit.nix went unflagged).
+  done
+
   local audit_content=""
-  if git diff --cached --name-only | grep -q "^${audit_nix}$"; then
-    audit_content=$(git show ":${audit_nix}" 2>/dev/null) || true
-  elif [ -f "$audit_nix" ]; then
-    audit_content=$(cat "$audit_nix")
+  if [ -n "$audit_nix" ]; then
+    if git diff --cached --name-only | grep -q "^${audit_nix}$"; then
+      audit_content=$(git show ":${audit_nix}" 2>/dev/null) || true
+    elif [ -f "$audit_nix" ]; then
+      audit_content=$(cat "$audit_nix")
+    fi
   fi
-  # Extract top-level keys from audit.nix: lines of the form:
-  #   <identifier> = {
-  # at exactly 2-space indent.
   local audit_keys=()
   if [ -n "$audit_content" ]; then
     while IFS= read -r line; do
@@ -105,13 +108,13 @@ check_overlay_audit_consistency() {
       fi
     done <<< "$audit_content"
   fi
+
   if (( ${#temp_keys[@]} == 0 && ${#audit_keys[@]} == 0 )); then
-    # No temporary overlays section in default.nix AND no entries in
-    # audit.nix — genuinely nothing to reconcile. Skip.
     return 0
   fi
+
+  local audit_label="${audit_nix:-${dir}/audit.nix}"
   local errors=()
-  # Check: every temporary overlay key must exist in audit.nix
   for key in "${temp_keys[@]}"; do
     local found=false
     for audit_key in "${audit_keys[@]}"; do
@@ -121,10 +124,9 @@ check_overlay_audit_consistency() {
       fi
     done
     if [ "$found" = false ]; then
-      errors+=("  MISSING from audit.nix: '${key}' (defined in ${default_nix})")
+      errors+=("  MISSING from ${audit_label}: '${key}'")
     fi
   done
-  # Check: every audit.nix key must exist in the temporary overlays section
   for audit_key in "${audit_keys[@]}"; do
     local found=false
     for key in "${temp_keys[@]}"; do
@@ -134,44 +136,63 @@ check_overlay_audit_consistency() {
       fi
     done
     if [ "$found" = false ]; then
-      errors+=("  STALE in audit.nix: '${audit_key}' (not found in temporary overlays section of ${default_nix})")
+      errors+=("  STALE in ${audit_label}: '${audit_key}' (not found in any temporary overlays section under ${dir})")
     fi
   done
+
   if (( ${#errors[@]} > 0 )); then
     echo ""
-    echo "Overlay audit consistency error: ${default_nix}"
+    echo "Overlay audit consistency error: ${dir}"
     for err in "${errors[@]}"; do
       echo "$err"
     done
     echo ""
-    echo "Either update ${audit_nix} to match, or move the overlay"
+    echo "Either update ${audit_label} to match, or move the overlay"
     echo "above the '# ── Temporary overlays' divider if it is permanent."
     return 1
   fi
-  echo "  ${default_nix}: audit.nix consistent ✓"
+  echo "  ${dir}: audit consistent ✓"
   return 0
 }
 overlay_errors=false
 audit_nix_staged=false
+overlay_dirs=()
 for f in "${staged_nix_files[@]}"; do
   case "$f" in
-    */overlays/default.nix)
-      echo "Checking overlay audit consistency: ${f}"
-      check_overlay_audit_consistency "$f" || overlay_errors=true
-      ;;
-    */overlays/audit.nix)
-      audit_nix_staged=true
+    */overlays/*.nix)
+      d="$(dirname "$f")"
+      already=false
+      for existing in "${overlay_dirs[@]}"; do
+        if [ "$existing" = "$d" ]; then
+          already=true
+          break
+        fi
+      done
+      if [ "$already" = false ]; then
+        overlay_dirs+=("$d")
+      fi
+      case "$f" in
+        */overlays/audit.nix | */overlays/_audit.nix)
+          audit_nix_staged=true
+          ;;
+      esac
       ;;
   esac
 done
-# If any audit.nix was staged, validate the full overlayAudits flake output.
+if (( ${#overlay_dirs[@]} > 0 )); then
+  for d in "${overlay_dirs[@]}"; do
+    echo "Checking overlay audit consistency: ${d}"
+    check_overlay_audit_consistency "$d" || overlay_errors=true
+  done
+fi
+# If any audit file was staged, validate the full overlayAudits flake output.
 # This catches missing required fields per strategy and type errors via the
 # module system assertions in flake/parts/exports/overlay-audits.nix.
 if [ "$audit_nix_staged" = true ]; then
-  echo "Validating flake.overlayAudits (audit.nix staged) ..."
+  echo "Validating flake.overlayAudits (audit file staged) ..."
   if ! nix eval .#overlayAudits --json > /dev/null 2>&1; then
     echo ""
-    echo "flake.overlayAudits eval failed — audit.nix has invalid or missing fields."
+    echo "flake.overlayAudits eval failed — an audit file has invalid or missing fields."
     echo "Run: nix eval .#overlayAudits --json"
     echo "to see the full error."
     overlay_errors=true

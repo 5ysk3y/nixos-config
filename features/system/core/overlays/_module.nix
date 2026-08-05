@@ -3,6 +3,9 @@ _:
 {
   nixpkgs.overlays = [
     (_final: _prev: {
+      # ── Temporary overlays ─────────────────────────────────────────
+      # Unstable qutebrowser build with unmerged FIDO2 support.
+      # Remove once upstream merges https://github.com/qutebrowser/qutebrowser/pull/8642
       qutebrowser = _prev.qutebrowser.overrideAttrs (_old: {
         version = "unstable-2026-08-04";
         src = _final.fetchFromGitHub {
