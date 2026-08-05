@@ -13,6 +13,8 @@ _: {
         emacsclient -t "$@"
       }
 
+      bindkey -M viins '\e.' insert-last-word
+
       commit-msg() {
         local amend=false
         [[ "$1" == "--amend" || "$1" == "-a" ]] && amend=true
