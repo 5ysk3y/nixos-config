@@ -17,15 +17,4 @@
     ];
     notes = "COUPLED REMOVAL: also remove qtwebengine-fix flake input from flake.nix and the qtPinnedPkgs let-binding in hosts/macbook/overlays/default.nix.";
   };
-  qutebrowser = {
-    strategy = "nixpkgs-pr";
-    description = "Implements FIDO2 support awaiting upstream merging";
-    systems = [ "aarch64-darwin" ];
-    trackingPRs = [
-      {
-        repo = "qutebrowser/qutebrowser";
-        number = 8642;
-      }
-    ];
-  };
 }
