@@ -24,8 +24,10 @@ _: {
           return 1
         fi
 
-        local template task rules context msg tmpfile
-        template=$(cat "$(git config commit.template)")
+        local template template_path task rules context msg tmpfile
+        template_path=$(git config commit.template)
+        template_path="''${template_path/#\~/$HOME}"
+        template=$(cat "$template_path")
 
         rules="Follow this template, replacing placeholder lines. Output the filled message as plain text — use markdown code fences only for code snippets or references, not for the commit message itself. Do NOT use # comment prefixes on the Why/What/Notes lines, only strip the comment lines from the template itself. Output the commit related context only, in line with the template structure, no preamble or explanation before it.\n\nFormatting rules:\n- Keep the entire first line (type(scope): description) to 72 characters total, including the type and scope.\n- Use imperative mood for the description (e.g. add, fix, refactor), not past tense.\n- Don't capitalize the first letter of the description and don't end it with a period.\n- Omit the scope entirely (no parentheses) if no single aspect, host, or area clearly applies — don't invent one.\n- Leave exactly one blank line between the subject line and the body.\n- Wrap Why/What/Notes body lines at 72 characters. If a '-' bullet wraps to a second line, indent the continuation by 2 spaces so it aligns under the bullet text, not the dash."
 

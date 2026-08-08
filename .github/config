@@ -1,0 +1,2 @@
+[commit]
+	template = ~/nixos-config/.github/.gitmessage
