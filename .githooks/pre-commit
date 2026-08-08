@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 staged_nix_files=()
 while IFS= read -r -d '' f; do
   case "$f" in
     *.nix) staged_nix_files+=("$f") ;;
   esac
 done < <(git diff --cached --name-only -z --diff-filter=ACMR)
+
 if (( ${#staged_nix_files[@]} > 0 )); then
   echo "Formatting staged Nix files"
   for f in "${staged_nix_files[@]}"; do
@@ -28,178 +30,80 @@ if (( ${#staged_nix_files[@]} > 0 )); then
 else
   echo "No staged Nix files to format"
 fi
+
 echo "Statix"
 nix run nixpkgs#statix -- check .
-# ── Overlay audit consistency check ────────────────────────────────────────
-# For every overlays/ directory touched by a staged .nix change, verify that
-# every key defined in the temporary overlays section (across ALL *.nix files
-# in that directory — not just default.nix, since the system-level overlay
-# module puts wiring in default.nix and actual overlay content in _module.nix)
-# has a corresponding entry in that directory's audit file, and vice versa.
+
+# ── Overlay audit liveness check ────────────────────────────────────────────
+# Every host's and the system-wide overlays/overlay-entries.nix is the single
+# source of truth for both the actual override and its audit metadata — a
+# temporary override with no `exempt = true` and no `meta` can't silently
+# exist there (enforced by an eval-time assertion in overlay-audits.nix).
 #
-# The audit file may be named `audit.nix` (hosts) or `_audit.nix`
-# (underscore-prefixed to keep it out of import-tree's flake-parts module
-# discovery, per the dendritic convention). Whichever exists is used.
-#
-# Temporary overlays are identified by their position after the divider:
-#   # ── Temporary overlays
-check_overlay_audit_consistency() {
-  local dir="$1"
+# The actual liveness check — does each override still evaluate against the
+# current locked nixpkgs, independent of tracking status — is shared with CI
+# via .githooks/lib/overlay-liveness.sh, so this logic exists in exactly one
+# place rather than as two hand-copied implementations that could drift.
+repo_root="$(git rev-parse --show-toplevel)"
+# shellcheck source=lib/overlay-liveness.sh
+source "${repo_root}/.githooks/lib/overlay-liveness.sh"
 
-  # Resolve the audit-metadata sibling file.
-  local audit_nix=""
-  for candidate in "${dir}/audit.nix" "${dir}/_audit.nix"; do
-    if git show ":${candidate}" > /dev/null 2>&1 || [ -f "$candidate" ]; then
-      audit_nix="$candidate"
-      break
-    fi
-  done
-
-  # Every *.nix file in this directory except the resolved audit file is a
-  # candidate overlay-definition file. Uses the staged version if staged,
-  # otherwise falls back to the working-tree version.
-  local def_files=()
-  while IFS= read -r -d '' df; do
-    [ "$df" = "$audit_nix" ] && continue
-    def_files+=("$df")
-  done < <(find "$dir" -maxdepth 1 -name '*.nix' -print0 2>/dev/null)
-
-  local temp_keys=()
-  for def_file in "${def_files[@]}"; do
-    local content
-    content=$(git show ":${def_file}" 2>/dev/null) || content=$(cat "$def_file" 2>/dev/null) || continue
-    local in_temp_section=false
-    local pending_key=""
-    while IFS= read -r line; do
-      if echo "$line" | grep -q '# ── Temporary overlays'; then
-        in_temp_section=true
-        continue
-      fi
-      if [ "$in_temp_section" = true ]; then
-        if echo "$line" | grep -qE '^[[:space:]]{6}[a-zA-Z][a-zA-Z0-9_-]+ ='; then
-          if [ -n "${pending_key:-}" ]; then
-            temp_keys+=("$pending_key")
-          fi
-          pending_key=$(echo "$line" | sed -E 's/^[[:space:]]+([a-zA-Z][a-zA-Z0-9_-]+)[[:space:]]=.*/\1/')
-        elif [ -n "${pending_key:-}" ] && echo "$line" | grep -q '# audit-exempt'; then
-          pending_key=""
-        fi
-      fi
-    done <<< "$content"
-    if [ -n "${pending_key:-}" ]; then
-      temp_keys+=("$pending_key")
-    fi
-  done
-
-  local audit_content=""
-  if [ -n "$audit_nix" ]; then
-    if git diff --cached --name-only | grep -q "^${audit_nix}$"; then
-      audit_content=$(git show ":${audit_nix}" 2>/dev/null) || true
-    elif [ -f "$audit_nix" ]; then
-      audit_content=$(cat "$audit_nix")
-    fi
-  fi
-  local audit_keys=()
-  if [ -n "$audit_content" ]; then
-    while IFS= read -r line; do
-      if echo "$line" | grep -qE '^[[:space:]]{2}[a-zA-Z][a-zA-Z0-9_-]+[[:space:]]=[[:space:]]\{'; then
-        key=$(echo "$line" | sed -E 's/^[[:space:]]+([a-zA-Z][a-zA-Z0-9_-]+)[[:space:]]=.*/\1/')
-        audit_keys+=("$key")
-      fi
-    done <<< "$audit_content"
-  fi
-
-  if (( ${#temp_keys[@]} == 0 && ${#audit_keys[@]} == 0 )); then
-    return 0
-  fi
-
-  local audit_label="${audit_nix:-${dir}/audit.nix}"
-  local errors=()
-  for key in "${temp_keys[@]}"; do
-    local found=false
-    for audit_key in "${audit_keys[@]}"; do
-      if [ "$key" = "$audit_key" ]; then
-        found=true
-        break
-      fi
-    done
-    if [ "$found" = false ]; then
-      errors+=("  MISSING from ${audit_label}: '${key}'")
-    fi
-  done
-  for audit_key in "${audit_keys[@]}"; do
-    local found=false
-    for key in "${temp_keys[@]}"; do
-      if [ "$audit_key" = "$key" ]; then
-        found=true
-        break
-      fi
-    done
-    if [ "$found" = false ]; then
-      errors+=("  STALE in ${audit_label}: '${audit_key}' (not found in any temporary overlays section under ${dir})")
-    fi
-  done
-
-  if (( ${#errors[@]} > 0 )); then
-    echo ""
-    echo "Overlay audit consistency error: ${dir}"
-    for err in "${errors[@]}"; do
-      echo "$err"
-    done
-    echo ""
-    echo "Either update ${audit_label} to match, or move the overlay"
-    echo "above the '# ── Temporary overlays' divider if it is permanent."
-    return 1
-  fi
-  echo "  ${dir}: audit consistent ✓"
-  return 0
-}
-overlay_errors=false
-audit_nix_staged=false
-overlay_dirs=()
+overlay_dirs_touched=()
 for f in "${staged_nix_files[@]}"; do
   case "$f" in
     */overlays/*.nix)
       d="$(dirname "$f")"
       already=false
-      for existing in "${overlay_dirs[@]}"; do
-        if [ "$existing" = "$d" ]; then
-          already=true
-          break
-        fi
+      for existing in "${overlay_dirs_touched[@]:-}"; do
+        [ "$existing" = "$d" ] && { already=true; break; }
       done
-      if [ "$already" = false ]; then
-        overlay_dirs+=("$d")
-      fi
-      case "$f" in
-        */overlays/audit.nix | */overlays/_audit.nix)
-          audit_nix_staged=true
-          ;;
-      esac
+      [ "$already" = false ] && overlay_dirs_touched+=("$d")
       ;;
   esac
 done
-if (( ${#overlay_dirs[@]} > 0 )); then
-  for d in "${overlay_dirs[@]}"; do
-    echo "Checking overlay audit consistency: ${d}"
-    check_overlay_audit_consistency "$d" || overlay_errors=true
-  done
-fi
-# If any audit file was staged, validate the full overlayAudits flake output.
-# This catches missing required fields per strategy and type errors via the
-# module system assertions in flake/parts/exports/overlay-audits.nix.
-if [ "$audit_nix_staged" = true ]; then
-  echo "Validating flake.overlayAudits (audit file staged) ..."
-  if ! nix eval .#overlayAudits --json > /dev/null 2>&1; then
+
+overlay_errors=false
+
+hook_liveness_callback() {
+  local host_key="$1" id="$2" target_host="$3" eval_attr="$4" result="$5" detail="$6"
+  case "$result" in
+    fail)
+      echo ""
+      echo "Overlay liveness error: ${host_key} / ${id} (on ${target_host})"
+      echo "  evalAttr '${eval_attr}' fails to evaluate against current locked nixpkgs:"
+      echo "    ${detail}"
+      echo ""
+      overlay_errors=true
+      ;;
+    skip)
+      echo "  WARNING: ${host_key} / ${id}: ${detail}"
+      ;;
+  esac
+}
+
+if (( ${#overlay_dirs_touched[@]} > 0 )); then
+  echo "Validating flake.overlayAudits ..."
+  if ! AUDIT_JSON=$(nix eval .#overlayAudits --json 2>/tmp/overlay-audits-eval-err); then
     echo ""
-    echo "flake.overlayAudits eval failed — an audit file has invalid or missing fields."
-    echo "Run: nix eval .#overlayAudits --json"
-    echo "to see the full error."
+    echo "flake.overlayAudits eval failed — an overlay-entries.nix has invalid or missing meta fields."
+    cat /tmp/overlay-audits-eval-err
     overlay_errors=true
   else
     echo "  flake.overlayAudits: valid ✓"
+    echo "Checking overlay liveness (does each override still evaluate) ..."
+
+    while IFS= read -r host_key; do
+      while IFS= read -r id; do
+        check_entry_liveness "$AUDIT_JSON" "$host_key" "$id" hook_liveness_callback
+      done < <(echo "$AUDIT_JSON" | jq -r --arg h "$host_key" '.[$h] | keys[]')
+    done < <(echo "$AUDIT_JSON" | jq -r 'keys[]')
+
+    if [ "$overlay_errors" = false ]; then
+      echo "  all audited overlays evaluate cleanly ✓"
+    fi
   fi
 fi
+
 if [ "$overlay_errors" = true ]; then
   exit 1
 fi
