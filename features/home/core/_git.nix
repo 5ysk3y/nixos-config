@@ -21,7 +21,6 @@ _: {
       branch.autoSetupMerge = true;
       commit = {
         gpgsign = true;
-        template = ".gitmessage";
       };
     };
 
@@ -29,6 +28,10 @@ _: {
       {
         condition = "gitdir:~/nixos-config/**";
         contents.core.hooksPath = ".githooks";
+      }
+      {
+        condition = "gitdir:~/nixos-config/";
+        path = "~/nixos-config/.github/config";
       }
     ];
 
