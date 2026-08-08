@@ -122,7 +122,7 @@ jobs:
       - name: Run gitleaks (native)
         run: |
           set -euo pipefail
-          nix run nixpkgs#gitleaks -- detect --source . --redact
+          nix run nixpkgs#gitleaks -- detect --source . --redact --config .github/gitleaks.toml 
 
   flake-secrets-check:
     name: full flake check (with secrets)

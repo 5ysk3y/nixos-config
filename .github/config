@@ -1,2 +1,2 @@
 [commit]
-	template = ~/nixos-config/.github/.gitmessage
+	template = ~/nixos-config/.github/gitmessage
