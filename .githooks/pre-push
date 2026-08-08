@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "Running gitleaks (native) …"
-nix run nixpkgs#gitleaks -- protect --staged --redact
+nix run nixpkgs#gitleaks -- protect --staged --redact --config .github/gitleaks.toml 
 
 echo "Running flake shape check …"
 nix flake show --no-write-lock-file >/dev/null
