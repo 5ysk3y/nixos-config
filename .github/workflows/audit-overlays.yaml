@@ -50,6 +50,13 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Liveness-check logic (resolve_config_namespace, check_override_evaluates,
+          # check_entry_liveness) is shared with the pre-commit hook via this file,
+          # so it exists in exactly one place rather than two hand-copied
+          # implementations that could drift.
+          # shellcheck source=.githooks/lib/overlay-liveness.sh
+          source "${GITHUB_WORKSPACE}/.githooks/lib/overlay-liveness.sh"
+
           OBSOLETE_IDS=()
           BROKEN_IDS=()
           REPORT_LINES=()
@@ -228,48 +235,6 @@ jobs:
             [ "$all_done" = true ]
           }
 
-          # ------------------------------------------------------------------
-          # resolve_config_namespace: determines whether a host_key lives under
-          # nixosConfigurations or darwinConfigurations, by probing both.
-          # Prints the namespace to stdout, empty if neither matches.
-          # ------------------------------------------------------------------
-          resolve_config_namespace() {
-            local host="$1"
-            if nix eval --json ".#nixosConfigurations.${host}" --apply 'x: true' >/dev/null 2>&1; then
-              echo "nixosConfigurations"
-            elif nix eval --json ".#darwinConfigurations.${host}" --apply 'x: true' >/dev/null 2>&1; then
-              echo "darwinConfigurations"
-            else
-              echo ""
-            fi
-          }
-
-          # ------------------------------------------------------------------
-          # check_override_evaluates: attempts to force derivation construction
-          # for the overridden package, independent of tracking-issue status.
-          # This catches breakage like a renamed .override argument that a
-          # closed upstream issue would never surface — e.g. a package's
-          # .override call referencing an argument name that no longer exists
-          # after an unrelated upstream rename.
-          # Returns 0 = still evaluates fine, 1 = broken, prints error tail on failure.
-          # ------------------------------------------------------------------
-          check_override_evaluates() {
-            local config_ns="$1" host="$2" eval_attr="$3"
-            local err_log
-            err_log="$(mktemp)"
-            echo "    nix eval .#${config_ns}.${host}.pkgs.${eval_attr}.drvPath ..." >&2
-            if nix eval --raw --inputs-from . \
-                ".#${config_ns}.${host}.pkgs.${eval_attr}.drvPath" \
-                >/dev/null 2>"$err_log"; then
-              rm -f "$err_log"
-              return 0
-            else
-              tail -n 6 "$err_log" | tr '\n' ' ' | sed 's/  */ /g'
-              rm -f "$err_log"
-              return 1
-            fi
-          }
-
           # ----------------------------------------------------------------
           # Main loop — read audit metadata from flake output.
           # Uses process substitution throughout to keep OBSOLETE_IDS,
@@ -283,16 +248,28 @@ jobs:
           LOCKED_NIXPKGS_REV=$(nix flake metadata --json | jq -r '.locks.nodes.nixpkgs.locked.rev')
           echo "Locked nixpkgs rev: ${LOCKED_NIXPKGS_REV}"
 
+          # entry_broken is set by ci_liveness_callback (see below) for
+          # whichever entry is currently being processed by the main loop.
+          entry_broken=false
+          ci_liveness_callback() {
+            local host_key="$1" id="$2" target_host="$3" eval_attr="$4" result="$5" detail="$6"
+            case "$result" in
+              fail)
+                entry_broken=true
+                REPORT_LINES+=("🔴 **${host_key} / ${id}** (on \`${target_host}\`): OVERRIDE BROKEN — evaluation fails against current locked nixpkgs, regardless of tracking status")
+                REPORT_LINES+=("  \`\`\`")
+                REPORT_LINES+=("  ${detail}")
+                REPORT_LINES+=("  \`\`\`")
+                ;;
+              skip)
+                REPORT_LINES+=("⚠️  **${host_key} / ${id}**: ${detail}")
+                ;;
+            esac
+          }
+
           while IFS= read -r host_key; do
             echo ""
             echo "=== ${host_key} ==="
-
-            CONFIG_NS=$(resolve_config_namespace "$host_key")
-            if [ -z "$CONFIG_NS" ]; then
-              echo "  WARNING: could not resolve nixosConfigurations/darwinConfigurations for ${host_key}"
-            else
-              echo "  Config namespace: ${CONFIG_NS}"
-            fi
 
             while IFS= read -r id; do
               entry=$(echo "$AUDIT_JSON" | jq -c --arg h "$host_key" --arg id "$id" '.[$h][$id]')
@@ -364,26 +341,19 @@ jobs:
                   ;;
                 *)
                   echo "  WARNING: unknown strategy '${strategy}'"
-                  REPORT_LINES+=("⚠️  **${host_key} / ${id}**: unknown strategy \`${strategy}\` — update audit.nix")
+                  REPORT_LINES+=("⚠️  **${host_key} / ${id}**: unknown strategy \`${strategy}\` — update overlay-entries.nix")
                   ;;
               esac
 
               # -- Liveness check: does the override still evaluate at all? --
-              if [ -n "$CONFIG_NS" ]; then
-                eval_attr=$(echo "$entry" | jq -r '.evalAttr // empty')
-                if [ -z "$eval_attr" ]; then
-                  echo "  ERROR: evalAttr not set for ${host_key}/${id} — cannot verify liveness"
-                  REPORT_LINES+=("⚠️  **${host_key} / ${id}**: \`evalAttr\` not set in audit.nix — liveness check skipped, add it to enable")
-                else
-                  eval_error=""
-                  if ! eval_error=$(check_override_evaluates "$CONFIG_NS" "$host_key" "$eval_attr"); then
-                    BROKEN_IDS+=("${host_key}::${id}")
-                    REPORT_LINES+=("🔴 **${host_key} / ${id}**: OVERRIDE BROKEN — evaluation fails against current locked nixpkgs, regardless of tracking status")
-                    REPORT_LINES+=("  \`\`\`")
-                    REPORT_LINES+=("  ${eval_error}")
-                    REPORT_LINES+=("  \`\`\`")
-                  fi
-                fi
+              # Runs unconditionally, independent of the strategy result above
+              # — the underlying tracked problem can be entirely unrelated to
+              # why the override itself stopped working. Shared with the
+              # pre-commit hook via check_entry_liveness (sourced above).
+              entry_broken=false
+              check_entry_liveness "$AUDIT_JSON" "$host_key" "$id" ci_liveness_callback
+              if [ "$entry_broken" = true ]; then
+                BROKEN_IDS+=("${host_key}::${id}")
               fi
 
               if [ "$is_obsolete" = true ]; then
@@ -438,13 +408,11 @@ jobs:
             cat "$REPORT_FILE"
             printf '\n### What to do\n\n'
             printf 'For each 🔴 **broken** entry above:\n\n'
-            printf -- '- Update or remove the overlay block in `overlays/default.nix` so it evaluates against current nixpkgs (check the error text above — often an argument/attribute rename)\n'
-            printf -- '- If removing entirely, also remove the corresponding entry from `overlays/audit.nix`\n'
+            printf -- '- Update or remove the tracked entry in the relevant overlays/overlay-entries.nix so it evaluates against current nixpkgs (check the error text above — often an argument/attribute rename)\n'
             printf -- '- Run `nixos-rebuild build --flake .#gibson` and/or `darwin-rebuild build --flake .#macbook` locally to confirm clean build\n'
             printf -- '- Raise a PR linked to this issue and merge as soon as practical — this is blocking, not routine cleanup\n\n'
             printf 'For each ✅ **obsolete** entry above:\n\n'
-            printf -- '- Remove the overlay block from `overlays/default.nix` in the relevant host directory\n'
-            printf -- '- Remove the corresponding entry from `overlays/audit.nix` in the same directory\n'
+            printf -- '- Remove the tracked entry (or its override) from the relevant overlays/overlay-entries.nix\n'
             printf -- '- Action any coupled removals described in the 📎 notes above\n'
             printf -- '- Run `nixos-rebuild build --flake .#gibson` and/or `darwin-rebuild build --flake .#macbook` locally to confirm clean build\n'
             printf -- '- Raise a PR linked to this issue and merge\n'
