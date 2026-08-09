@@ -4,7 +4,7 @@ let
   extraSubstituters = [
     "https://nix-community.cachix.org"
     "https://nix-gaming.cachix.org"
-    "http://192.168.1.110:8080/home-cache"
+    "https://attic.home.arpa/home-cache"
   ];
 
   extraTrustedPublicKeys = [
