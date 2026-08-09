@@ -34,6 +34,9 @@ let
           hmExtra = {
             backupFileExtension = "before-nix";
           };
+          extraSpecialArgs = {
+            inherit (packages) pkgs-stable;
+          };
         };
     };
 
