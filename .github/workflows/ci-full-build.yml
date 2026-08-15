@@ -49,10 +49,26 @@ jobs:
             echo "lockfile_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-  eval-check:
-    name: full build check (linux)
+  check-cache:
+    name: verify attic cache is reachable
+    runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.lockfile_changed == 'true'
+    steps:
+      - name: Verify attic cache is reachable
+        run: |
+          curl --fail --silent --show-error --max-time 30 \
+            http://attic.taileda465.ts.net:8080/home-cache/nix-cache-info
+
+  eval-check:
+    name: full build check (linux)
+    needs:
+      - changes
+      - check-cache
+    if: |
+      needs.changes.result == 'success' &&
+      needs.check-cache.result == 'success' &&
+      needs.changes.outputs.lockfile_changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     permissions:
@@ -107,12 +123,17 @@ jobs:
           command: |
             set -euo pipefail
             nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
-            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
+            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 2 ./result
 
   darwin-eval-check:
     name: full build check (darwin)
-    needs: changes
-    if: needs.changes.outputs.lockfile_changed == 'true'
+    needs:
+      - changes
+      - check-cache
+    if: |
+      needs.changes.result == 'success' &&
+      needs.check-cache.result == 'success' &&
+      needs.changes.outputs.lockfile_changed == 'true'
     runs-on: macos-latest
     timeout-minutes: 240
     permissions:
@@ -167,4 +188,4 @@ jobs:
           command: |
             set -euo pipefail
             nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
-            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
+            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 2 ./result
