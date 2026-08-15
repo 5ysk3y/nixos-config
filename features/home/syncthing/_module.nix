@@ -195,7 +195,10 @@ in
     }
 
     (mkIf
-      (!pkgs.stdenv.isLinux && builtins.any (f: f.bootstrap.enable) (builtins.attrValues enabledFolders))
+      (
+        !pkgs.stdenv.hostPlatform.isLinux
+        && builtins.any (f: f.bootstrap.enable) (builtins.attrValues enabledFolders)
+      )
       {
         assertions = [
           {

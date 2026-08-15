@@ -2,7 +2,7 @@
   perSystem =
     { pkgs, lib, ... }:
     {
-      packages = lib.optionalAttrs pkgs.stdenv.isLinux {
+      packages = lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
         dim-screen = pkgs.callPackage ./../../../pkgs/dim-screen { };
         sddm-astronaut-theme = pkgs.callPackage ./../../../pkgs/sddm-themes { };
         game-cleanup = pkgs.callPackage ./../../../pkgs/game-cleanup { };

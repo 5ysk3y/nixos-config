@@ -25,7 +25,7 @@ let
   syncthingConfigFile = "${config.home.homeDirectory}/.local/state/syncthing/config.xml";
 in
 {
-  config = mkIf (pkgs.stdenv.isLinux && bootstrapFolders != { }) {
+  config = mkIf (pkgs.stdenv.hostPlatform.isLinux && bootstrapFolders != { }) {
     systemd.user.services.syncthing-bootstrap = {
       Unit = {
         Description = "Safe first-sync bootstrap for Syncthing";

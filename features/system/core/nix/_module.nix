@@ -14,7 +14,7 @@ let
   ];
 in
 {
-  nix.settings = lib.mkIf pkgs.stdenv.isLinux {
+  nix.settings = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     substituters = [
       "https://cache.nixos.org"
     ]
@@ -26,7 +26,7 @@ in
     ++ extraTrustedPublicKeys;
   };
 
-  environment.etc."nix/nix.custom.conf" = lib.mkIf pkgs.stdenv.isDarwin {
+  environment.etc."nix/nix.custom.conf" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     text = ''
       extra-substituters = ${lib.concatStringsSep " " extraSubstituters}
       extra-trusted-public-keys = ${lib.concatStringsSep " " extraTrustedPublicKeys}
