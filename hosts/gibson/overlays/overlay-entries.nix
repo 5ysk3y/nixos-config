@@ -53,7 +53,7 @@
                 hash = "sha256-IpX7tmVJi9seHg5M4Wuexy78bQDlbntVk1HcT9kFts4=";
               })
               {
-                inherit (prev) system;
+                inherit (prev.stdenv.hostPlatform) system;
                 config.allowUnfree = true;
               };
         in
