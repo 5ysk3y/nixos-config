@@ -110,6 +110,23 @@ mkMerge [
       };
       startWithUserSession = true;
     };
+
+    # installDoomEmacs (above) runs via the system-level
+    # home-manager-${username}.service, which has no ordering relative to this
+    # user-level emacs.service (WantedBy=default.target).  On a cold boot they
+    # race; this will guard against starting before the doomemacs-modules rsync
+    # has completed.
+    systemd.user.services.emacs.Service.ExecStartPre = [
+      "${pkgs.writeShellScript "wait-for-doom-modules" ''
+        marker="${config.xdg.configHome}/emacs/sources/doom+/modules/ui/doom/config.el"
+        for _ in $(seq 1 30); do
+          [ -e "$marker" ] && exit 0
+          sleep 1
+        done
+        echo "wait-for-doom-modules: gave up after 30s waiting for $marker" >&2
+        exit 0
+      ''}"
+    ];
   })
 
   (mkIf pkgs.stdenv.hostPlatform.isDarwin {
