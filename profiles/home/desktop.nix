@@ -10,6 +10,7 @@
     inputs.self.modules.homeManager.gaming
     inputs.self.modules.homeManager.github-cli
     inputs.self.modules.homeManager.hypr
+    inputs.self.modules.homeManager.hugo
     inputs.self.modules.homeManager.kitty
     inputs.self.modules.homeManager.mako
     inputs.self.modules.homeManager.media
