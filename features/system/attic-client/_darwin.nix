@@ -8,8 +8,8 @@
       export HOME=/var/lib/attic-watch-store
       mkdir -p "$HOME"
       ${pkgs.attic-client}/bin/attic login home \
-        http://192.168.1.110:8080 "$(cat ${config.sops.secrets."services/attic/token".path})"
-      exec ${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 1 home:home-cache
+        https://attic.home.arpa "$(cat ${config.sops.secrets."services/attic/token".path})"
+      exec ${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache
     '';
     serviceConfig = {
       KeepAlive = true;
