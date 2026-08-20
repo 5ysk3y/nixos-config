@@ -117,13 +117,13 @@ mkMerge [
     # race; this will guard against starting before the doomemacs-modules rsync
     # has completed.
     systemd.user.services.emacs.Service.ExecStartPre = [
-      "${pkgs.writeShellScript "wait-for-doom-modules" ''
-        marker="${config.xdg.configHome}/emacs/sources/doom+/modules/ui/doom/config.el"
-        for _ in $(seq 1 30); do
-          [ -e "$marker" ] && exit 0
-          sleep 1
+      "${pkgs.writeShellScript "wait-for-home-manager-activation" ''
+        for _ in $(seq 1 60); do
+        state=$(${pkgs.systemd}/bin/systemctl show -p ActiveState --value home-manager-${vars.username}.service 2>/dev/null || echo unknown)
+        [ "$state" = "active" ] && exit 0
+        sleep 1
         done
-        echo "wait-for-doom-modules: gave up after 30s waiting for $marker" >&2
+        echo "wait-for-home-manager-activation: home-manager-${vars.username}.service not active after 60s (state=$state)" >&2
         exit 0
       ''}"
     ];
