@@ -120,6 +120,23 @@
         wantedBy = [ "multi-user.target" ];
         serviceConfig.Restart = "always";
       };
+      reenable-monitors = {
+        description = "Re-enable DRM outputs forced off for Plymouth boot splash";
+        after = [ "plymouth-quit.service" ];
+        before = [ "display-manager.service" ];
+        wantedBy = [ "graphical.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = pkgs.writeShellScript "reenable-side-monitors" ''
+            for conn in DP-2 HDMI-A-1; do
+                for f in /sys/class/drm/card*-$conn/status; do
+                [ -e "$f" ] && echo detect > "$f"
+                done
+            done
+          '';
+        };
+      };
     };
   };
 

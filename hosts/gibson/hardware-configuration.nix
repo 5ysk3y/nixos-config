@@ -33,8 +33,8 @@
       "splash"
       "acpi_enforce_resources=lax"
       "video=DP-1:2560x1440@144"
-      "video=DP-2:1920x1080@144"
-      "video=HDMI-A-1:1920x1080@60"
+      "video=DP-2:d"
+      "video=HDMI-A-1:d"
       "zswap.enabled=1"
       "zswap.compressor=lz4"
       "zswap.max_pool_percent=20"
@@ -46,7 +46,7 @@
       timeout = 0;
       systemd-boot = {
         enable = true;
-        configurationLimit = 20;
+        configurationLimit = 5;
       };
       efi.canTouchEfiVariables = true;
     };
@@ -74,6 +74,11 @@
         "/swap.key" = "/etc/secrets/swap.key";
       };
       systemd.enable = true;
+      kernelModules = [
+        "nvidia"
+        "nvidia_modeset"
+        "nvidia_drm"
+      ];
       availableKernelModules = [
         "nvme"
         "xhci_pci"
@@ -86,10 +91,10 @@
     resumeDevice = "/dev/disk/by-label/swap";
     plymouth = {
       enable = true;
-      theme = "tech_b";
+      theme = "hexagon_hud";
       themePackages = with pkgs; [
         (adi1090x-plymouth-themes.override {
-          selected_themes = [ "tech_b" ];
+          selected_themes = [ "hexagon_hud" ];
         })
       ];
     };
