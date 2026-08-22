@@ -55,6 +55,10 @@ jobs:
     needs: changes
     if: needs.changes.outputs.lockfile_changed == 'true'
     steps:
+      - name: Setup tailscale
+        uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888
+        with:
+          authkey: ${{ secrets.TS_AUTHKEY }}
       - name: Verify attic cache is reachable
         run: |
           curl --fail --silent --show-error --max-time 30 \
@@ -189,3 +193,37 @@ jobs:
             set -euo pipefail
             nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
             nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 2 ./result
+
+  ci-gate:
+    name: CI required status
+    if: always()
+    needs:
+      - changes
+      - check-cache
+      - eval-check
+      - darwin-eval-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all required jobs actually succeeded
+        run: |
+          set -euo pipefail
+          echo "changes:           ${{ needs.changes.result }}"
+          echo "check-cache:       ${{ needs.check-cache.result }}"
+          echo "eval-check:        ${{ needs.eval-check.result }}"
+          echo "darwin-eval-check: ${{ needs.darwin-eval-check.result }}"
+
+          if [ "${{ needs.changes.result }}" != "success" ]; then
+            echo "::error::changes job did not succeed"
+            exit 1
+          fi
+
+          if [ "${{ needs.changes.outputs.lockfile_changed }}" = "true" ]; then
+            for r in "${{ needs.check-cache.result }}" "${{ needs.eval-check.result }}" "${{ needs.darwin-eval-check.result }}"; do
+              if [ "$r" != "success" ]; then
+                echo "::error::a required full-build job did not succeed (got: $r)"
+                exit 1
+              fi
+            done
+          fi
+
+          echo "All required checks passed."
