@@ -382,7 +382,7 @@
   };
 
   features.system.sddm = {
-    theme = "post-apocalyptic_hacker";
+    theme = "cyberpunk";
     kwinOutputConfig = ./applications/sddm/kwinoutputconfig.json;
   };
 
