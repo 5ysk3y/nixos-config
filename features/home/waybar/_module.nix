@@ -64,13 +64,13 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
         };
 
         cpu = {
-          format = " {usage}%";
+          format = " {usage}%";
           interval = 10;
           tooltip = false;
         };
 
         memory = {
-          format = " {used:0.1f}G";
+          format = " {used:0.1f}G";
         };
 
         disk = {
