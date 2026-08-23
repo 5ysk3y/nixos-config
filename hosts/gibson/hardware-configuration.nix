@@ -2,7 +2,6 @@
 # and may be overwritten by future invocations.  Please make changes
 # to /etc/nixos/configuration.nix instead.
 {
-  config,
   pkgs,
   modulesPath,
   system,
@@ -18,10 +17,6 @@
   boot = {
     kernelPackages = pkgs.linuxPackages_zen;
     kernelModules = [
-      "nvidia"
-      "nvidia_modeset"
-      "nvidia_uvm"
-      "nvidia_drm"
       "ntsync"
     ];
     blacklistedKernelModules = [
@@ -126,16 +121,8 @@
     graphics = {
       enable = true;
       enable32Bit = true;
-      extraPackages = with pkgs; [ nvidia-vaapi-driver ]; # For additional packages if needed
     };
 
-    nvidia = {
-      modesetting.enable = true;
-      open = true;
-      powerManagement.enable = true;
-      nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.latest;
-    };
   };
 
   nixpkgs.hostPlatform = "${system}";

@@ -17,6 +17,8 @@ in
 
       home.packages = with pkgs; [ hyprshutdown ];
 
+      services.hyprpolkitagent.enable = true;
+
       wayland.windowManager.hyprland = {
         enable = true;
         sourceFirst = false;

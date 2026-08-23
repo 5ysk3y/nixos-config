@@ -18,6 +18,7 @@ rec {
 
   systemProfiles = [
     ./../../profiles/system/nixos.nix
+    ./../../profiles/system/desktop.nix
   ];
 
   homeProfiles = [
