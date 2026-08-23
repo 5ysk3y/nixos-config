@@ -13,6 +13,10 @@
     inputs.self.modules.nixos.nvidia
   ];
 
+  security.sudo.extraConfig = ''
+    Defaults env_keep+=NIX_SSHOPTS
+  '';
+
   networking = {
     useDHCP = false;
     dhcpcd.enable = false;
@@ -48,7 +52,6 @@
     LC_TIME = "en_GB.UTF-8";
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users = {
     users."${vars.username}" = {
       isNormalUser = true;
@@ -63,8 +66,6 @@
         "gamemode"
         "sops"
       ];
-      #   packages = with pkgs; [    ];
-      #   USER PKGS MANAGED IN HOME.NIX
       shell = pkgs.zsh;
       hashedPasswordFile = config.sops.secrets."system/gibson_user_pass".path;
     };

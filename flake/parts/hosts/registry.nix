@@ -17,6 +17,7 @@ in
             kind = lib.mkOption {
               type = lib.types.enum [
                 "nixos"
+                "nixos-minimal" # No home-manager/secrets/yubikey config
                 "darwin"
               ];
             };
@@ -38,7 +39,9 @@ in
             };
 
             homeModule = lib.mkOption {
-              type = lib.types.path;
+              type = lib.types.nullOr lib.types.path;
+              default = null;
+              description = "Not required for kind = \"nixos-minimal\" — those hosts get no Home Manager module at all.";
             };
 
             overlaysModule = lib.mkOption {
@@ -57,7 +60,7 @@ in
 
             homeProfiles = lib.mkOption {
               type = lib.types.listOf lib.types.path;
-              readOnly = true;
+              default = [ ];
             };
 
             vars = lib.mkOption {
@@ -82,7 +85,14 @@ in
         };
       };
 
-      filterHosts = kind: hosts: lib.filterAttrs (_: v: v.kind == kind) hosts;
+      # `kinds` may be a single kind string or a list of kinds (e.g. both
+      # "nixos" and "nixos-minimal" build through the same nixosSystem path).
+      filterHosts =
+        kinds: hosts:
+        let
+          kindList = if builtins.isList kinds then kinds else [ kinds ];
+        in
+        lib.filterAttrs (_: v: builtins.elem v.kind kindList) hosts;
       mapHosts = f: hosts: lib.mapAttrs (_: f) hosts;
 
       mkHomeManagerModule =
