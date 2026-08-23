@@ -103,7 +103,7 @@ let
   # file is imported transitively via systemProfiles and is not reachable
   # through host.overlaysModule, so it's wired in explicitly here with the
   # same treatment, including the same validateTrackedList assertion.
-  systemEntriesFile = ./../../../features/system/core/overlays/_overlay-entries.nix;
+  systemEntriesFile = ./../../../features/system-core/overlays/_overlay-entries.nix;
   systemAudits =
     if builtins.pathExists systemEntriesFile then
       let

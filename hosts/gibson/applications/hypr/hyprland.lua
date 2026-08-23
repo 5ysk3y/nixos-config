@@ -207,7 +207,6 @@ return function(WS)
   -- AUTOSTART
   ------------------------------------------------------------------------
   hl.on("hyprland.start", function()
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd("mako")
     hl.exec_cmd("[group new lock] discord")
     hl.exec_cmd("[group new lock] cider-2")

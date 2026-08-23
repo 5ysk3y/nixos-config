@@ -5,6 +5,8 @@
 }:
 
 {
+  programs.virt-manager.enable = true;
+
   virtualisation = {
     podman = {
       enable = true;

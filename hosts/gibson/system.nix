@@ -2,14 +2,15 @@
 {
   config,
   pkgs,
-  inputs,
   hostname,
   vars,
+  inputs,
   ...
 }:
 {
   imports = [
     ./hardware-configuration.nix
+    inputs.self.modules.nixos.nvidia
   ];
 
   networking = {
@@ -29,11 +30,6 @@
       enable = true;
       internalInterfaces = [ "ve-pentesting" ];
       externalInterface = "enp7s0";
-    };
-
-    firewall = {
-      trustedInterfaces = [ config.services.tailscale.interfaceName ];
-      allowedUDPPorts = [ config.services.tailscale.port ];
     };
   };
 
@@ -96,26 +92,11 @@
   systemd = {
     tmpfiles = {
       rules = [
-        "d /nix/tmp 0755 root root - -"
         "d /var/lib/age 0750 root sops - -"
         "f /var/lib/age/keys.txt 0640 root sops - -"
       ];
     };
     services = {
-      nix-daemon = {
-        environment = {
-          TMPDIR = "/nix/tmp";
-        };
-        serviceConfig = {
-          RequiresMountsFor = [
-            "/nix/tmp"
-          ];
-        };
-        restartTriggers = [
-          config.environment.etc."nix/nix.conf".source
-        ];
-        after = [ "local-fs.target" ];
-      };
       pcscd = {
         wantedBy = [ "multi-user.target" ];
         serviceConfig.Restart = "always";
@@ -165,16 +146,8 @@
       DOCKER_HOST = "unix://\${XDG_RUNTIME_DIR}/podman/podman.sock";
       ENABLE_DPMS = "1";
       ENABLE_DDC = "1";
-      GBM_BACKEND = "nvidia-drm";
       GSETTINGS_BACKEND = "keyfile";
       GTK_THEME = "adw-gtk3:dark";
-      LIBVA_DRIVER_NAME = "nvidia";
-      NVD_BACKEND = "direct";
-      WLR_NO_HARDWARE_CURSORS = "1";
-      __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-      __GL_MaxFramesAllowed = "1";
-      __GL_GSYNC_ALLOWED = "0";
-      __GL_VRR_ALLOWED = "0";
     };
 
     pathsToLink = [
@@ -187,17 +160,6 @@
   security = {
     polkit.enable = true;
     rtkit.enable = true;
-    sudo.extraRules = [
-      {
-        users = [ vars.username ];
-        commands = [
-          {
-            command = "/run/current-system/sw/bin/chvt";
-            options = [ "NOPASSWD" ];
-          }
-        ];
-      }
-    ];
   };
 
   # List services that you want to enable:
@@ -284,17 +246,6 @@
         motherboard = "amd";
       };
     };
-
-    displayManager = {
-      defaultSession = "hyprland";
-    };
-
-    xserver = {
-      xkb.layout = "us";
-      xkb.variant = "";
-      videoDrivers = [ "nvidia" ];
-      enable = true;
-    };
   };
 
   # End Services
@@ -303,24 +254,14 @@
 
   programs = {
 
-    dconf.enable = true;
-    gamescope.enable = true;
-    hyprland.enable = true;
-    steam.enable = true;
-    virt-manager.enable = true;
     zsh.enable = true;
 
-    gamemode = {
-      enable = true;
-      enableRenice = true;
-      settings = {
-        gpu = {
-          apply_gpu_optimisations = "accept-responsibility";
-          gpu_device = 1;
-          amd_performance_level = "high";
-        };
-      };
+    gamemode.settings.gpu = {
+      apply_gpu_optimisations = "accept-responsibility";
+      gpu_device = 1;
+      amd_performance_level = "high";
     };
+
     gnupg = {
       agent = {
         enable = true;
@@ -330,27 +271,8 @@
   };
 
   nix = {
-    nixPath = [
-      "nixpkgs=${inputs.nixpkgs}"
-    ];
-    package = pkgs.nixVersions.latest;
-    extraOptions = ''
-      experimental-features = nix-command flakes
-    '';
     settings = {
-      auto-optimise-store = true;
-      download-buffer-size = 1000000000; # Something that'll hopefully never get exceeded
-      max-jobs = "auto";
       cores = 16;
-      trusted-users = [
-        "@wheel"
-      ];
-    };
-    gc = {
-      automatic = true;
-      dates = "weekly";
-      persistent = true;
-      options = "--delete-older-than 7d";
     };
   };
 
