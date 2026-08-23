@@ -19,4 +19,12 @@
       username
       ;
   };
+
+  attic = import ./attic.nix {
+    inherit
+      inputs
+      mkVars
+      username
+      ;
+  };
 }
