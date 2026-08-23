@@ -67,7 +67,7 @@ arg_defaults() {
 # Usage preamble — callers append platform-specific sections
 # ---------------------------------------------------------------------------
 usage_common() {
-  cat <<EOF
+  cat <<'EOF'
 Usage: bootstrap/${SCRIPT_NAME} [OPTIONS]
 
 Shared options:
