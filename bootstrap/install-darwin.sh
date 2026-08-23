@@ -73,7 +73,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 # ---------------------------------------------------------------------------
 usage() {
   usage_common
-  cat <<EOF
+  cat <<'EOF'
 
 Darwin notes:
   TARGET is always / on macOS — there is no install-time mountpoint.
