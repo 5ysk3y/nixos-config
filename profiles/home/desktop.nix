@@ -14,7 +14,6 @@
     inputs.self.modules.homeManager.kitty
     inputs.self.modules.homeManager.mako
     inputs.self.modules.homeManager.media
-    inputs.self.modules.homeManager.nix-settings
     inputs.self.modules.homeManager.obs-studio
     inputs.self.modules.homeManager.password-management
     inputs.self.modules.homeManager.playerctld

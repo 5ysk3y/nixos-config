@@ -69,9 +69,6 @@
     iptables -D nixos-fw -p tcp -s 192.168.1.113 --dport 22 -j ACCEPT || true
   '';
 
-  # TODO: replace with gibson's actual SSH public key (e.g. from
-  # /etc/ssh/ssh_host_ed25519_key.pub or a dedicated deploy keypair) —
-  # required for `nixos-rebuild --target-host` to reach this box.
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHDYsCglDjOEYHw6fpBL7KorictTA8314+K5VA6QaOko"
   ];

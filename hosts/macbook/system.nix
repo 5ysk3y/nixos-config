@@ -19,17 +19,6 @@
     shell = pkgs.zsh;
   };
 
-  environment = {
-    systemPackages = [ ];
-    etc = {
-      "nix/nix.custom.conf" = {
-        text = ''
-          experimental-features = nix-command flakes
-        '';
-      };
-    };
-  };
-
   services.openssh.enable = false;
 
   system = {

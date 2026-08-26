@@ -74,22 +74,6 @@
     };
   };
 
-  fonts.packages = with pkgs; [
-    nerd-fonts.symbols-only
-    hack-font
-    noto-fonts
-    noto-fonts-color-emoji
-    tamzen
-    font-awesome
-    material-design-icons
-
-    (google-fonts.override {
-      fonts = [
-        "Silkscreen"
-      ];
-    })
-  ];
-
   systemd = {
     tmpfiles = {
       rules = [
@@ -100,7 +84,6 @@
     services = {
       pcscd = {
         wantedBy = [ "multi-user.target" ];
-        serviceConfig.Restart = "always";
       };
       reenable-monitors = {
         description = "Re-enable DRM outputs forced off for Plymouth boot splash";
@@ -163,15 +146,8 @@
     rtkit.enable = true;
   };
 
-  # List services that you want to enable:
   services = {
     pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      audio.enable = true;
-
       wireplumber = {
         enable = true;
         extraConfig = {
@@ -208,15 +184,6 @@
         };
       };
     };
-
-    upower.enable = true;
-
-    dbus = {
-      enable = true;
-      implementation = "broker";
-    };
-
-    logind.settings.Login.HandleHibernateKey = "ignore";
 
     udev = {
       enable = true;
@@ -261,13 +228,6 @@
       apply_gpu_optimisations = "accept-responsibility";
       gpu_device = 1;
       amd_performance_level = "high";
-    };
-
-    gnupg = {
-      agent = {
-        enable = true;
-        enableSSHSupport = true;
-      };
     };
   };
 

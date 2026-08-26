@@ -1,4 +1,8 @@
-{ vars, pkgs, ... }:
+{
+  vars,
+  pkgs,
+  ...
+}:
 {
   home = {
     inherit (vars) username;
