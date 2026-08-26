@@ -51,6 +51,7 @@ in
     text = ''
       extra-substituters = ${lib.concatStringsSep " " extraSubstituters}
       extra-trusted-public-keys = ${lib.concatStringsSep " " extraTrustedPublicKeys}
+      experimental-features = nix-command flakes
     '';
   };
 }
