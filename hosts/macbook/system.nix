@@ -17,8 +17,6 @@
     shell = pkgs.zsh;
   };
 
-  services.openssh.enable = false;
-
   system = {
     stateVersion = 5;
     primaryUser = "${vars.username}";
