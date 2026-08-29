@@ -8,6 +8,8 @@
   home = {
     homeDirectory = "/Users/${vars.username}";
 
+    pointerCursor.enable = false;
+
     sessionVariables = {
     };
 

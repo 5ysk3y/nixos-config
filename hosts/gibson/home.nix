@@ -13,10 +13,7 @@
   home = {
     homeDirectory = "/home/${vars.username}";
 
-    pointerCursor = {
-      enable = true;
-      name = "Bibata-Modern-Classic";
-    };
+    pointerCursor.enable = true;
 
     sessionVariables = {
       NIXOS_OZONE_WL = 1;
