@@ -17,6 +17,10 @@
     shell = pkgs.zsh;
   };
 
+  environment.systemPackages = with pkgs; [
+    nixos-rebuild
+  ];
+
   system = {
     stateVersion = 5;
     primaryUser = "${vars.username}";
