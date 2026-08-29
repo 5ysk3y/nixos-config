@@ -97,7 +97,7 @@ jobs:
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
       - uses: DeterminateSystems/flakehub-cache-action@83293488abfd33fbfb2ab084097467491c029962
         with:
-          github-actions-cache: disabled
+          use-gha-cache: disabled
       - name: Start ssh-agent and add deploy key
         uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
         with:
@@ -127,7 +127,7 @@ jobs:
           command: |
             set -euo pipefail
             nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
-            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 2 ./result
+            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   darwin-eval-check:
     name: full build check (darwin)
@@ -162,7 +162,7 @@ jobs:
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
       - uses: DeterminateSystems/flakehub-cache-action@83293488abfd33fbfb2ab084097467491c029962
         with:
-          github-actions-cache: disabled
+          use-gha-cache: disabled
       - name: Start ssh-agent and add deploy key
         uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
         with:
@@ -192,7 +192,7 @@ jobs:
           command: |
             set -euo pipefail
             nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
-            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 2 ./result
+            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   ci-gate:
     name: CI required status
