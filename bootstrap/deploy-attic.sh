@@ -43,5 +43,14 @@ SSH_OPTS=($NIX_SSHOPTS)
 echo "==> pushing atticd env to ${TARGET}"
 sops --decrypt --extract '["services"]["attic"]["server-token"]' "$SECRETS_FILE" \
   | ssh "${SSH_OPTS[@]}" "$TARGET" 'install -m 0600 /dev/stdin /var/lib/attic/env'
+EXTRA_REBUILD_ARGS=()
+if [ "$(uname -s)" = "Darwin" ]; then
+  # macOS can't build or execute x86_64-linux directly: --fast skips
+  # nixos-rebuild's default self-reexec-for-target-platform step (which is
+  # exactly what fails on macOS), and --build-host delegates the actual
+  # build to attic itself. Evaluation still happens locally either way —
+  # only the build step moves, so this doesn't give attic any new access.
+  EXTRA_REBUILD_ARGS+=(--fast --build-host "$TARGET")
+fi
 echo "==> building + switching .#attic on ${TARGET}"
-nixos-rebuild switch --flake ".#attic" --target-host "$TARGET"
+nixos-rebuild switch --flake ".#attic" --target-host "$TARGET" "${EXTRA_REBUILD_ARGS[@]}"
