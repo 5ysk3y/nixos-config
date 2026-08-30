@@ -50,7 +50,7 @@ if [ "$(uname -s)" = "Darwin" ]; then
   # exactly what fails on macOS), and --build-host delegates the actual
   # build to attic itself. Evaluation still happens locally either way —
   # only the build step moves, so this doesn't give attic any new access.
-  EXTRA_REBUILD_ARGS+=(--fast --build-host "$TARGET")
+  EXTRA_REBUILD_ARGS+=(--no-reexec --build-host "$TARGET")
 fi
 echo "==> building + switching .#attic on ${TARGET}"
 nixos-rebuild switch --flake ".#attic" --target-host "$TARGET" "${EXTRA_REBUILD_ARGS[@]}"
