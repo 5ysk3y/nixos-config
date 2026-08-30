@@ -68,9 +68,12 @@
 
   features = {
     home = {
+      hyprland.luaConfig = ./applications/hypr/hyprland-host.lua;
+
       mako = {
         output = "DP-1";
       };
+
       syncthing = {
         enable = true;
         deviceName = "${hostname}";
