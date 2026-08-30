@@ -10,6 +10,17 @@
 #  --format proxmox-lxc \
 #  -c ./bootstrap/bootstrap-staging.nix
 #
+# Once the container image is available in Proxmox:
+#
+# pct create <CTID> local:vztmpl/image-name.tar.xz \
+# --unprivileged 1 \
+# --features nesting=1 \
+# --net0 name=eth0,bridge=vmbr0,firewall=1 \
+# --rootfs local-lvm:4 \
+# --cores <NUM> \
+# --memory <NUM> \
+# --swap <NUM>
+#
 # *******
 #
 # 192.168.1.150 is a fixed staging address, safe to reuse serially: only
