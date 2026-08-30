@@ -1,19 +1,21 @@
 {
+  config,
   lib,
   pkgs,
-  vars,
-  hostname,
   ...
 }:
-let
-  hyprConfig = vars.flakeSource + "/hosts/${hostname}/applications/hypr/hyprland.lua";
-in
 {
+  options.features.home.hyprland.luaConfig = lib.mkOption {
+    type = lib.types.path;
+    description = "Host level hyprland.lua config file";
+  };
+
   config =
     with lib;
     mkIf pkgs.stdenv.hostPlatform.isLinux {
-      # Shared hyprland configuration
-      xdg.configFile."hypr/${hostname}.lua".source = hyprConfig;
+
+      # Host-level hyprland configuration
+      xdg.configFile."hypr/hyprland-host.lua".source = config.features.home.hyprland.luaConfig;
 
       home.packages = with pkgs; [ hyprshutdown ];
 
@@ -133,7 +135,7 @@ in
           hl.animation({ leaf = "fade",       enabled = true, speed = 6, bezier = "default" })
           hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default", style = "fade" })
 
-          require("${hostname}")(WS)
+          require("hyprland-host")(WS)
         '';
       };
     };
