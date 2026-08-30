@@ -4,22 +4,26 @@
   username,
 }:
 let
-  hostname = "attic";
+  hostname = "gibson";
   system = "x86_64-linux";
-  path = ./../../hosts/attic;
+  path = ./../../../hosts/personal/gibson;
 in
 rec {
-  # No home-manager, no sops-nix, no YubiKey — see registry.nix for what
-  # this kind skips.
-  kind = "nixos-minimal";
+  kind = "nixos";
   inherit hostname system path;
 
   systemModule = path + /system.nix;
+  homeModule = path + /home.nix;
   overlaysModule = path + /overlays;
 
   systemProfiles = [
-    ./../../profiles/system/nixos.nix
-    ./../../profiles/system/server.nix
+    ./../../../profiles/system/nixos.nix
+    ./../../../profiles/system/desktop.nix
+  ];
+
+  homeProfiles = [
+    ./../../../profiles/home/common.nix
+    ./../../../profiles/home/desktop.nix
   ];
 
   modules = [

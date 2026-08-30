@@ -6,7 +6,7 @@
 let
   hostname = "macbook";
   system = "aarch64-darwin";
-  path = ./../../hosts/macbook;
+  path = ./../../../hosts/personal/macbook;
 in
 rec {
   kind = "darwin";
@@ -17,12 +17,12 @@ rec {
   overlaysModule = path + /overlays;
 
   systemProfiles = [
-    ./../../profiles/system/darwin.nix
+    ./../../../profiles/system/darwin.nix
   ];
 
   homeProfiles = [
-    ./../../profiles/home/common.nix
-    ./../../profiles/home/darwin.nix
+    ./../../../profiles/home/common.nix
+    ./../../../profiles/home/darwin.nix
   ];
 
   modules = [
