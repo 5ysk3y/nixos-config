@@ -40,22 +40,24 @@
     ];
   };
 
-  services.resolved.enable = true;
-
   proxmoxLXC = {
     manageNetwork = false;
     privileged = false;
     manageHostName = true;
   };
 
-  services.openssh = {
-    enable = true;
-    openFirewall = false;
-    settings = {
-      PasswordAuthentication = false;
-      KbdInteractiveAuthentication = false;
-      PermitRootLogin = "prohibit-password";
+  services = {
+    openssh = {
+      enable = true;
+      openFirewall = false;
+      settings = {
+        PasswordAuthentication = false;
+        KbdInteractiveAuthentication = false;
+        PermitRootLogin = "prohibit-password";
+      };
     };
+    resolved.enable = true;
+    zabbixAgent.settings.Hostname = "theVault.home.arpa";
   };
 
   # Standard LAN ssh allow list
