@@ -21,7 +21,7 @@ let
       inherit (host) system;
 
       specialArgs = {
-        inherit inputs;
+        inherit inputs repoLib;
         inherit (host) hostname system vars;
         inherit (packages) pkgs-stable;
       };

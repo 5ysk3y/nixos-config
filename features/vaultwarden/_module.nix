@@ -1,4 +1,8 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  repoLib,
+  ...
+}:
 {
   # Vaultwarden's secret env file (ADMIN_TOKEN, YUBICO_SECRET_KEY) lives at
   # /var/lib/vaultwarden-secrets/env, a plain root:root 0600 file outside
@@ -40,6 +44,25 @@
       INCREASE_NOTE_SIZE_LIMIT = false;
       YUBICO_CLIENT_ID = "107284";
     };
+  };
+
+  services.restic.backups.vaultwarden = repoLib.mkResticBackup {
+    paths = [
+      "/var/lib/vaultwarden/backup/db.sqlite3"
+      "/var/lib/vaultwarden/rsa_key.pem"
+      "/var/lib/vaultwarden/rsa_key.pub.pem"
+      "/var/lib/vaultwarden/attachments"
+      "/var/lib/vaultwarden/sends"
+    ];
+    repository = "sftp:networkBackup@backupServer.home.arpa:Linux/bitwarden";
+    passwordFile = "/var/lib/vaultwarden-secrets/restic-password";
+    extraOptions = [
+      "sftp.command='ssh networkBackup@backupServer.home.arpa -i /var/lib/vaultwarden-secrets/restic-sftp-key -s sftp'"
+    ];
+    backupPrepareCommand = ''
+      mkdir -p /var/lib/vaultwarden/backup
+      ${pkgs.sqlite}/bin/sqlite3 /var/lib/vaultwarden/db.sqlite3 ".backup '/var/lib/vaultwarden/backup/db.sqlite3'"
+    '';
   };
 
   # /var/lib/vaultwarden-secrets must exist before push_secrets' `install`

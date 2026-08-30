@@ -136,6 +136,34 @@ in
             // hmExtra;
           }
         ];
+
+      mkResticBackup =
+        {
+          paths,
+          repository,
+          passwordFile,
+          backupPrepareCommand ? null,
+          extraOptions ? [ ],
+          timerConfig ? {
+            OnCalendar = "03:00";
+          },
+          pruneOpts ? [
+            "--keep-daily 7"
+            "--keep-weekly 4"
+            "--keep-monthly 6"
+          ],
+        }:
+        {
+          inherit
+            paths
+            repository
+            passwordFile
+            extraOptions
+            timerConfig
+            pruneOpts
+            ;
+        }
+        // lib.optionalAttrs (backupPrepareCommand != null) { inherit backupPrepareCommand; };
     };
 
     repo.hosts = import ../../hosts {
