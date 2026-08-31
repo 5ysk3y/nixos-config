@@ -17,7 +17,7 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 | `gibson` | NixOS | x86_64-linux | Personal | Main NixOS PC |
 | `macbook` | nix-darwin | aarch64-darwin | Personal | M2 Macbook Air |
 | `attic` | NixOS | x86_64-linux | Server | Attic Cache under Proxmox PCT |
-| `vaultwarden` | NixOS | x86_64-linux | Server | Vaultwarden under Proxmox PCT |
+| `theVault` | NixOS | x86_64-linux | Server | Vaultwarden under Proxmox PCT |
 
 ---
 
