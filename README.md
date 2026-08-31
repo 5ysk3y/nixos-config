@@ -12,11 +12,12 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 
 ## Hosts
 
-| Host | Platform | System | Description |
-|---|---|---|---|
-| `gibson` | NixOS | x86_64-linux | Main NixOS PC |
-| `attic` | NixOS | x86_64-linux | Attic Cache under Proxmox PCT |
-| `macbook` | nix-darwin | aarch64-darwin | M2 Macbook Air |
+| Host | Platform | System | Type | Description |
+|---|---|---|---|---|
+| `gibson` | NixOS | x86_64-linux | Personal | Main NixOS PC |
+| `macbook` | nix-darwin | aarch64-darwin | Personal | M2 Macbook Air |
+| `attic` | NixOS | x86_64-linux | Server | Attic Cache under Proxmox PCT |
+| `vaultwarden` | NixOS | x86_64-linux | Server | Vaultwarden under Proxmox PCT |
 
 ---
 
@@ -29,7 +30,9 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 │   ├── hosts/                 # Per-host declarations (kind, system, profiles)
 │   ├── parts/                 # Flake-parts modules (outputs, platforms, features)
 │   └── lib/
-├── hosts/                     # Host-specific system, home, disko, overlays
+├── hosts/
+│   ├── personal               # Per-host config (system, home, overrides) for personal machines
+│   ├── servers/               # Per-host config (system, home, overrides) for servers
 ├── features/                  # Feature modules — home and system
 ├── profiles/                  # Profile compositions — groups of features per host class
 ├── pkgs/                      # Custom packages
