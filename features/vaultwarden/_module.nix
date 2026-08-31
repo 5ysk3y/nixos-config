@@ -62,15 +62,31 @@
     backupPrepareCommand = ''
       mkdir -p /var/lib/vaultwarden/backup
       ${pkgs.sqlite}/bin/sqlite3 /var/lib/vaultwarden/db.sqlite3 ".backup '/var/lib/vaultwarden/backup/db.sqlite3'"
+      : > /var/log/restic_backup_local.log
     '';
   };
 
   # /var/lib/vaultwarden-secrets must exist before push_secrets' `install`
   # can write into it on a fresh host — declared here rather than left to
   # an undocumented manual mkdir before the first deploy.
-  systemd.tmpfiles.rules = [
-    "d /var/lib/vaultwarden-secrets 0700 root root -"
-  ];
+  systemd = {
+    tmpfiles.rules = [
+      "d /var/lib/vaultwarden-secrets 0700 root root -"
+      "f /var/log/restic_backup_local.log 0644 root root -"
+    ];
+    services = {
+      restic-backups-vaultwarden.onFailure = [
+        "restic-backup-failure-vaultwarden.service"
+      ];
+      restic-backup-failure-vaultwarden = {
+        description = "Records restic backup failure for Zabbix monitoring";
+        serviceConfig.Type = "oneshot";
+        script = ''
+          echo "local failure" > /var/log/restic_backup_local.log
+        '';
+      };
+    };
+  };
 
   environment.systemPackages = [
     pkgs.vaultwarden # for `vaultwarden hash` if the admin token ever needs regenerating
