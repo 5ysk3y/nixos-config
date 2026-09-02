@@ -29,7 +29,7 @@
         trackingPRs = [
           {
             repo = "qutebrowser/qutebrowser";
-            number = 8642;
+            numbers = [ 8642 ];
           }
         ];
       };

@@ -318,7 +318,7 @@ jobs:
                   issue_output=""
                   rc=0
                   issue_output=$(check_github_items "$items_json" "issue") || rc=$?
-                  summary=$(echo "$issue_output" | paste -sd ', ')
+                  summary=$(echo "$issue_output" | paste -sd ',' | sed 's/,/, /g')
                   if [ $rc -eq 0 ]; then
                     is_obsolete=true
                     REPORT_LINES+=("✅ **${host_key} / ${id}**: all tracking issues closed — ${summary}")
@@ -327,11 +327,11 @@ jobs:
                   fi
                   ;;
                 nixpkgs-pr)
-                  items_json=$(echo "$entry" | jq -c '.trackingPRs')
+                  items_json=$(echo "$entry" | jq -c '[.trackingPRs[] | .repo as $r | .numbers[] | {repo: $r, number: .}]')
                   pr_output=""
                   rc=0
                   pr_output=$(check_github_items "$items_json" "pull") || rc=$?
-                  summary=$(echo "$pr_output" | paste -sd ', ')
+                  summary=$(echo "$pr_output" | paste -sd ',' | sed 's/,/, /g')
                   if [ $rc -eq 0 ]; then
                     is_obsolete=true
                     REPORT_LINES+=("✅ **${host_key} / ${id}**: all tracking PRs merged — ${summary}")

@@ -206,12 +206,12 @@ in
                 lib.types.submodule {
                   options = {
                     repo = lib.mkOption { type = lib.types.str; };
-                    number = lib.mkOption { type = lib.types.int; };
+                    numbers = lib.mkOption { type = lib.types.listOf lib.types.int; };
                   };
                 }
               );
               default = [ ];
-              description = "GitHub PRs that must ALL be merged (nixpkgs-pr only).";
+              description = "GitHub PRs that must ALL be merged, grouped by repo.";
             };
 
             notes = lib.mkOption {
