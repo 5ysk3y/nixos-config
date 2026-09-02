@@ -27,7 +27,11 @@ in
         trackingPRs = [
           {
             repo = "NixOS/nixpkgs";
-            number = 515997;
+            numbers = [
+              515997
+              520445
+              547302
+            ];
           }
         ];
         notes = "COUPLED REMOVAL: also remove qtwebengine-fix flake input from flake.nix and the qtPinnedPkgs let-binding in hosts/macbook/overlays/overlay-entries.nix.";
