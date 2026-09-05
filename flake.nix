@@ -27,7 +27,7 @@
 
     # other stuff
     flake-parts.url = "github:hercules-ci/flake-parts";
-    import-tree.url = "github:vic/import-tree";
+    import-tree.url = "github:denful/import-tree";
 
     emacs-overlay.url = "github:nix-community/emacs-overlay/master";
     sops-nix.url = "github:Mic92/sops-nix";
