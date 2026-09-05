@@ -18,7 +18,7 @@
 # in this same list.
 { inputs }:
 {
-  permanent = final: prev: {
+  permanent = _final: prev: {
     steam = prev.steam.override {
       extraPkgs =
         pkgs: with pkgs; [
@@ -42,7 +42,7 @@
       # TODO: hibernate/hyprlock black-screen bisect — remove once root cause confirmed/fixed upstream
       exempt = true; # diagnostic only, no upstream issue filed yet
       overlay =
-        final: prev:
+        _final: prev:
         let
           oldNixpkgs =
             import
@@ -77,7 +77,7 @@
         threshold = "0.42.0";
         notes = "mpv override is a coupled removal — remove both entries together.";
       };
-      overlay = final: prev: {
+      overlay = _final: prev: {
         mpv-unwrapped = prev.mpv-unwrapped.overrideAttrs (old: {
           patches = (old.patches or [ ]) ++ [
             ./patches/mpv-fence-leak.patch
@@ -106,7 +106,7 @@
         threshold = "0.16.0";
         notes = "Also remove waybar-patched flake input from flake.nix. Release cadence has been strictly minor bumps since 0.11.0.";
       };
-      overlay = final: prev: {
+      overlay = _final: prev: {
         waybar = prev.waybar.overrideAttrs (old: {
           src = inputs.waybar-patched;
           version = "git-0594574";
@@ -135,7 +135,7 @@
         ];
         notes = "No upstream fix is proposed yet";
       };
-      overlay = final: prev: {
+      overlay = _final: prev: {
         bitwarden-desktop = prev.bitwarden-desktop.overrideAttrs (old: {
           postFixup = (old.postFixup or "") + ''
             wrapProgram $out/bin/bitwarden \
