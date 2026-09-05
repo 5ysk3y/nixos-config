@@ -65,13 +65,11 @@
 
   outputs =
     inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } (
-      {
-        systems = [
-          "x86_64-linux"
-          "aarch64-darwin"
-        ];
-      }
-      // (inputs.import-tree ./flake/parts)
-    );
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
+      imports = [ (inputs.import-tree ./flake/parts) ];
+    };
 }
