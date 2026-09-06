@@ -37,8 +37,11 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 ├── profiles/                  # Profile compositions — groups of features per host class
 ├── pkgs/                      # Custom packages
 └── bootstrap/
-    └── install.sh             # Bootstrap entrypoint; use with --help for assistance
-    └── deploy-attic.sh        # Attic-specific deployment script
+    └── install.sh             # Bootstrap entrypoint for personal NixOS hosts
+    └── install-darwin.sh      # Bootstrap entrypoint for personal Nix-Darwin hosts
+    └── deploy.sh              # Bootstrap entrypoint for server hosts
+    └── test.sh                # Custom boostraping test suite
+    └── servers/               # Individual server deployment scripts used by deploy.sh
 ```
 
 The config follows the [dendritic pattern](https://saylesss88.github.io/flakes/dendritic_flake_parts.html) — features are small, self-contained modules composed into hosts via profiles rather than monolithic per-host config files. [flake-parts](https://github.com/hercules-ci/flake-parts) and [import-tree](https://github.com/vic/import-tree) handle the wiring.
