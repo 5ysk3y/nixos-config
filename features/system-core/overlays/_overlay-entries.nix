@@ -3,12 +3,7 @@
 # convention explanation. Kept underscore-prefixed like the other files in
 # this directory, per the dendritic convention of excluding it from
 # import-tree's flake-parts module discovery.
-{
-  inputs ? null,
-  pkgs ? null,
-  ...
-}:
-{
+_: {
   permanent = _final: _prev: { };
 
   tracked = [
@@ -36,7 +31,7 @@
       # Unstable qutebrowser build with unmerged FIDO2 support.
       # Remove once upstream merges https://github.com/qutebrowser/qutebrowser/pull/8642
       overlay = final: prev: {
-        qutebrowser = prev.qutebrowser.overrideAttrs (old: {
+        qutebrowser = prev.qutebrowser.overrideAttrs (_old: {
           version = "unstable-2026-08-04";
           src = final.fetchFromGitHub {
             owner = "coderkun";
