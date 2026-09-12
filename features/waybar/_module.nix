@@ -125,7 +125,7 @@ lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
             " "
             " "
           ];
-          "on-click" = "pwvucontrol";
+          "on-click" = "pavucontrol";
         };
 
         clock = {
