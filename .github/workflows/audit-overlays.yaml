@@ -1,17 +1,19 @@
 name: Audit temporary overlays
 
 on:
-  # Run after the weekly flake lock update so nix eval reflects freshest nixpkgs
-  workflow_run:
-    workflows: ["Update flake.lock"]
-    types: [completed]
-  # Allow manual trigger for ad-hoc checks
+  pull_request:
+    branches: [main]
+    paths:
+      - flake.lock
   workflow_dispatch: {}
+
+concurrency:
+  group: overlay-audit-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   audit:
     name: Check overlay obsolescence
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -20,8 +22,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@021c8a1bd3570eb21f5c20a054812b0c4d9ca614
@@ -258,13 +258,13 @@ jobs:
             case "$result" in
               fail)
                 entry_broken=true
-                REPORT_LINES+=("🔴 **${host_key} / ${id}** (on \`${target_host}\`): OVERRIDE BROKEN — evaluation fails against current locked nixpkgs, regardless of tracking status")
-                REPORT_LINES+=("  \`\`\`")
-                REPORT_LINES+=("  ${detail}")
-                REPORT_LINES+=("  \`\`\`")
+                REPORT_LINES+=("- 🔴 **${host_key} / ${id}** (on \`${target_host}\`): OVERRIDE BROKEN — evaluation fails against current locked nixpkgs, regardless of tracking status")
+                REPORT_LINES+=("    \`\`\`")
+                REPORT_LINES+=("    ${detail}")
+                REPORT_LINES+=("    \`\`\`")
                 ;;
               skip)
-                REPORT_LINES+=("⚠️  **${host_key} / ${id}**: ${detail}")
+                REPORT_LINES+=("- ⚠️  **${host_key} / ${id}**: ${detail}")
                 ;;
             esac
           }
@@ -298,18 +298,18 @@ jobs:
                     rc=0
                     current=$(check_nixpkgs_version "$attr" "$threshold" "$system") || rc=$?
                     case $rc in
-                      0) version_lines+=("- ✅ \`${system}\`: \`${attr} = ${current}\` >= \`${threshold}\`") ;;
-                      1) version_lines+=("- ⏳ \`${system}\`: \`${attr} = ${current}\` < \`${threshold}\`")
+                      0) version_lines+=("    - ✅ \`${system}\`: \`${attr} = ${current}\` >= \`${threshold}\`") ;;
+                      1) version_lines+=("    - ⏳ \`${system}\`: \`${attr} = ${current}\` < \`${threshold}\`")
                          all_met=false ;;
-                      2) version_lines+=("- ⚠️  \`${system}\`: eval of \`${attr}\` failed — manual check required")
+                      2) version_lines+=("    - ⚠️  \`${system}\`: eval of \`${attr}\` failed — manual check required")
                          all_met=false ;;
                     esac
                   done < <(echo "$entry" | jq -r '.systems[]')
                   if [ "$all_met" = true ]; then
                     is_obsolete=true
-                    REPORT_LINES+=("✅ **${host_key} / ${id}**: nixpkgs meets threshold \`>= ${threshold}\` on all declared systems")
+                    REPORT_LINES+=("- ✅ **${host_key} / ${id}**: nixpkgs meets threshold \`>= ${threshold}\` on all declared systems")
                   else
-                    REPORT_LINES+=("⏳ **${host_key} / ${id}**: threshold \`${threshold}\` not yet reached on all systems")
+                    REPORT_LINES+=("- ⏳ **${host_key} / ${id}**: threshold \`${threshold}\` not yet reached on all systems")
                   fi
                   for line in "${version_lines[@]}"; do
                     REPORT_LINES+=("$line")
@@ -320,30 +320,34 @@ jobs:
                   issue_output=""
                   rc=0
                   issue_output=$(check_github_items "$items_json" "issue") || rc=$?
-                  summary=$(echo "$issue_output" | paste -sd ',' | sed 's/,/, /g')
                   if [ $rc -eq 0 ]; then
                     is_obsolete=true
-                    REPORT_LINES+=("✅ **${host_key} / ${id}**: all tracking issues closed — ${summary}")
+                    REPORT_LINES+=("- ✅ **${host_key} / ${id}**: all tracking issues closed")
                   else
-                    REPORT_LINES+=("⏳ **${host_key} / ${id}**: tracking issue(s) still open — ${summary}")
+                    REPORT_LINES+=("- ⏳ **${host_key} / ${id}**: tracking issue(s) still open")
                   fi
+                  while IFS= read -r line; do
+                    REPORT_LINES+=("    - $line")
+                  done <<< "$issue_output"
                   ;;
                 nixpkgs-pr)
                   items_json=$(echo "$entry" | jq -c '[.trackingPRs[] | .repo as $r | .numbers[] | {repo: $r, number: .}]')
                   pr_output=""
                   rc=0
                   pr_output=$(check_github_items "$items_json" "pull") || rc=$?
-                  summary=$(echo "$pr_output" | paste -sd ',' | sed 's/,/, /g')
                   if [ $rc -eq 0 ]; then
                     is_obsolete=true
-                    REPORT_LINES+=("✅ **${host_key} / ${id}**: all tracking PRs merged — ${summary}")
+                    REPORT_LINES+=("- ✅ **${host_key} / ${id}**: all tracking PRs merged")
                   else
-                    REPORT_LINES+=("⏳ **${host_key} / ${id}**: tracking PR(s) not yet merged — ${summary}")
+                    REPORT_LINES+=("- ⏳ **${host_key} / ${id}**: tracking PR(s) not yet merged")
                   fi
+                  while IFS= read -r line; do
+                    REPORT_LINES+=("    - $line")
+                  done <<< "$pr_output"
                   ;;
                 *)
                   echo "  WARNING: unknown strategy '${strategy}'"
-                  REPORT_LINES+=("⚠️  **${host_key} / ${id}**: unknown strategy \`${strategy}\` — update overlay-entries.nix")
+                  REPORT_LINES+=("- ⚠️  **${host_key} / ${id}**: unknown strategy \`${strategy}\` — update overlay-entries.nix")
                   ;;
               esac
 
@@ -361,7 +365,7 @@ jobs:
               if [ "$is_obsolete" = true ]; then
                 OBSOLETE_IDS+=("${host_key}::${id}")
                 if [ -n "$notes" ]; then
-                  REPORT_LINES+=("  📎 **Note:** ${notes}")
+                  REPORT_LINES+=("    - 📎 **Note:** ${notes}")
                 fi
               fi
 
@@ -437,12 +441,18 @@ jobs:
             exit 0
           fi
 
-          gh issue create \
+          issue_url=$(gh issue create \
             --title "chore(overlays): audit flagged obsolete/broken overlays ($(date -u +'%d/%m/%y'))" \
             --body-file "$ISSUE_BODY_FILE" \
-            --label "dependencies" \
-            --label "automated"
-          echo "Issue created"
+            2>&1) || { echo "::error::gh issue create failed: $issue_url"; exit 1; }
+          issue_number="${issue_url##*/}"
+          echo "Issue #${issue_number} created: ${issue_url}"
+
+          if ! gh issue edit "$issue_number" --add-label "dependencies" --add-label "automated"; then
+            echo "::error::failed to apply labels to issue #${issue_number} — created without labels, needs manual fix"
+            exit 1
+          fi
+          echo "Labels applied to #${issue_number}"
 
       - name: No obsolete or broken overlays found
         if: steps.audit.outputs.obsolete_count == '0' && steps.audit.outputs.broken_count == '0'
