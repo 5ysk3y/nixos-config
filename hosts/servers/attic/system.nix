@@ -45,6 +45,7 @@
   proxmoxLXC = {
     manageNetwork = false;
     privileged = false;
+    manageHostName = true;
   };
 
   services.openssh = {
