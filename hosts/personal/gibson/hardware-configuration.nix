@@ -67,9 +67,6 @@
       };
       systemd.enable = true;
       kernelModules = [
-        "nvidia"
-        "nvidia_modeset"
-        "nvidia_drm"
       ];
       availableKernelModules = [
         "nvme"
