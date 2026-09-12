@@ -47,12 +47,6 @@
     stylix.url = "github:nix-community/stylix";
     stylix.inputs.nixpkgs.follows = "nixpkgs";
 
-    # Temporary: pins a specific nixpkgs commit to fix qtwebengine on Darwin.
-    # Used only in hosts/macbook/overlays/default.nix.
-    # TODO: remove once https://github.com/NixOS/nixpkgs/pull/515997 lands in
-    # nixos-unstable and the macbook overlay is updated accordingly.
-    qtwebengine-fix.url = "github:NixOS/nixpkgs/d233902339c02a9c334e7e593de68855ad26c4cb";
-    qtwebengine-fix.flake = false;
     waybar-patched.url = "github:Alexays/Waybar/0594574";
     waybar-patched.flake = false;
 

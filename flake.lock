@@ -799,23 +799,6 @@
         "type": "github"
       }
     },
-    "qtwebengine-fix": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1778869304,
-        "narHash": "sha256-30sZNZoA1cqF5JNO9fVX+wgiQYjB7HJqqJ4ztCDeBZE=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "d233902339c02a9c334e7e593de68855ad26c4cb",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "d233902339c02a9c334e7e593de68855ad26c4cb",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "claude-code-nix": "claude-code-nix",
@@ -833,7 +816,6 @@
         "nixpkgs": "nixpkgs_8",
         "nixpkgs-setuptools-pin": "nixpkgs-setuptools-pin",
         "nixpkgs-stable": "nixpkgs-stable_2",
-        "qtwebengine-fix": "qtwebengine-fix",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "waybar-patched": "waybar-patched",
