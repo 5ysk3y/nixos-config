@@ -9,6 +9,8 @@ _: {
     };
 
     initContent = ''
+      cd ~/nixos-config
+
       vim() {
         emacsclient -t "$@"
       }
