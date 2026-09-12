@@ -66,6 +66,18 @@ darwin-rebuild switch --flake ~/nixos-config#macbook
 
 ---
 
+## A 📝 on AI use
+In the event that it isn't obvious: AI collaboration (Claude, Anthropic) shows up in a few places in this repo and I want to make a point of outlining exactly _how_ it is used:
+
+- **Design** — architectural **review** during major restructures (e.g. dendritic pattern migration)
+- **Debugging** — root-cause issue analysis, i.e. kernel regressions, CI pipeline races, and other edge cases where my own investigations yield nothing useful
+- **CI/CD** — aiding maintenance of consistently hardened pipeline intergations and workflow fixes, if necessary
+- **Tooling** — a local git hook generates templated commit messages via Claude, based on staged changes, which is why it may appear as a co-author on commits
+
+To be clear: AI is used as a tool to do some of the more boilerplate/mundane bits, e.g. adding inline comments and explanations and reviewing code changes, under my guidance; all AI input, in whatever capacity, is checked and double-checked by myself-- a real-life actual human bean (not a typo)-- before it is commited back to the repo.
+
+---
+
 ## References
 
 - [sops-nix](https://github.com/Mic92/sops-nix)
