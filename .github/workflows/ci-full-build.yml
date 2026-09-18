@@ -38,12 +38,17 @@ jobs:
             fi
             exit 0
           fi
-          files="$(git diff --name-only \
-            "${{ github.event.pull_request.base.sha }}" \
-            "${{ github.event.pull_request.head.sha }}")"
-          echo "Changed files:"
-          echo "$files"
-          if echo "$files" | grep -qx 'flake.lock'; then
+
+          base_hash="$(git show "${{ github.event.pull_request.base.sha }}:flake.lock" 2>/dev/null | jq -r '.nodes.nixpkgs.locked.narHash // empty')" || base_hash=""
+          head_hash="$(git show "${{ github.event.pull_request.head.sha }}:flake.lock" 2>/dev/null | jq -r '.nodes.nixpkgs.locked.narHash // empty')" || head_hash=""
+
+          echo "base nixpkgs narHash: ${base_hash:-<none>}"
+          echo "head nixpkgs narHash: ${head_hash:-<none>}"
+
+          if [ -z "$base_hash" ] || [ -z "$head_hash" ]; then
+            echo "::warning::couldn't read nodes.nixpkgs.locked.narHash from flake.lock on one side — running full build to be safe"
+            echo "lockfile_changed=true" >> "$GITHUB_OUTPUT"
+          elif [ "$base_hash" != "$head_hash" ]; then
             echo "lockfile_changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "lockfile_changed=false" >> "$GITHUB_OUTPUT"
