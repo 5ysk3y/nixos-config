@@ -61,8 +61,6 @@
           inherit (oldNixpkgs)
             hyprland
             hyprlock
-            hyprutils
-            aquamarine
             ;
         };
     }
