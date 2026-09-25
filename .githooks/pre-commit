@@ -17,7 +17,7 @@ if (( ${#staged_nix_files[@]} > 0 )); then
     git show ":${f}" > "$staged_tmp"
     cp "$staged_tmp" "$original_tmp"   # snapshot pre-format staged content
     cp -- "$f" "$workdir_tmp"          # snapshot working tree
-    nix run nixpkgs#nixfmt -- "$staged_tmp"
+    nix run --inputs-from . nixpkgs#nixfmt -- "$staged_tmp"
     new_blob=$(git hash-object -w "$staged_tmp")
     git update-index --cacheinfo "100644,${new_blob},${f}"
     # Working tree matched pre-format staged content → no real unstaged changes
@@ -32,7 +32,7 @@ else
 fi
 
 echo "Statix"
-nix run nixpkgs#statix -- check .
+nix run --inputs-from . nixpkgs#statix -- check .
 
 # ── Overlay audit liveness check ────────────────────────────────────────────
 # Every host's and the system-wide overlays/overlay-entries.nix is the single

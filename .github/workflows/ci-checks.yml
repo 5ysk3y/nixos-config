@@ -13,6 +13,10 @@ defaults:
   run:
     shell: bash
 
+# Least privilege by default; jobs that need more declare it themselves.
+permissions:
+  contents: read
+
 jobs:
   changes:
     name: detect relevant changes
@@ -82,7 +86,7 @@ jobs:
             echo ""
             echo "Formatting required."
             echo "Run this locally to fix (or just commit again and let hooks handle it):"
-            echo "  nix run nixpkgs#nixfmt -- ."
+            echo "  nix fmt"
             echo ""
             exit 1
           }
@@ -103,7 +107,8 @@ jobs:
       - name: statix
         run: |
           set -euo pipefail
-          nix run nixpkgs#statix -- check .
+          # --inputs-from .: use the flake.lock-pinned nixpkgs, same as the git hooks
+          nix run --inputs-from . nixpkgs#statix -- check .
 
   gitleaks:
     name: gitleaks scan
@@ -122,7 +127,7 @@ jobs:
       - name: Run gitleaks (native)
         run: |
           set -euo pipefail
-          nix run nixpkgs#gitleaks -- git --redact --config .github/gitleaks.toml
+          nix run --inputs-from . nixpkgs#gitleaks -- git --redact --config .github/gitleaks.toml
 
   flake-secrets-check:
     name: full flake check (with secrets)
@@ -137,16 +142,18 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: DeterminateSystems/determinate-nix-action@8d87e8d5e5b8a8309d4281094560f127d9a265f1
       - uses: DeterminateSystems/flakehub-cache-action@83282a8aef353db1d659d3bacf4a28b6683de0b3
-      - name: Start ssh-agent and add deploy key
-        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
+      - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
-      - name: Add GitHub to known_hosts
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
       - name: Flake check
         run: |
           set -euo pipefail
           nix flake check --no-write-lock-file --all-systems
+      # `nix flake check` skips darwinConfigurations ("known but unchecked"),
+      # so without this the macbook config is only evaluated by the full
+      # build, which runs only when nixpkgs itself changes.
+      - name: Darwin eval check (macbook)
+        run: |
+          set -euo pipefail
+          nix eval --raw --no-write-lock-file \
+            .#darwinConfigurations.macbook.config.system.build.toplevel.drvPath

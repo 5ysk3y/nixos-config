@@ -17,6 +17,10 @@ defaults:
   run:
     shell: bash
 
+# Least privilege by default; jobs that need more declare it themselves.
+permissions:
+  contents: read
+
 jobs:
   changes:
     name: detect lockfile changes
@@ -60,10 +64,20 @@ jobs:
     needs: changes
     if: needs.changes.outputs.lockfile_changed == 'true'
     steps:
+      # Tailnet Lock is enabled, so this must be a pre-signed, ephemeral,
+      # reusable auth key: OAuth clients / OIDC federation can't join a
+      # locked tailnet (tailscale/github-action README, "Tailnet Lock").
+      # The runner's "authkey has been deprecated" warning is expected here.
       - name: Setup tailscale
         uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
+          # Required with Tailnet Lock: somewhere to keep the Tailnet Key
+          # Authority state (the default is in-memory)
+          statedir: ${{ runner.temp }}/tailscale-state
+          # Wait until attic is actually reachable (new peers propagate
+          # eventually) before anything tries the cache.
+          ping: attic.taileda465.ts.net
       - name: Verify attic cache is reachable
         run: |
           curl --fail --silent --show-error --max-time 30 \
@@ -91,10 +105,20 @@ jobs:
           df -h
           sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
           df -h
+      # Tailnet Lock is enabled, so this must be a pre-signed, ephemeral,
+      # reusable auth key: OAuth clients / OIDC federation can't join a
+      # locked tailnet (tailscale/github-action README, "Tailnet Lock").
+      # The runner's "authkey has been deprecated" warning is expected here.
       - name: Setup tailscale
         uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
+          # Required with Tailnet Lock: somewhere to keep the Tailnet Key
+          # Authority state (the default is in-memory)
+          statedir: ${{ runner.temp }}/tailscale-state
+          # Wait until attic is actually reachable (new peers propagate
+          # eventually) before anything tries the cache.
+          ping: attic.taileda465.ts.net
       - uses: DeterminateSystems/determinate-nix-action@8d87e8d5e5b8a8309d4281094560f127d9a265f1
         with:
           extra-conf: |
@@ -103,15 +127,9 @@ jobs:
       - uses: DeterminateSystems/flakehub-cache-action@83282a8aef353db1d659d3bacf4a28b6683de0b3
         with:
           use-gha-cache: disabled
-      - name: Start ssh-agent and add deploy key
-        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
+      - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
-      - name: Add GitHub to known_hosts
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
       - name: Full build test
         run: |
           set -euo pipefail
@@ -124,8 +142,8 @@ jobs:
           max_attempts: 2
           command: |
             set -euo pipefail
-            nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
-            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
+            nix run --inputs-from . nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+            nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   darwin-eval-check:
     name: full build check (darwin)
@@ -149,10 +167,20 @@ jobs:
           df -h
           sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
           df -h
+      # Tailnet Lock is enabled, so this must be a pre-signed, ephemeral,
+      # reusable auth key: OAuth clients / OIDC federation can't join a
+      # locked tailnet (tailscale/github-action README, "Tailnet Lock").
+      # The runner's "authkey has been deprecated" warning is expected here.
       - name: Setup tailscale
         uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
+          # Required with Tailnet Lock: somewhere to keep the Tailnet Key
+          # Authority state (the default is in-memory)
+          statedir: ${{ runner.temp }}/tailscale-state
+          # Wait until attic is actually reachable (new peers propagate
+          # eventually) before anything tries the cache.
+          ping: attic.taileda465.ts.net
       - uses: DeterminateSystems/determinate-nix-action@8d87e8d5e5b8a8309d4281094560f127d9a265f1
         with:
           extra-conf: |
@@ -161,15 +189,9 @@ jobs:
       - uses: DeterminateSystems/flakehub-cache-action@83282a8aef353db1d659d3bacf4a28b6683de0b3
         with:
           use-gha-cache: disabled
-      - name: Start ssh-agent and add deploy key
-        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555
+      - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
-      - name: Add GitHub to known_hosts
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
       - name: Full build test
         run: |
           set -euo pipefail
@@ -182,8 +204,8 @@ jobs:
           max_attempts: 2
           command: |
             set -euo pipefail
-            nix run nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
-            nix run nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
+            nix run --inputs-from . nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+            nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   ci-gate:
     name: CI required status

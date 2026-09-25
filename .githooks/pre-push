@@ -21,7 +21,7 @@ while read -r _local_ref local_oid _remote_ref remote_oid; do
   fi
 
   # </dev/null: keep nix/gitleaks from consuming the hook's ref list on stdin
-  nix run nixpkgs#gitleaks -- git --redact --config .github/gitleaks.toml \
+  nix run --inputs-from . nixpkgs#gitleaks -- git --redact --config .github/gitleaks.toml \
     --log-opts="${range}" </dev/null
 done
 
