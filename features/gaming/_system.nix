@@ -1,4 +1,6 @@
 _: {
+  hardware.xone.enable = true;
+
   programs = {
     dconf.enable = true;
     gamescope.enable = true;
