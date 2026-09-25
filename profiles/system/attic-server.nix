@@ -1,10 +1,9 @@
+{ config, ... }:
 {
-  inputs,
-  ...
-}:
-{
-  imports = [
-    inputs.self.modules.nixos.attic-server
-    inputs.self.modules.nixos.tailscale
-  ];
+  infra.profiles.nixos.attic-server = {
+    imports = with config.flake.modules.nixos; [
+      attic-server
+      tailscale
+    ];
+  };
 }

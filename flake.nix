@@ -61,6 +61,19 @@
         "x86_64-linux"
         "aarch64-darwin"
       ];
-      imports = [ (inputs.import-tree ./flake/parts) ];
+      # The only place top-level directories are named. Everything else is
+      # discovered from here and referenced by name (config.flake.modules,
+      # infra.hosts), so directories below these roots can move freely.
+      imports = [
+        (inputs.import-tree [
+          ./flake/parts
+          ./features
+          ./profiles
+        ])
+        # Hosts: only hosts/<class>/<host>/default.nix registers a host; the
+        # other .nix files there are NixOS/darwin/home modules.
+        ((inputs.import-tree.match "/[^/]+/[^/]+/default\\.nix") ./hosts)
+        ./pkgs
+      ];
     };
 }

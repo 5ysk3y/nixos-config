@@ -8,7 +8,7 @@
 #   4. Clones nixos-config + nix-secrets via YubiKey SSH auth
 #   5. Decrypts the YubiKey-encrypted age identity blob
 #      → ~/Library/Application Support/sops/age/keys.txt
-#      (matches vars.age.keyFile for isDarwin in flake/lib/mk-vars.nix)
+#      (matches vars.age.keyFile for darwin, set by mkVars in the host registry)
 #   6. Optionally activates the nix-darwin configuration
 #
 # Run as your normal user. sudo is used only where unavoidable.
@@ -78,7 +78,7 @@ usage() {
 Darwin notes:
   TARGET is always / on macOS — there is no install-time mountpoint.
 
-  Age key path is fixed to match flake/lib/mk-vars.nix (isDarwin branch):
+  Age key path is fixed to match vars.age.keyFile (mkVars, darwin branch):
     ~/Library/Application Support/sops/age/keys.txt
 
 Examples:
@@ -111,7 +111,7 @@ parse_common_args "$@"
 # Darwin paths — TARGET is always /, no mount prefix
 [[ -n "$CONFIG_DEST" ]] || CONFIG_DEST="$HOME/nixos-config"
 
-# Age key path MUST match mk-vars.nix isDarwin branch:
+# Age key path MUST match vars.age.keyFile (mkVars, darwin branch):
 #   "${homePrefix}/${username}/Library/Application Support/sops/age/keys.txt"
 # This is user-owned; no sudo required.
 AGE_KEYS_DIR="$HOME/Library/Application Support/sops/age"

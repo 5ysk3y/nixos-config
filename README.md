@@ -25,17 +25,15 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 
 ```
 .
-├── flake.nix                  # Entrypoint — flake-parts + import-tree
+├── flake.nix                  # Entrypoint — flake-parts + import-tree; the only file naming top-level dirs
 ├── flake/
-│   ├── hosts/                 # Per-host declarations (kind, system, profiles)
-│   ├── parts/                 # Flake-parts modules (outputs, platforms, features)
-│   └── lib/
+│   └── parts/                 # Flake-parts modules (host registry, platforms, exports, formatter)
 ├── hosts/
-│   ├── personal               # Per-host config (system, home, overrides) for personal machines
-│   ├── servers/               # Per-host config (system, home, overrides) for servers
-├── features/                  # Feature modules — home and system
-├── profiles/                  # Profile compositions — groups of features per host class
-├── pkgs/                      # Custom packages
+│   ├── personal/<host>/       # default.nix registers the host; system/home/overlays alongside it
+│   └── servers/<host>/        # Same, for servers
+├── features/                  # Feature modules — home and system, published by name
+├── profiles/                  # Profile compositions — named groups of features per host class
+├── pkgs/                      # Custom packages 
 └── bootstrap/
     └── install.sh             # Bootstrap entrypoint for personal NixOS hosts
     └── install-darwin.sh      # Bootstrap entrypoint for personal Nix-Darwin hosts
@@ -44,7 +42,7 @@ The repo is public as a rebuild reference for myself, and in case anything here 
     └── servers/               # Individual server deployment scripts used by deploy.sh
 ```
 
-The config follows the [dendritic pattern](https://saylesss88.github.io/flakes/dendritic_flake_parts.html) — features are small, self-contained modules composed into hosts via profiles rather than monolithic per-host config files. [flake-parts](https://github.com/hercules-ci/flake-parts) and [import-tree](https://github.com/vic/import-tree) handle the wiring.
+The config follows the [dendritic pattern](https://saylesss88.github.io/flakes/dendritic_flake_parts.html) — features are small, self-contained modules composed into hosts via profiles rather than monolithic per-host config files. Nothing references another directory by path (`../`); modules, profiles and hosts are referenced by name, so directories can be moved without breaking the wiring (enforced by a check in CI and the pre-commit hook). [flake-parts](https://github.com/hercules-ci/flake-parts) and [import-tree](https://github.com/vic/import-tree) handle the wiring.
 
 ---
 

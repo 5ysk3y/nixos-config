@@ -1,16 +1,15 @@
+{ config, ... }:
 {
-  inputs,
-  ...
-}:
-{
-  imports = [
-    inputs.self.modules.darwin.attic-client
-    inputs.self.modules.darwin.editor
-    inputs.self.modules.darwin.locale
-    inputs.self.modules.darwin.nix-settings
-    inputs.self.modules.darwin.overlays
-    inputs.self.modules.darwin.security
-    inputs.self.modules.darwin.sops-nix
-    inputs.self.modules.darwin.tailscale
-  ];
+  infra.profiles.darwin.darwin = {
+    imports = with config.flake.modules.darwin; [
+      attic-client
+      editor
+      locale
+      nix-settings
+      overlays
+      security
+      sops-nix
+      tailscale
+    ];
+  };
 }

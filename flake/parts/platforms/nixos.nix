@@ -2,16 +2,16 @@
   config,
   lib,
   inputs,
-  repoLib,
+  infraLib,
   ...
 }:
 let
-  inherit (config.repo) hosts;
+  inherit (config.infra) hosts;
 
   mkNixosHost =
     host:
     let
-      packages = repoLib.pkgsFor host.system;
+      packages = infraLib.pkgsFor host.system;
       # kind = "nixos-minimal" hosts get neither sops-nix nor Home Manager —
       # see flake/parts/hosts/registry.nix for why this is a distinct kind
       # rather than a per-host toggle.
@@ -21,7 +21,7 @@ let
       inherit (host) system;
 
       specialArgs = {
-        inherit inputs repoLib;
+        inherit inputs;
         inherit (host) hostname system vars;
         inherit (packages) pkgs-stable;
       };
@@ -34,7 +34,7 @@ let
           inputs.sops-nix.nixosModules.sops
         ]
         ++ lib.optionals hasSecretsAndHome (
-          repoLib.mkHomeManagerModule {
+          infraLib.mkHomeManagerModule {
             platformModule = inputs.home-manager.nixosModules.home-manager;
             inherit host;
             hmExtra = {
@@ -47,8 +47,8 @@ let
         );
     };
 
-  nixosHosts = repoLib.filterHosts [ "nixos" "nixos-minimal" ] hosts;
+  nixosHosts = infraLib.filterHosts [ "nixos" "nixos-minimal" ] hosts;
 in
 {
-  flake.nixosConfigurations = repoLib.mapHosts mkNixosHost nixosHosts;
+  flake.nixosConfigurations = infraLib.mapHosts mkNixosHost nixosHosts;
 }
