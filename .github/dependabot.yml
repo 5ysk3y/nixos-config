@@ -2,7 +2,11 @@ version: 2
 
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/"
+    # "/" only covers .github/workflows (+ a root action.yml); composite
+    # actions need listing explicitly or their pins never get bumped.
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
