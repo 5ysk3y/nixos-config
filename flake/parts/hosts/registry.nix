@@ -137,66 +137,6 @@ in
           }
         ];
 
-      mkResticBackup =
-        {
-          name,
-          paths,
-          repository,
-          passwordFile,
-          extraOptions ? [ ],
-          extraBackupArgs ? [ ],
-          backupPrepareCommand ? null,
-          timerConfig ? {
-            OnCalendar = "2:30";
-          },
-          pruneOpts ? [
-            "--keep-daily 7"
-            "--keep-weekly 4"
-            "--keep-monthly 6"
-          ],
-        }:
-        let
-          statusFile = "/var/log/restic_backup_local.log";
-        in
-        {
-          services.restic.backups.${name} = {
-            inherit
-              paths
-              repository
-              passwordFile
-              extraOptions
-              extraBackupArgs
-              timerConfig
-              pruneOpts
-              ;
-            # Status file truncated first, before any caller-supplied
-            # prepare step — if that step itself fails, onFailure below
-            # still fires and overwrites with "local failure" regardless,
-            # but truncating first keeps the intent readable: this run's
-            # status starts clean before anything else happens.
-            backupPrepareCommand =
-              ": > ${statusFile}"
-              + lib.optionalString (backupPrepareCommand != null) ("\n" + backupPrepareCommand);
-          };
-
-          systemd = {
-            tmpfiles.rules = [
-              "f /var/log/restic_backup_local.log 0644 root root -"
-            ];
-            services = {
-              "restic-backups-${name}".onFailure = [
-                "restic-backup-failure-${name}.service"
-              ];
-              "restic-backup-failure-${name}" = {
-                description = "Records restic backup failure for Zabbix monitoring (${name})";
-                serviceConfig.Type = "oneshot";
-                script = ''
-                  echo "local failure" > ${statusFile}
-                '';
-              };
-            };
-          };
-        };
     };
 
     repo.hosts = import ../../hosts {
