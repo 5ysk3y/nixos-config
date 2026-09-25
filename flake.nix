@@ -22,21 +22,17 @@
     nix-secrets.url = "git+ssh://git@github.com/5ysk3y/nix-secrets.git?ref=main";
     nix-secrets.flake = false;
 
-    # disko
-    disko.url = "github:nix-community/disko";
-    disko.inputs.nixpkgs.follows = "nixpkgs";
-
     # other stuff
     flake-parts.url = "github:hercules-ci/flake-parts";
     import-tree.url = "github:denful/import-tree";
 
-    emacs-overlay.url = "github:nix-community/emacs-overlay/master";
     sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     wayland-pipewire-idle-inhibit.url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
-    nix-gaming.url = "github:fufexan/nix-gaming";
+    wayland-pipewire-idle-inhibit.inputs.nixpkgs.follows = "nixpkgs";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
 
-    # Used as a Nix store path in features/home/doomemacs/module.nix for the
+    # Used as a Nix store path in features/doomemacs/_module.nix for the
     # rsync-based activation script. The input hash drives the stamp-based
     # doom sync-skip logic — keeping as a flake input is intentional.
     doomemacs.url = "github:doomemacs/core";
@@ -53,7 +49,7 @@
 
     # Temporary: pins a specific nixpkgs commit to fix Python Setuptools
     # on Linux.
-    # Used only in features/system/containers/pentesting/_module.nix
+    # Used only in features/containers/pentesting/_module.nix
     # TODO: Monitor nixpkgs upstream for an issue/PR to track this
     nixpkgs-setuptools-pin.url = "github:NixOS/nixpkgs/bc69cb503d4a70df1f12ea9fad63366ed6f62b3c";
   };
