@@ -1,4 +1,5 @@
-_: {
+{ vars, ... }:
+{
   programs.git = {
     enable = true;
 
@@ -24,14 +25,15 @@ _: {
       };
     };
 
+    # Repo-local settings for this repo's checkout only. A trailing "/" in a
+    # gitdir: pattern matches everything below it (git appends "**").
     includes = [
       {
-        condition = "gitdir:~/nixos-config/**";
-        contents.core.hooksPath = ".githooks";
-      }
-      {
-        condition = "gitdir:~/nixos-config/";
-        path = "~/nixos-config/.github/config";
+        condition = "gitdir:${vars.configDir}/";
+        contents = {
+          core.hooksPath = ".githooks";
+          commit.template = "${vars.configDir}/.github/gitmessage";
+        };
       }
     ];
 

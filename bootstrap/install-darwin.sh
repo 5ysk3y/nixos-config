@@ -109,6 +109,7 @@ parse_common_args "$@"
   || die "Unknown argument(s): ${REMAINING_ARGS[*]}"
 
 # Darwin paths — TARGET is always /, no mount prefix
+# Default must match vars.configDir (mkVars in the host registry)
 [[ -n "$CONFIG_DEST" ]] || CONFIG_DEST="$HOME/nixos-config"
 
 # Age key path MUST match vars.age.keyFile (mkVars, darwin branch):

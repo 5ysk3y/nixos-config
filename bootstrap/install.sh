@@ -98,6 +98,7 @@ parse_common_args "${_filtered[@]+"${_filtered[@]}"}"
 # ---------------------------------------------------------------------------
 # Derived paths
 # ---------------------------------------------------------------------------
+# Default must match vars.configDir (mkVars in the host registry)
 [[ -n "$CONFIG_DEST" ]] || CONFIG_DEST="$TARGET/home/$USER_NAME/nixos-config"
 
 # Verify config dest is inside the target — catches typos before anything destructive
