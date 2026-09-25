@@ -135,11 +135,19 @@ echo
 
 [[ -d "$TARGET" ]] || die "Target path does not exist: $TARGET"
 
-DISKO_NIX="$ROOT_DIR/hosts/$HOST/disko.nix"
-if [[ $DO_INSTALL -eq 1 ]] && [[ -f "$DISKO_NIX" ]]; then
+# Hosts live under a class directory (hosts/personal/<host>, hosts/servers/<host>),
+# so match any class rather than hard-coding one.
+DISKO_NIX=""
+for _candidate in "$ROOT_DIR"/hosts/*/"$HOST"/disko.nix; do
+    [[ -f "$_candidate" ]] && { DISKO_NIX="$_candidate"; break; }
+done
+
+if [[ $DO_INSTALL -eq 1 ]] && [[ -n "$DISKO_NIX" ]]; then
+    # Everything below is destructive to $DISK — refuse to guess.
+    [[ -n "$DISK" ]] || die "$DISKO_NIX exists for $HOST, so --disk DEVICE is required with --install"
+    [[ -b "$DISK" ]] || die "--disk $DISK is not a block device"
+
     echo "=== Disko config found for $HOST: Running disko... ==="
-    DISKO_ARGS=("$DISKO_NIX")
-    [[ -n "$DISK" ]] && DISKO_ARGS+=(--argstr disk "$DISK")
 
     echo -n "temporarypassword" | $SUDO tee /tmp/disko-luks-password > /dev/null
 
@@ -154,7 +162,9 @@ if [[ $DO_INSTALL -eq 1 ]] && [[ -f "$DISKO_NIX" ]]; then
         --key-file /tmp/disko-luks-password
     sudo cryptsetup luksChangeKey /dev/disk/by-partlabel/disk-main-SWAP \
         --key-file /tmp/disko-luks-password
-    rm -f /tmp/disko-luks-password
+    # Created root-owned via `$SUDO tee` above; /tmp is sticky, so an
+    # unprivileged rm fails and set -e would abort the bootstrap here.
+    sudo rm -f /tmp/disko-luks-password
 fi
 
 # ---------------------------------------------------------------------------

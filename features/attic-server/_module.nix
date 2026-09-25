@@ -2,7 +2,7 @@
 {
   # atticd's HS256 signing secret lives in /var/lib/attic/env, a plain
   # root:root 0600 file outside the Nix store — delivered by
-  # bootstrap/deploy-attic.sh from nix-secrets (services.attic.server-token),
+  # bootstrap/servers/attic.sh (via deploy.sh) from nix-secrets (services.attic.server-token),
   # not by sops-nix. This host intentionally has no age key, so it never
   # decrypts anything itself; systemd reads EnvironmentFile as root before
   # dropping to atticd's user, so the file's ownership doesn't need to

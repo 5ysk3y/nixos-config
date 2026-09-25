@@ -99,7 +99,7 @@ let
   # Keyed by hostname so the CI script can report which host each overlay belongs to.
   hostAudits = lib.mapAttrs readHostAudits hosts;
 
-  # Hook for the system-wide overlay at features/system/core/overlays. This
+  # Hook for the system-wide overlay at features/system-core/overlays. This
   # file is imported transitively via systemProfiles and is not reachable
   # through host.overlaysModule, so it's wired in explicitly here with the
   # same treatment, including the same validateTrackedList assertion.
@@ -108,14 +108,14 @@ let
     if builtins.pathExists systemEntriesFile then
       let
         entries = import systemEntriesFile { inherit inputs; };
-        tracked = validateTrackedList "features/system/core/overlays" (entries.tracked or [ ]);
+        tracked = validateTrackedList "features/system-core/overlays" (entries.tracked or [ ]);
         withMeta = builtins.filter (e: e ? meta) tracked;
       in
       {
-        "features/system/core/overlays" = lib.listToAttrs (
+        "features/system-core/overlays" = lib.listToAttrs (
           map (e: {
             name = e.id;
-            value = validateEntry "features/system/core/overlays" e.id e.meta;
+            value = validateEntry "features/system-core/overlays" e.id e.meta;
           }) withMeta
         );
       }
@@ -176,7 +176,7 @@ in
               description = ''
                 Explicit list of hosts to run the liveness check against.
                 Required for shared/cross-host entries (e.g. under
-                features/system/core/overlays) where the entry's own grouping key
+                features/system-core/overlays) where the entry's own grouping key
                 isn't itself a host name. Defaults to just the entry's own host
                 when unset and that key resolves to a real host.
               '';
@@ -227,7 +227,7 @@ in
     description = ''
       Audit metadata for temporary overlays, sourced directly from each
       host's overlays/overlay-entries.nix (and the system-wide
-      features/system/core/overlays/_overlay-entries.nix) — the same file
+      features/system-core/overlays/_overlay-entries.nix) — the same file
       that builds nixpkgs.overlays. Every entry in that file's `tracked` list
       must declare either `exempt = true` or `meta`, enforced by an eval-time
       assertion, so a temporary override can't silently exist untracked.

@@ -5,7 +5,7 @@
 #
 # Host-specific detail lives in bootstrap/servers/<host>.sh, which must
 # define TARGET (root@<ip>) and may define a push_secrets() function that runs
-# before the rebuild. 
+# before the rebuild.
 #
 # `all` loops over every bootstrap/servers/*.sh and re-invokes this same
 # script per host, rather than duplicating the single-host logic — one
@@ -51,8 +51,12 @@ fi
 source "$SERVER_SCRIPT"
 : "${TARGET:?bootstrap/servers/$HOST.sh must set TARGET (root@<ip>)}"
 
-# Same passphrase-less-by-design key handling as deploy-attic.sh — see that
-# script's original comment for why a bare -i is used instead of an agent.
+# DEPLOY_KEY is passphrase-less on disk by design (root's authorized_keys on
+# the servers is scoped to this key; no human is present at automation time
+# to type a passphrase). -i reads it directly and never touches any agent —
+# deliberately: the local SSH agent is gpg-agent, which imports anything
+# handed to it via ssh-add into its own key store and demands a *separate*
+# storage passphrase for it, which is exactly the friction a bare -i avoids.
 DEPLOY_KEY="${DEPLOY_KEY:-$HOME/.ssh/deploy}"
 if [ -z "${NIX_SSHOPTS:-}" ]; then
   export NIX_SSHOPTS="-i $DEPLOY_KEY"
@@ -71,9 +75,11 @@ fi
 
 EXTRA_REBUILD_ARGS=()
 if [ "$(uname -s)" = "Darwin" ]; then
-  # See deploy-attic.sh's original comment: macOS can't build/execute
-  # x86_64-linux directly, so evaluation stays local and only the build
-  # step delegates to the target.
+  # macOS can't build or execute x86_64-linux directly: --no-reexec skips
+  # nixos-rebuild's self-reexec-for-target-platform step (which is exactly
+  # what fails on macOS), and --build-host delegates the actual build to the
+  # target. Evaluation still happens locally — only the build step moves, so
+  # this gives the server no new access.
   EXTRA_REBUILD_ARGS+=(--no-reexec --build-host "$TARGET")
 fi
 
