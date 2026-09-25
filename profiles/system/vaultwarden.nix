@@ -1,9 +1,8 @@
+{ config, ... }:
 {
-  inputs,
-  ...
-}:
-{
-  imports = [
-    inputs.self.modules.nixos.vaultwarden
-  ];
+  infra.profiles.nixos.vaultwarden = {
+    imports = with config.flake.modules.nixos; [
+      vaultwarden
+    ];
+  };
 }

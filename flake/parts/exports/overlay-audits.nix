@@ -5,7 +5,7 @@
   ...
 }:
 let
-  inherit (config.repo) hosts;
+  inherit (config.infra) hosts;
 
   # Validate strategy-specific required fields at eval time.
   # This means `nix eval .#overlayAudits` fails loudly with a clear message
@@ -99,31 +99,38 @@ let
   # Keyed by hostname so the CI script can report which host each overlay belongs to.
   hostAudits = lib.mapAttrs readHostAudits hosts;
 
-  # Hook for the system-wide overlay at features/system-core/overlays. This
-  # file is imported transitively via systemProfiles and is not reachable
-  # through host.overlaysModule, so it's wired in explicitly here with the
-  # same treatment, including the same validateTrackedList assertion.
-  systemEntriesFile = ./../../../features/system-core/overlays/_overlay-entries.nix;
-  systemAudits =
-    if builtins.pathExists systemEntriesFile then
-      let
-        entries = import systemEntriesFile { inherit inputs; };
-        tracked = validateTrackedList "features/system-core/overlays" (entries.tracked or [ ]);
-        withMeta = builtins.filter (e: e ? meta) tracked;
-      in
-      {
-        "features/system-core/overlays" = lib.listToAttrs (
-          map (e: {
-            name = e.id;
-            value = validateEntry "features/system-core/overlays" e.id e.meta;
-          }) withMeta
-        );
-      }
-    else
-      { };
+  # Entry files that aren't a host's own overlaysModule — e.g. the
+  # system-wide overlays feature, which reaches hosts via their profiles —
+  # register themselves under infra.sharedOverlayEntries (keyed by audit group
+  # name) and get the same treatment, including the same validateTrackedList
+  # assertion.
+  readSharedAudits =
+    key: entriesFile:
+    let
+      entries = import entriesFile { inherit inputs; };
+      tracked = validateTrackedList key (entries.tracked or [ ]);
+      withMeta = builtins.filter (e: e ? meta) tracked;
+    in
+    lib.listToAttrs (
+      map (e: {
+        name = e.id;
+        value = validateEntry key e.id e.meta;
+      }) withMeta
+    );
+  sharedAudits = lib.mapAttrs readSharedAudits config.infra.sharedOverlayEntries;
 
 in
 {
+  options.infra.sharedOverlayEntries = lib.mkOption {
+    type = lib.types.attrsOf lib.types.path;
+    default = { };
+    description = ''
+      overlay-entries files not owned by a single host, keyed by the audit
+      group name they appear under in flake.overlayAudits. Set by the
+      feature that owns the file, e.g. features/system-core/overlays.
+    '';
+  };
+
   options.flake.overlayAudits = lib.mkOption {
     type = lib.types.attrsOf (
       lib.types.attrsOf (
@@ -237,5 +244,5 @@ in
     '';
   };
 
-  config.flake.overlayAudits = hostAudits // systemAudits;
+  config.flake.overlayAudits = hostAudits // sharedAudits;
 }

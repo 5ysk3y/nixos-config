@@ -1,14 +1,13 @@
+{ config, ... }:
 {
-  inputs,
-  ...
-}:
-{
-  imports = [
-    inputs.self.modules.homeManager.base
-    inputs.self.modules.homeManager.git
-    inputs.self.modules.homeManager.gpg
-    inputs.self.modules.homeManager.nix-settings
-    inputs.self.modules.homeManager.zsh
-    inputs.self.modules.homeManager.zoxide
-  ];
+  infra.profiles.homeManager.common = {
+    imports = with config.flake.modules.homeManager; [
+      base
+      git
+      gpg
+      nix-settings
+      zsh
+      zoxide
+    ];
+  };
 }

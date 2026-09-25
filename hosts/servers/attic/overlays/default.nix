@@ -1,4 +1,4 @@
 # No host-specific overlays needed for attic. This file exists only
-# because registry.nix requires every host to declare an overlaysModule
-# (imported directly as a module path by flake/hosts/servers/attic.nix).
+# because every host must declare an overlaysModule (set in this host's
+# default.nix).
 _: { }

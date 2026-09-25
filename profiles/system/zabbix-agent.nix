@@ -1,9 +1,8 @@
+{ config, ... }:
 {
-  inputs,
-  ...
-}:
-{
-  imports = [
-    inputs.self.modules.nixos.zabbix-agent
-  ];
+  infra.profiles.nixos.zabbix-agent = {
+    imports = with config.flake.modules.nixos; [
+      zabbix-agent
+    ];
+  };
 }

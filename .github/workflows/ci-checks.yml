@@ -109,6 +109,8 @@ jobs:
           set -euo pipefail
           # --inputs-from .: use the flake.lock-pinned nixpkgs, same as the git hooks
           nix run --inputs-from . nixpkgs#statix -- check .
+      - name: no ../ paths in Nix files
+        run: bash .githooks/lib/no-parent-paths.sh
 
   gitleaks:
     name: gitleaks scan

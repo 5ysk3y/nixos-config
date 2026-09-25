@@ -1,16 +1,16 @@
 {
   config,
   inputs,
-  repoLib,
+  infraLib,
   ...
 }:
 let
-  inherit (config.repo) hosts;
+  inherit (config.infra) hosts;
 
   mkDarwinHost =
     host:
     let
-      packages = repoLib.pkgsFor host.system;
+      packages = infraLib.pkgsFor host.system;
     in
     inputs.nix-darwin.lib.darwinSystem {
       inherit (host) system;
@@ -28,7 +28,7 @@ let
         ++ [
           inputs.sops-nix.darwinModules.sops
         ]
-        ++ repoLib.mkHomeManagerModule {
+        ++ infraLib.mkHomeManagerModule {
           platformModule = inputs.home-manager.darwinModules.home-manager;
           inherit host;
           hmExtra = {
@@ -40,8 +40,8 @@ let
         };
     };
 
-  darwinHosts = repoLib.filterHosts "darwin" hosts;
+  darwinHosts = infraLib.filterHosts "darwin" hosts;
 in
 {
-  flake.darwinConfigurations = repoLib.mapHosts mkDarwinHost darwinHosts;
+  flake.darwinConfigurations = infraLib.mapHosts mkDarwinHost darwinHosts;
 }

@@ -615,7 +615,7 @@ _t_darwin_age_path() {
     bash "$INSTALL_DARWIN" --config-dest "$T/config" --dry-run 2>&1 || true)"
   [[ "$out" == *"Library/Application Support/sops/age"* ]]
 }
-it "age key path matches mk-vars.nix isDarwin branch" _t_darwin_age_path
+it "age key path matches vars.age.keyFile (mkVars darwin branch)" _t_darwin_age_path
 
 _t_darwin_dryrun() {
   local T; T="$(mktemp -d)"; trap "rm -rf '$T'" RETURN
