@@ -61,7 +61,7 @@ jobs:
     if: needs.changes.outputs.lockfile_changed == 'true'
     steps:
       - name: Setup tailscale
-        uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
       - name: Verify attic cache is reachable
@@ -92,15 +92,15 @@ jobs:
           sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
           df -h
       - name: Setup tailscale
-        uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-      - uses: DeterminateSystems/determinate-nix-action@021c8a1bd3570eb21f5c20a054812b0c4d9ca614
+      - uses: DeterminateSystems/determinate-nix-action@8d87e8d5e5b8a8309d4281094560f127d9a265f1
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@e80fccc9c4e3a885ad51721c8b92ba3f839d2f6f
+      - uses: DeterminateSystems/flakehub-cache-action@83282a8aef353db1d659d3bacf4a28b6683de0b3
         with:
           use-gha-cache: disabled
       - name: Start ssh-agent and add deploy key
@@ -157,15 +157,15 @@ jobs:
           sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
           df -h
       - name: Setup tailscale
-        uses: tailscale/github-action@780049a30b6ff5c378a9e7b389d15ece7a204888
+        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-      - uses: DeterminateSystems/determinate-nix-action@021c8a1bd3570eb21f5c20a054812b0c4d9ca614
+      - uses: DeterminateSystems/determinate-nix-action@8d87e8d5e5b8a8309d4281094560f127d9a265f1
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@e80fccc9c4e3a885ad51721c8b92ba3f839d2f6f
+      - uses: DeterminateSystems/flakehub-cache-action@83282a8aef353db1d659d3bacf4a28b6683de0b3
         with:
           use-gha-cache: disabled
       - name: Start ssh-agent and add deploy key
