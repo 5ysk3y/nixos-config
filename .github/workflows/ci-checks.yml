@@ -146,13 +146,6 @@ jobs:
           set -euo pipefail
           mkdir -p ~/.ssh
           ssh-keyscan -t rsa,ed25519 github.com >> ~/.ssh/known_hosts
-      - name: Prepare age key in runner temp
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/age"
-          printf "%s" "${{ secrets.SOPS_AGE_KEY }}" > "$RUNNER_TEMP/age/keys.txt"
-          chmod 0600 "$RUNNER_TEMP/age/keys.txt"
-          echo "SOPS_AGE_KEY_FILE=$RUNNER_TEMP/age/keys.txt" >> "$GITHUB_ENV"
       - name: Flake check
         run: |
           set -euo pipefail
