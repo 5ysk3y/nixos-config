@@ -1,9 +1,9 @@
 _:
 let
-  ghKey = builtins.fetchurl {
-    url = "https://github.com/5ysk3y.gpg";
-    sha256 = "072875xvjay4ssx8g0a3f8cm51xsc4l63ls6xpjl7abzq29a5m9z";
-  };
+  # Vendored copy of https://github.com/5ysk3y.gpg — avoids a network fetch
+  # at eval time, and eval breaking whenever GitHub's copy changes. Update
+  # it deliberately when the key (or a subkey) changes.
+  ghKey = ./files/5ysk3y.asc;
 in
 {
   programs.gpg = {
