@@ -1,5 +1,5 @@
 # Single source of truth for the system-wide (cross-host) overlays and their
-# audit metadata. See hosts/gibson/overlays/overlay-entries.nix for the full
+# audit metadata. See hosts/personal/gibson/overlays/overlay-entries.nix for the full
 # convention explanation. Kept underscore-prefixed like the other files in
 # this directory, per the dendritic convention of excluding it from
 # import-tree's flake-parts module discovery.

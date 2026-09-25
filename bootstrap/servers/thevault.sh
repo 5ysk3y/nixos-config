@@ -11,7 +11,7 @@ TARGET="${TARGET:-root@192.168.1.9}"
 
 # Hard requirement: this deploy must never run before the real Vaultwarden
 # database is already in place, or the first successful service start
-# creates a fresh, empty one — see chat, this replaced an earlier
+# creates a fresh, empty one. This replaced an earlier
 # stop-the-service-after-first-start plan that carried real risk.
 preflight_check() {
   echo "==> checking ${TARGET} is reachable"

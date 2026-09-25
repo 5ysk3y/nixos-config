@@ -32,7 +32,7 @@
 
   # Vaultwarden's secret env file (ADMIN_TOKEN, YUBICO_SECRET_KEY) lives at
   # /var/lib/vaultwarden-secrets/env, a plain root:root 0600 file outside
-  # the Nix store — delivered by bootstrap/deploy-vaultwarden.sh from
+  # the Nix store — delivered by bootstrap/servers/thevault.sh (via deploy.sh) from
   # nix-secrets. This host has no age key and no sops-nix module.
   services.vaultwarden = {
     enable = true;
