@@ -1,4 +1,5 @@
-_: {
+{ vars, ... }:
+{
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
@@ -9,7 +10,7 @@ _: {
     };
 
     initContent = ''
-      cd ~/nixos-config
+      cd "${vars.configDir}"
 
       vim() {
         emacsclient -t "$@"

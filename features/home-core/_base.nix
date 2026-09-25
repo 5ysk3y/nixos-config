@@ -13,7 +13,7 @@
 
     sessionVariables = {
       GIT_AUTO_FETCH_INTERVAL = 1200;
-      NIXOS_CONFIG = "$HOME/nixos-config";
+      NIXOS_CONFIG = vars.configDir;
     };
 
     stateVersion = "23.11";

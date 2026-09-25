@@ -17,6 +17,9 @@ let
       inherit username;
       secretsPath = toString inputs.nix-secrets;
       syncthingPath = "${homePrefix}/${username}/Sync";
+      # Where this repo is cloned. bootstrap/install*.sh clone to the same
+      # place by default (--config-dest) — keep the two in step.
+      configDir = "${homePrefix}/${username}/nixos-config";
       age.keyFile =
         if isDarwin then
           "${homePrefix}/${username}/Library/Application Support/sops/age/keys.txt"
