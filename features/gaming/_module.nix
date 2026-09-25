@@ -8,6 +8,7 @@
     enable = true;
     settings = {
       winesync = 1;
+      device_battery = "gamepad";
     };
   };
 
