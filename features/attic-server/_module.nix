@@ -47,23 +47,19 @@
   };
   users.groups.atticd.gid = 990;
 
-  networking.firewall = {
-    # CI runners reach the cache API over Tailscale. Only :8080 is open on
-    # the tailnet interface; everything else there (sshd included) stays
-    # closed.
-    interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [ 8080 ];
+  # CI runners reach the cache API over Tailscale. Only :8080 is open on
+  # the tailnet interface; everything else there (sshd included) stays
+  # closed.
+  networking.firewall.interfaces.${config.services.tailscale.interfaceName}.allowedTCPPorts = [
+    8080
+  ];
 
-    # Explicit LAN allowlist for the plain-HTTP :8080 API — everything else
-    # on the LAN is denied.
-    extraCommands = ''
-      iptables -A nixos-fw -p tcp -s 192.168.1.5 --dport 8080 -j ACCEPT
-      iptables -A nixos-fw -p tcp -s 192.168.1.7 --dport 8080 -j ACCEPT
-    '';
-    extraStopCommands = ''
-      iptables -D nixos-fw -p tcp -s 192.168.1.5 --dport 8080 -j ACCEPT || true
-      iptables -D nixos-fw -p tcp -s 192.168.1.7 --dport 8080 -j ACCEPT || true
-    '';
-  };
+  # Explicit LAN allowlist for the plain-HTTP :8080 API (the reverse
+  # proxies) — everything else on the LAN is denied.
+  features.system.firewallAllowlist."8080" = [
+    "192.168.1.5"
+    "192.168.1.7"
+  ];
 
   environment.systemPackages = [
     pkgs.attic-client

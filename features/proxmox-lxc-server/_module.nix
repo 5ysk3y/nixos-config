@@ -12,7 +12,6 @@
 let
   cfg = config.features.system.proxmoxLxcServer;
   gateway = "192.168.1.1";
-  sshRule = action: ip: "iptables -${action} nixos-fw -p tcp -s ${ip} --dport 22 -j ACCEPT";
 in
 {
   imports = [
@@ -57,14 +56,11 @@ in
         interface = "eth0";
       };
       nameservers = [ gateway ];
-
-      # SSH is not opened on the firewall generally (openFirewall = false
-      # below); only the allowlisted deploy hosts get through.
-      firewall.extraCommands = lib.concatMapStrings (ip: sshRule "A" ip + "\n") cfg.sshAllowedSources;
-      firewall.extraStopCommands = lib.concatMapStrings (
-        ip: sshRule "D" ip + " || true\n"
-      ) cfg.sshAllowedSources;
     };
+
+    # SSH is not opened on the firewall generally (openFirewall = false
+    # below); only the allowlisted deploy hosts get through.
+    features.system.firewallAllowlist."22" = cfg.sshAllowedSources;
 
     services.resolved.enable = true;
 

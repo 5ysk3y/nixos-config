@@ -61,13 +61,12 @@ let
     assert lib.all checkEntry tracked;
     tracked;
 
-  # Single source of truth: host.overlaysModule + "/overlay-entries.nix".
-  # The same file that builds nixpkgs.overlays for that host. Every entry in
-  # its `tracked` list is either `exempt = true` or carries `meta`; we
-  # extract `meta` from the latter here. validateTrackedList enforces that
-  # every entry actually declares one or the other before we even get to
-  # filtering — an entry with neither fails eval loudly rather than silently
-  # falling through unnoticed.
+  # Reads one overlay-entries.nix — the same file that builds
+  # nixpkgs.overlays for its host (or, for shared entries, the feature that
+  # owns it). Every entry in its `tracked` list is either `exempt = true` or
+  # carries `meta`; validateTrackedList enforces that before filtering, so an
+  # entry with neither fails eval loudly rather than silently falling
+  # through. `meta` is extracted from the rest.
   #
   # Only `inputs` is passed here, not `pkgs` — metadata extraction (id, meta,
   # exempt) never forces evaluation of the `overlay` function bodies, so a
@@ -75,36 +74,7 @@ let
   # deriving `system`) still works correctly here via laziness; it only
   # needs the real value when actually building, which happens through that
   # host's own default.nix, not through this metadata-only import.
-  readHostAudits =
-    hostKey: host:
-    let
-      entriesFile = host.overlaysModule + "/overlay-entries.nix";
-    in
-    if builtins.pathExists entriesFile then
-      let
-        entries = import entriesFile { inherit inputs; };
-        tracked = validateTrackedList hostKey (entries.tracked or [ ]);
-        withMeta = builtins.filter (e: e ? meta) tracked;
-      in
-      lib.listToAttrs (
-        map (e: {
-          name = e.id;
-          value = validateEntry hostKey e.id e.meta;
-        }) withMeta
-      )
-    else
-      { };
-
-  # Aggregate per-host audit metadata across all hosts.
-  # Keyed by hostname so the CI script can report which host each overlay belongs to.
-  hostAudits = lib.mapAttrs readHostAudits hosts;
-
-  # Entry files that aren't a host's own overlaysModule — e.g. the
-  # system-wide overlays feature, which reaches hosts via their profiles —
-  # register themselves under infra.sharedOverlayEntries (keyed by audit group
-  # name) and get the same treatment, including the same validateTrackedList
-  # assertion.
-  readSharedAudits =
+  readAudits =
     key: entriesFile:
     let
       entries = import entriesFile { inherit inputs; };
@@ -117,7 +87,27 @@ let
         value = validateEntry key e.id e.meta;
       }) withMeta
     );
-  sharedAudits = lib.mapAttrs readSharedAudits config.infra.sharedOverlayEntries;
+
+  # Per-host audits come from host.overlaysModule + "/overlay-entries.nix",
+  # keyed by hostname so the CI script can report which host each overlay
+  # belongs to. Hosts without an overlaysModule (or without an entries file
+  # in it) get an empty set.
+  readHostAudits =
+    hostKey: host:
+    let
+      entriesFile = host.overlaysModule + "/overlay-entries.nix";
+    in
+    if host.overlaysModule != null && builtins.pathExists entriesFile then
+      readAudits hostKey entriesFile
+    else
+      { };
+  hostAudits = lib.mapAttrs readHostAudits hosts;
+
+  # Entry files that aren't a host's own overlaysModule — e.g. the
+  # system-wide overlays feature, which reaches hosts via their profiles —
+  # register themselves under infra.sharedOverlayEntries (keyed by audit group
+  # name) and get the same treatment.
+  sharedAudits = lib.mapAttrs readAudits config.infra.sharedOverlayEntries;
 
 in
 {
