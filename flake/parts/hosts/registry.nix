@@ -76,7 +76,9 @@ in
               };
 
               overlaysModule = lib.mkOption {
-                type = lib.types.path;
+                type = lib.types.nullOr lib.types.path;
+                default = null;
+                description = "Host-specific overlays directory (default.nix + overlay-entries.nix); null if the host has none.";
               };
 
               modules = lib.mkOption {
@@ -84,8 +86,8 @@ in
                 readOnly = true;
                 default = [
                   config.systemModule
-                  config.overlaysModule
-                ];
+                ]
+                ++ lib.optional (config.overlaysModule != null) config.overlaysModule;
               };
 
               systemProfiles = lib.mkOption {

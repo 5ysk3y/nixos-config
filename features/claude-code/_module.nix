@@ -1,9 +1,9 @@
 _:
 
 {
-  # Note: the claude-code-nix overlay is applied at the NixOS system level in
-  # hosts/personal/gibson/overlays/default.nix — setting nixpkgs.overlays here has no
-  # effect when home-manager.useGlobalPkgs = true and will become an error.
+  # claude-code itself comes from the claude-code-nix overlay, applied by
+  # this feature's nixos/darwin modules (see default.nix) via the system
+  # profiles.
   programs = {
     claude-code = {
       enable = true;

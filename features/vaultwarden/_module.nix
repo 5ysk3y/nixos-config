@@ -81,12 +81,8 @@
   ];
 
   # Standard LAN reverse proxy allow list
-  networking.firewall.extraCommands = ''
-    iptables -A nixos-fw -p tcp -s 192.168.1.5 --dport 8000 -j ACCEPT
-    iptables -A nixos-fw -p tcp -s 192.168.1.7 --dport 8000 -j ACCEPT
-  '';
-  networking.firewall.extraStopCommands = ''
-    iptables -D nixos-fw -p tcp -s 192.168.1.5 --dport 8000 -j ACCEPT || true
-    iptables -D nixos-fw -p tcp -s 192.168.1.7 --dport 8000 -j ACCEPT || true
-  '';
+  features.system.firewallAllowlist."8000" = [
+    "192.168.1.5"
+    "192.168.1.7"
+  ];
 }

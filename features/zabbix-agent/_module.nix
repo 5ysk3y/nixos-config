@@ -23,10 +23,6 @@
     "d /run/zabbix 0755 zabbix-agent zabbix-agent -"
   ];
 
-  networking.firewall.extraCommands = ''
-    iptables -A nixos-fw -p tcp -s 192.168.1.3 --dport 10050 -j ACCEPT
-  '';
-  networking.firewall.extraStopCommands = ''
-    iptables -D nixos-fw -p tcp -s 192.168.1.3 --dport 10050 -j ACCEPT || true
-  '';
+  # The Zabbix server polls the agent
+  features.system.firewallAllowlist."10050" = [ "192.168.1.3" ];
 }

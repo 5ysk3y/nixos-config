@@ -1,3 +1,7 @@
-_: {
-  flake.modules.nixos.attic-server = ./_module.nix;
+{ config, ... }:
+{
+  flake.modules.nixos.attic-server.imports = [
+    config.flake.modules.nixos.firewall-allowlist
+    ./_module.nix
+  ];
 }

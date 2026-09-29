@@ -1,6 +1,9 @@
 { config, inputs, ... }:
 {
-  flake.modules.nixos.proxmox-lxc-server = ./_module.nix;
+  flake.modules.nixos.proxmox-lxc-server.imports = [
+    config.flake.modules.nixos.firewall-allowlist
+    ./_module.nix
+  ];
 
   # Reusable Proxmox staging image for bootstrapping any new nix-based LXC —
   # build it once, reuse the same tarball as a Proxmox CT template for every
