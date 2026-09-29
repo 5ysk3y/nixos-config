@@ -55,17 +55,20 @@ check_nixpkgs_version() {
 # checks whether it's already an ancestor of the locked nixpkgs rev
 # (i.e. actually present in what a system builds against, not
 # just merged somewhere upstream).
-# Returns 0 if landed, 1 if not.
+# Returns 0 if landed, 1 if not, 2 if the API request failed.
 # ------------------------------------------------------------------
 check_landed_in_nixpkgs() {
   local commit_sha="$1"
   local cmp_status
-  cmp_status=$(curl -fsSL \
+  if ! cmp_status=$(curl -fsSL \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer ${GH_TOKEN}" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     "https://api.github.com/repos/NixOS/nixpkgs/compare/${LOCKED_NIXPKGS_REV}...${commit_sha}" \
-    | jq -r '.status')
+    | jq -r '.status'); then
+    echo "::error::GitHub API: compare ${LOCKED_NIXPKGS_REV}...${commit_sha} failed" >&2
+    return 2
+  fi
   echo "    compare ${LOCKED_NIXPKGS_REV}...${commit_sha}: ${cmp_status}" >&2
   case "$cmp_status" in
     identical|behind) return 0 ;;
@@ -81,13 +84,15 @@ check_landed_in_nixpkgs() {
 # "Fixes #N" keyword syntax — not for manual closure with a linked
 # PR (GitHub's "closed this as completed in #N" UI action).
 # Prints the merge commit SHA to stdout if found, empty otherwise.
+# Returns 2 if the API request failed.
 # ------------------------------------------------------------------
 find_closing_commit() {
   local repo="$1" number="$2"
   local owner_part repo_part gql_response commit
   owner_part="${repo%%/*}"
   repo_part="${repo##*/}"
-  gql_response=$(gh api graphql \
+  # gh exits non-zero on HTTP errors and on a GraphQL "errors" response
+  if ! gql_response=$(gh api graphql \
     -F owner="${owner_part}" \
     -F repo="${repo_part}" \
     -F issue="${number}" \
@@ -100,7 +105,10 @@ find_closing_commit() {
             }
           }
         }
-      }')
+      }'); then
+    echo "::error::GitHub API: closing PR lookup for ${repo} issue ${number} failed" >&2
+    return 2
+  fi
   commit=$(printf '%s' "$gql_response" | jq -r '[.data.repository.issue.closedByPullRequestsReferences.nodes[] | select(.merged == true) | .mergeCommit.oid] | last // empty')
   if [ -z "$commit" ]; then
     echo "    no merged closing PR found via closedByPullRequestsReferences" >&2
@@ -112,7 +120,9 @@ find_closing_commit() {
 # check_github_items: checks state of issues or PRs via REST API.
 # item_type: "issue" or "pull"
 # Prints one summary line per item to stdout (captured by caller).
-# Returns: 0 if ALL items are resolved, 1 otherwise.
+# Returns: 0 if ALL items are resolved, 1 otherwise, 2 if any GitHub
+# API request failed (so a failed lookup is never mistaken for "still
+# open" — callers abort the audit on 2).
 #
 # BACKLINK PREVENTION:
 # - Progress lines go to stderr only (never reach PR body)
@@ -126,16 +136,19 @@ check_github_items() {
   local items_json="$1" item_type="$2"
   local all_done=true
   while IFS= read -r item; do
-    local repo number state merged merge_commit_sha api_response repo_short landed closing_commit reached_terminal_state
+    local repo number state merged merge_commit_sha api_response repo_short landed closing_commit reached_terminal_state landed_rc
     repo=$(echo "$item" | jq -r '.repo')
     number=$(echo "$item" | jq -r '.number')
     repo_short="${repo##*/}"
     echo "    Checking ${repo} ${item_type} ${number} ..." >&2
-    api_response=$(curl -fsSL \
+    if ! api_response=$(curl -fsSL \
       -H "Accept: application/vnd.github+json" \
       -H "Authorization: Bearer ${GH_TOKEN}" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      "https://api.github.com/repos/${repo}/${item_type}s/${number}")
+      "https://api.github.com/repos/${repo}/${item_type}s/${number}"); then
+      echo "::error::GitHub API: ${repo} ${item_type} ${number} request failed" >&2
+      return 2
+    fi
     if [ "$item_type" = "pull" ]; then
       merged=$(echo "$api_response" | jq -r '.merged')
       state=$([ "$merged" = "true" ] && echo "merged" || echo "$(echo "$api_response" | jq -r '.state')")
@@ -146,19 +159,23 @@ check_github_items() {
     echo "    state: ${state}" >&2
     landed=""
     if [ "$item_type" = "pull" ] && [ "$state" = "merged" ] && [ "$repo" = "NixOS/nixpkgs" ] && [ -n "${merge_commit_sha:-}" ]; then
-      if check_landed_in_nixpkgs "$merge_commit_sha"; then
-        landed="yes"
-      else
-        landed="no"
-      fi
+      landed_rc=0
+      check_landed_in_nixpkgs "$merge_commit_sha" || landed_rc=$?
+      case "$landed_rc" in
+        0) landed="yes" ;;
+        1) landed="no" ;;
+        *) return 2 ;;
+      esac
     elif [ "$item_type" = "issue" ] && [ "$state" = "closed" ] && [ "$repo" = "NixOS/nixpkgs" ]; then
-      closing_commit=$(find_closing_commit "$repo" "$number")
+      closing_commit=$(find_closing_commit "$repo" "$number") || return 2
       if [ -n "$closing_commit" ]; then
-        if check_landed_in_nixpkgs "$closing_commit"; then
-          landed="yes"
-        else
-          landed="no"
-        fi
+        landed_rc=0
+        check_landed_in_nixpkgs "$closing_commit" || landed_rc=$?
+        case "$landed_rc" in
+          0) landed="yes" ;;
+          1) landed="no" ;;
+          *) return 2 ;;
+        esac
       fi
     fi
     # Only append a landed-status suffix when the item has actually
@@ -277,7 +294,10 @@ while IFS= read -r host_key; do
         issue_output=""
         rc=0
         issue_output=$(check_github_items "$items_json" "issue") || rc=$?
-        if [ $rc -eq 0 ]; then
+        if [ $rc -eq 2 ]; then
+          echo "::error::${host_key} / ${id}: GitHub API lookup failed — aborting rather than reporting a wrong result"
+          exit 1
+        elif [ $rc -eq 0 ]; then
           is_obsolete=true
           REPORT_LINES+=("- ✅ **${host_key} / ${id}**: all tracking issues closed")
         else
@@ -292,7 +312,10 @@ while IFS= read -r host_key; do
         pr_output=""
         rc=0
         pr_output=$(check_github_items "$items_json" "pull") || rc=$?
-        if [ $rc -eq 0 ]; then
+        if [ $rc -eq 2 ]; then
+          echo "::error::${host_key} / ${id}: GitHub API lookup failed — aborting rather than reporting a wrong result"
+          exit 1
+        elif [ $rc -eq 0 ]; then
           is_obsolete=true
           REPORT_LINES+=("- ✅ **${host_key} / ${id}**: all tracking PRs merged")
         else
