@@ -1,6 +1,7 @@
-# Restic backups that also record failures in a status file for Zabbix to
-# monitor. Import by name (inputs.self.modules.nixos.restic-backup) and
-# declare each backup under features.system.resticBackups.<name>.
+# Restic backups, checked after every run, that also record failures in a
+# status file for Zabbix to monitor. Import by name
+# (inputs.self.modules.nixos.restic-backup) and declare each backup under
+# features.system.resticBackups.<name>.
 { config, lib, ... }:
 let
   cfg = config.features.system.resticBackups;
@@ -43,6 +44,16 @@ in
               "--keep-monthly 6"
             ];
           };
+          checkOpts = mkOption {
+            type = types.listOf types.str;
+            default = [ "--read-data-subset=5%" ];
+            description = ''
+              Options for the `restic check` run after every backup and prune.
+              A failed check fails the backup unit, so it's recorded in the
+              status file like any other failure. The default re-reads a
+              random 5% of the repository's data each run; [ ] disables the check.
+            '';
+          };
           statusFile = mkOption {
             type = types.str;
             default = "/var/log/restic_backup_local.log";
@@ -71,6 +82,9 @@ in
         timerConfig
         pruneOpts
         ;
+      # services.restic puts these straight into ExecStart, where systemd
+      # reads "%" as a specifier; "%%" is how a literal "%" gets through.
+      checkOpts = map (lib.replaceStrings [ "%" ] [ "%%" ]) b.checkOpts;
       # Status file truncated first, before any caller-supplied
       # prepare step — if that step itself fails, onFailure below
       # still fires and overwrites with "local failure" regardless,

@@ -3,6 +3,12 @@
   pkgs,
   ...
 }:
+let
+  atticConfig = import ./_config.nix {
+    inherit pkgs;
+    tokenFile = config.sops.secrets."services/attic/token".path;
+  };
+in
 {
   users.groups.attic-watch-store = { };
   users.users.attic-watch-store = {
@@ -24,13 +30,11 @@
       Group = "attic-watch-store";
       Type = "simple";
       StateDirectory = "attic-watch-store";
-      Environment = "HOME=%S/attic-watch-store";
-      ExecStart = pkgs.writeShellScript "attic-watch-store-start" ''
-        set -euo pipefail
-        ${pkgs.attic-client}/bin/attic login home \
-          https://attic.home.arpa "$(cat ${config.sops.secrets."services/attic/token".path})"
-        exec ${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache
-      '';
+      Environment = [
+        "HOME=%S/attic-watch-store"
+        "XDG_CONFIG_HOME=${atticConfig}"
+      ];
+      ExecStart = "${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache";
       Restart = "on-failure";
       RestartSec = 10;
     };

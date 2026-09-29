@@ -34,7 +34,6 @@ in
       auto-optimise-store = true;
       download-buffer-size = 1000000000;
       max-jobs = "auto";
-      trusted-users = [ "@wheel" ];
     };
 
     gc = {
