@@ -43,7 +43,13 @@ jobs:
             exit 0
           fi
 
-          base_hash="$(git show "${{ github.event.pull_request.base.sha }}:flake.lock" 2>/dev/null | jq -r '.nodes.nixpkgs.locked.narHash // empty')" || base_hash=""
+          # Compare against where the PR branched from main, not main's
+          # current tip: otherwise a branch opened before the weekly lock
+          # update looks like it changes nixpkgs and gets a needless build.
+          fork_point="$(git merge-base \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}")"
+          base_hash="$(git show "${fork_point}:flake.lock" 2>/dev/null | jq -r '.nodes.nixpkgs.locked.narHash // empty')" || base_hash=""
           head_hash="$(git show "${{ github.event.pull_request.head.sha }}:flake.lock" 2>/dev/null | jq -r '.nodes.nixpkgs.locked.narHash // empty')" || head_hash=""
 
           echo "base nixpkgs narHash: ${base_hash:-<none>}"
@@ -161,12 +167,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Free up disk space
-        run: |
-          set -euo pipefail
-          df -h
-          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
-          df -h
       # Tailnet Lock is enabled, so this must be a pre-signed, ephemeral,
       # reusable auth key: OAuth clients / OIDC federation can't join a
       # locked tailnet (tailscale/github-action README, "Tailnet Lock").
