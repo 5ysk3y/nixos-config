@@ -1,4 +1,10 @@
 { config, pkgs, ... }:
+let
+  atticConfig = import ./_config.nix {
+    inherit pkgs;
+    tokenFile = config.sops.secrets."services/attic/token".path;
+  };
+in
 {
   sops.secrets."services/attic/token" = { };
 
@@ -6,9 +12,8 @@
     script = ''
       set -euo pipefail
       export HOME=/var/lib/attic-watch-store
+      export XDG_CONFIG_HOME=${atticConfig}
       mkdir -p "$HOME"
-      ${pkgs.attic-client}/bin/attic login home \
-        https://attic.home.arpa "$(cat ${config.sops.secrets."services/attic/token".path})"
       exec ${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache
     '';
     serviceConfig = {
