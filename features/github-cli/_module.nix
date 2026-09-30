@@ -28,6 +28,10 @@ in
     package = ghWrapped;
     settings = {
       git_protocol = "ssh";
+      aliases = {
+        pr-claude = "!gh pr create -fa \"@me\" --title \"$(git log -1 --format=%s)\" --body \"$(git log -1 --format=%b | grep -viE \"^co-authored-by:\")\" \"$@\"";
+        pr-create = "!gh pr create -fa \"@me\"";
+      };
     };
     hosts = {
       "github.com" = {
