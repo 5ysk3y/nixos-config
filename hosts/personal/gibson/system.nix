@@ -212,6 +212,10 @@
 
     zsh.enable = true;
 
+    ssh.extraConfig = ''
+      Match host * exec "gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1"
+    '';
+
     gamemode.settings.gpu = {
       apply_gpu_optimisations = "accept-responsibility";
       gpu_device = 1;

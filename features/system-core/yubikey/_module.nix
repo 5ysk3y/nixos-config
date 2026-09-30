@@ -3,7 +3,6 @@
   pkgs,
   vars,
   hostname,
-  lib,
   ...
 }:
 {
@@ -14,7 +13,7 @@
       cue = true;
       origin = "pam://${hostname}";
       appid = "pam://${hostname}";
-      authFile = config.sops.secrets."system/pam/yubikeyPub".path;
+      authfile = config.sops.secrets."system/pam/yubikeyPub".path;
     };
   };
 
@@ -29,28 +28,22 @@
 
   services.pcscd = {
     enable = true;
-    plugins = [ pkgs.ccid ];
   };
 
-  systemd = {
-    services = {
-      pcscd-resume = {
-        description = "Restart pcscd after hibernate resume";
-        wantedBy = [ "hibernate.target" ];
-        after = [ "hibernate.target" ];
-        script = ''
-          sleep 1
-          ${pkgs.systemd}/bin/systemctl restart pcscd
-        '';
-        serviceConfig.Type = "oneshot";
+  # pam_u2f: build its libfido2 without PC/SC so FIDO auth never socket-activates
+  # pcscd. pcscd initialising the YubiKey's CCID reader after hibernate resume
+  # makes the key answer CTAPHID ERR_CHANNEL_BUSY (0x06) to FIDO for ~20s,
+  # which drops hyprlock to the password prompt. Deliberate build choice, not
+  # an upstream workaround, so it lives here rather than in the audited overlays.
+  nixpkgs.overlays = [
+    (final: prev: {
+      pam_u2f = prev.pam_u2f.override {
+        libfido2 = prev.libfido2.override { withPcsclite = false; };
       };
-      pcscd.serviceConfig.Restart = lib.mkForce "no";
-    };
-  };
+    })
+  ];
 
   services.udev.packages = with pkgs; [
     yubikey-manager
-    yubikey-personalization
-    libu2f-host
   ];
 }
