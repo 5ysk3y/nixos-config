@@ -38,34 +38,6 @@
 
   tracked = [
     {
-      id = "hyprland-blackscreen-bisect";
-      # TODO: hibernate/hyprlock black-screen bisect — remove once root cause confirmed/fixed upstream
-      exempt = true; # diagnostic only, no upstream issue filed yet
-      overlay =
-        _final: prev:
-        let
-          oldNixpkgs =
-            import
-              (prev.fetchFromGitHub {
-                owner = "NixOS";
-                repo = "nixpkgs";
-                rev = "a47c123a609287a012dfc44d281de2dd4ed13394";
-                hash = "sha256-IpX7tmVJi9seHg5M4Wuexy78bQDlbntVk1HcT9kFts4=";
-              })
-              {
-                inherit (prev.stdenv.hostPlatform) system;
-                config.allowUnfree = true;
-              };
-        in
-        {
-          inherit (oldNixpkgs)
-            hyprland
-            hyprlock
-            ;
-        };
-    }
-
-    {
       id = "mpv-unwrapped";
       meta = {
         strategy = "nixpkgs-version";
