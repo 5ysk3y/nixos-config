@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+case "$2" in merge|squash) exit 0 ;; esac   # leave merge/squash messages alone
+tmp=$(mktemp) || exit 1
+grep -viE '^co-authored-by:.*noreply@anthropic\.com' "$1" > "$tmp"
+cat "$tmp" > "$1"
+rm -f "$tmp"
+git interpret-trailers --in-place --if-exists addIfDifferent \
+  --trailer "Co-authored-by: Claude <noreply@anthropic.com>" "$1"
