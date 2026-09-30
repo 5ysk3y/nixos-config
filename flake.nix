@@ -66,7 +66,7 @@
       # infra.hosts), so directories below these roots can move freely.
       imports = [
         (inputs.import-tree [
-          ./flake/parts
+          ./flake-parts
           ./features
           ./profiles
         ])
