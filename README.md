@@ -26,8 +26,7 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 ```
 .
 ├── flake.nix                  # Entrypoint — flake-parts + import-tree; the only file naming top-level dirs
-├── flake/
-│   └── parts/                 # Flake-parts modules (host registry, platforms, exports, formatter)
+├── flake-parts/               # Flake-parts modules (host registry, platforms, exports, formatter)
 ├── hosts/
 │   ├── personal/<host>/       # default.nix registers the host; system/home/overlays alongside it
 │   └── servers/<host>/        # Same, for servers
