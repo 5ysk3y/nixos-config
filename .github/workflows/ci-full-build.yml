@@ -125,12 +125,12 @@ jobs:
           # Wait until attic is actually reachable (new peers propagate
           # eventually) before anything tries the cache.
           ping: attic.taileda465.ts.net
-      - uses: DeterminateSystems/determinate-nix-action@8d87e8d5e5b8a8309d4281094560f127d9a265f1
+      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@83282a8aef353db1d659d3bacf4a28b6683de0b3
+      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
         with:
           use-gha-cache: disabled
       - uses: ./.github/actions/private-flake-access
@@ -181,12 +181,12 @@ jobs:
           # Wait until attic is actually reachable (new peers propagate
           # eventually) before anything tries the cache.
           ping: attic.taileda465.ts.net
-      - uses: DeterminateSystems/determinate-nix-action@8d87e8d5e5b8a8309d4281094560f127d9a265f1
+      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@83282a8aef353db1d659d3bacf4a28b6683de0b3
+      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
         with:
           use-gha-cache: disabled
       - uses: ./.github/actions/private-flake-access
