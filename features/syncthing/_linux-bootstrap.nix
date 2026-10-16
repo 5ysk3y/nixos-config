@@ -13,6 +13,8 @@ let
 
   cfg = config.features.home.syncthing;
 
+  topology = import ./_topology.nix;
+
   bootstrapFolders = filterAttrs (_: f: f.enable && f.bootstrap.enable) cfg.folders;
 
   firstBootstrapFolder = builtins.head (builtins.attrNames bootstrapFolders);
@@ -21,6 +23,8 @@ let
 
   inherit (folderCfg.bootstrap) markerFile;
   folderPath = folderCfg.path;
+  # The REST API addresses folders by their Syncthing ID, not this option's name
+  folderId = topology.folders.${firstBootstrapFolder}.id;
 
   syncthingConfigFile = "${config.home.homeDirectory}/.local/state/syncthing/config.xml";
 in
@@ -48,6 +52,7 @@ in
 
           marker=${escapeShellArg markerFile}
           folder_path=${escapeShellArg folderPath}
+          folder_id=${escapeShellArg folderId}
           config_file=${escapeShellArg syncthingConfigFile}
 
           mkdir -p "$folder_path/.stfolder"
@@ -91,26 +96,26 @@ in
             -X PATCH \
             -H "Authorization: Bearer $token" \
             -H "Content-Type: application/json" \
-            "$api_base/rest/config/folders/sync" \
+            "$api_base/rest/config/folders/$folder_id" \
             --data '{"type":"receiveonly"}' >/dev/null
 
           ${pkgs.curl}/bin/curl "''${curl_extra[@]}" -fsS \
             -X POST \
             -H "Authorization: Bearer $token" \
-            "$api_base/rest/db/scan?folder=sync" >/dev/null
+            "$api_base/rest/db/scan?folder=$folder_id" >/dev/null
 
           sleep 2
 
           ${pkgs.curl}/bin/curl "''${curl_extra[@]}" -fsS \
             -X POST \
             -H "Authorization: Bearer $token" \
-            "$api_base/rest/db/revert?folder=sync" >/dev/null
+            "$api_base/rest/db/revert?folder=$folder_id" >/dev/null
 
           for _ in $(seq 1 60); do
             completion="$(
               ${pkgs.curl}/bin/curl "''${curl_extra[@]}" -fsS \
                 -H "Authorization: Bearer $token" \
-                "$api_base/rest/db/completion?folder=sync" \
+                "$api_base/rest/db/completion?folder=$folder_id" \
               | ${pkgs.jq}/bin/jq -r '.completion'
             )"
 
@@ -124,7 +129,7 @@ in
             -X PATCH \
             -H "Authorization: Bearer $token" \
             -H "Content-Type: application/json" \
-            "$api_base/rest/config/folders/sync" \
+            "$api_base/rest/config/folders/$folder_id" \
             --data '{"type":"sendreceive"}' >/dev/null
 
           touch "$marker"
