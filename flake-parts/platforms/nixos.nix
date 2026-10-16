@@ -12,9 +12,8 @@ let
     host:
     let
       packages = infraLib.pkgsFor host.system;
-      # kind = "nixos-minimal" hosts get neither sops-nix nor Home Manager —
-      # see flake/parts/hosts/registry.nix for why this is a distinct kind
-      # rather than a per-host toggle.
+      # kind = "nixos-minimal" hosts get neither sops-nix nor Home Manager
+      # (see the `kind` option in flake-parts/hosts/registry.nix).
       hasSecretsAndHome = host.kind == "nixos";
     in
     inputs.nixpkgs.lib.nixosSystem {
