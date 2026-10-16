@@ -32,8 +32,12 @@ in
           };
           timerConfig = mkOption {
             type = types.attrsOf types.anything;
+            # Replaces services.restic's default wholesale, so Persistent has
+            # to be restated or a run missed while the host was down never
+            # happens.
             default = {
               OnCalendar = "2:30";
+              Persistent = true;
             };
           };
           pruneOpts = mkOption {
