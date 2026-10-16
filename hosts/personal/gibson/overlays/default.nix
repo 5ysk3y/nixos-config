@@ -4,7 +4,6 @@ let
 in
 {
   nixpkgs.overlays = [
-    inputs.self.overlays.default
     entries.permanent
   ]
   ++ (map (e: e.overlay) entries.tracked);
