@@ -1,7 +1,6 @@
 {
   config,
   vars,
-  hostname,
   pkgs,
   ...
 }:
@@ -76,7 +75,6 @@
 
       syncthing = {
         enable = true;
-        deviceName = "${hostname}";
 
         folders.sync = {
           enable = true;

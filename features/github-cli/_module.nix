@@ -12,8 +12,8 @@ let
     name = "gh";
     text = ''
       if ! GH_TOKEN="$(cat ${lib.escapeShellArg tokenPath})"; then
-       echo "gh: failed to read GitHub token from ${lib.escapeShellArg tokenPath}" >&2
-         exit 1
+        echo "gh: failed to read GitHub token from ${lib.escapeShellArg tokenPath}" >&2
+        exit 1
       fi
 
       export GH_TOKEN

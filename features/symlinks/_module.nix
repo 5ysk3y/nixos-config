@@ -6,8 +6,7 @@
   ...
 }:
 let
-  isLinux = pkgs != null && pkgs.stdenv.hostPlatform.isLinux;
-  isDarwin = pkgs != null && pkgs.stdenv.hostPlatform.isDarwin;
+  inherit (pkgs.stdenv.hostPlatform) isLinux isDarwin;
 in
 {
   home.file = {
