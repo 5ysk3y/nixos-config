@@ -5,7 +5,7 @@
 #                        no independent tracking; matches the old inline
 #                        "# audit-exempt" comment convention)
 #   - meta = { ... }   — real audit metadata, consumed by
-#                        flake/parts/exports/overlay-audits.nix and checked
+#                        flake-parts/exports/overlay-audits.nix and checked
 #                        by both the pre-commit hook and the weekly CI audit
 #
 # There is no third way for an entry to exist here without going through one

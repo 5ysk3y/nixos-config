@@ -3,9 +3,9 @@
 #   bootstrap/deploy.sh attic
 # (root SSH is key-only, see features/proxmox-lxc-server).
 #
-# Never `switch` locally on this host — see the repo README/CI notes on why
-# nix-secrets makes local flake evaluation here a non-starter regardless of
-# what this host's own modules reference.
+# Never `switch` locally on this host: it has no access to fetch the
+# private nix-secrets flake input, so local flake evaluation here is a
+# non-starter regardless of what this host's own modules reference.
 #
 # Tailscale on this host is unrelated to the above — it exists solely so
 # GitHub Actions runners can reach the :8080 cache API for CI build/push,

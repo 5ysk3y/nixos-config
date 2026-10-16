@@ -1,6 +1,6 @@
 { config, ... }:
 {
-  # No home-manager, no sops-nix, no YubiKey — see flake/parts/platforms/nixos.nix
+  # No home-manager, no sops-nix, no YubiKey — see flake-parts/platforms/nixos.nix
   # for what this kind skips.
   infra.hosts.attic = {
     kind = "nixos-minimal";
