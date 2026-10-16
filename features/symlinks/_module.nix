@@ -50,6 +50,7 @@ in
 
     "jellyfin-mpv-shim/conf.json" = lib.mkIf isLinux {
       text = builtins.readFile ./files/jellyfin-mpv-shim/conf.json;
+      force = true;
     };
 
     "jellyfin-mpv-shim/input.json" = lib.mkIf isLinux {
