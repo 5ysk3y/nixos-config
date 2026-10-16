@@ -46,12 +46,6 @@
 
     waybar-patched.url = "github:Alexays/Waybar/0594574";
     waybar-patched.flake = false;
-
-    # Temporary: pins a specific nixpkgs commit to fix Python Setuptools
-    # on Linux.
-    # Used only in features/containers/pentesting/_module.nix
-    # TODO: Monitor nixpkgs upstream for an issue/PR to track this
-    nixpkgs-setuptools-pin.url = "github:NixOS/nixpkgs/bc69cb503d4a70df1f12ea9fad63366ed6f62b3c";
   };
 
   outputs =
