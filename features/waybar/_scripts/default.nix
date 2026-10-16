@@ -26,11 +26,12 @@
       gnugrep
       coreutils
       rivalcfg
+      util-linux # flock
     ];
 
     text = ''
-      set +e +u +o pipefail
-      set -u
+      # Every probe below may fail; the script decides what to print itself.
+      set +e +o pipefail
 
       cache_dir="''${XDG_RUNTIME_DIR:-/tmp}/waybar-mouse-battery"
       cache_file="$cache_dir/status.json"

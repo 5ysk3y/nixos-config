@@ -4,7 +4,7 @@ pkgs.writeShellApplication {
   runtimeInputs = with pkgs; [
     gnugrep
     gawk
-    util-linux
+    procps
   ];
   text = ''
     # shellcheck disable=SC2009
