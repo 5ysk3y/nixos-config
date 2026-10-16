@@ -1,4 +1,21 @@
-{ vars, ... }:
+{
+  pkgs,
+  vars,
+  hostname,
+  ...
+}:
+let
+  flake = "${vars.configDir}#${hostname}";
+
+  # The rebuild command for this platform, minus the action. On NixOS it
+  # runs under systemd-inhibit so the machine can't suspend or shut down
+  # mid-activation.
+  rebuildCmd =
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      "sudo darwin-rebuild"
+    else
+      "systemd-inhibit --no-pager --no-legend --mode=block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild";
+in
 {
   programs.zsh = {
     enable = true;
@@ -17,6 +34,15 @@
       }
 
       bindkey -M viins '\e.' insert-last-word
+
+      # rebuild [action] [args...]: run this host's config from
+      # ${vars.configDir} with any rebuild action (switch, boot, build,
+      # test, ...), defaulting to switch. Extra args are passed through.
+      rebuild() {
+        local action="''${1:-switch}"
+        (( $# )) && shift
+        ${rebuildCmd} "$action" --flake '${flake}' --show-trace "$@"
+      }
 
       commit-msg() {
         local amend=false
