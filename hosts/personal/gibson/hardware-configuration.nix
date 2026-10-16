@@ -47,7 +47,6 @@
         devices = {
           "rootfs" = {
             device = "/dev/disk/by-label/ROOT";
-            preLVM = true;
             crypttabExtraOpts = [
               "fido2-device=auto"
               "token-timeout=30"
@@ -55,7 +54,6 @@
           };
           "swap" = {
             device = "/dev/disk/by-label/SWAP";
-            preLVM = true;
             allowDiscards = true;
             crypttabExtraOpts = [ "keyfile-timeout=10s" ];
             keyFile = "/swap.key";
