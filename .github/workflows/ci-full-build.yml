@@ -125,7 +125,7 @@ jobs:
           # Wait until attic is actually reachable (new peers propagate
           # eventually) before anything tries the cache.
           ping: attic.taileda465.ts.net
-      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
+      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
@@ -181,7 +181,7 @@ jobs:
           # Wait until attic is actually reachable (new peers propagate
           # eventually) before anything tries the cache.
           ping: attic.taileda465.ts.net
-      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
+      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
         with:
           extra-conf: |
             extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
