@@ -1,0 +1,56 @@
+name: Join the tailnet
+description: >
+  Join the tailnet as an ephemeral CI node and wait until a host is
+  reachable. If that fails, print Tailscale's own view of the node and of
+  Tailnet Lock to show why.
+
+inputs:
+  authkey:
+    description: >
+      Pre-signed, tagged, reusable, ephemeral auth key. Tailnet Lock is
+      enabled, so OAuth clients / OIDC federation can't be used instead
+      (tailscale/github-action README, "Tailnet Lock"); the runner's
+      "authkey has been deprecated" warning is expected.
+    required: true
+  ping:
+    description: Host (MagicDNS name or Tailscale IP) to wait for before continuing.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Tailnet Lock needs somewhere to keep the Tailnet Key Authority state
+    # (the action's default is in-memory). Composite actions get the runner's
+    # environment variables, so the path comes from $RUNNER_TEMP.
+    - name: Pick tailscale state directory
+      id: state
+      shell: bash
+      run: echo "dir=${RUNNER_TEMP}/tailscale-state" >> "$GITHUB_OUTPUT"
+
+    - name: Setup tailscale
+      uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
+      with:
+        authkey: ${{ inputs.authkey }}
+        statedir: ${{ steps.state.outputs.dir }}
+        # Wait until the host is actually reachable (new peers propagate
+        # eventually) before anything tries to use it.
+        ping: ${{ inputs.ping }}
+
+    # A peer missing from the netmap (e.g. an auth key without the right tag)
+    # surfaces as a DNS lookup failure in the ping above; these show the
+    # actual state. Only node and peer names/addresses visible to this CI node
+    # are printed, and the run logs of a public repo are public.
+    - name: Tailscale diagnostics
+      if: failure()
+      shell: bash
+      run: |
+        if ! command -v tailscale >/dev/null 2>&1; then
+          echo "tailscale was never installed — the failure is before 'tailscale up'"
+          exit 0
+        fi
+        echo "::group::tailscale status"
+        tailscale status || true
+        echo "::endgroup::"
+        echo "::group::tailscale lock status"
+        tailscale lock status || true
+        echo "::endgroup::"

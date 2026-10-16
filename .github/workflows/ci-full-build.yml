@@ -21,6 +21,10 @@ defaults:
 permissions:
   contents: read
 
+env:
+  # attic's MagicDNS name: CI reaches the cache API over the tailnet
+  ATTIC_HOST: attic.taileda465.ts.net
+
 jobs:
   changes:
     name: detect lockfile changes
@@ -70,24 +74,17 @@ jobs:
     needs: changes
     if: needs.changes.outputs.lockfile_changed == 'true'
     steps:
-      # Tailnet Lock is enabled, so this must be a pre-signed, ephemeral,
-      # reusable auth key: OAuth clients / OIDC federation can't join a
-      # locked tailnet (tailscale/github-action README, "Tailnet Lock").
-      # The runner's "authkey has been deprecated" warning is expected here.
-      - name: Setup tailscale
-        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
+      # Local actions are read from the checkout
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Join the tailnet
+        uses: ./.github/actions/tailnet
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-          # Required with Tailnet Lock: somewhere to keep the Tailnet Key
-          # Authority state (the default is in-memory)
-          statedir: ${{ runner.temp }}/tailscale-state
-          # Wait until attic is actually reachable (new peers propagate
-          # eventually) before anything tries the cache.
-          ping: attic.taileda465.ts.net
+          ping: ${{ env.ATTIC_HOST }}
       - name: Verify attic cache is reachable
         run: |
           curl --fail --silent --show-error --max-time 30 \
-            http://attic.taileda465.ts.net:8080/home-cache/nix-cache-info
+            http://${{ env.ATTIC_HOST }}:8080/home-cache/nix-cache-info
 
   eval-check:
     name: full build check (linux)
@@ -111,24 +108,15 @@ jobs:
           df -h
           sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
           df -h
-      # Tailnet Lock is enabled, so this must be a pre-signed, ephemeral,
-      # reusable auth key: OAuth clients / OIDC federation can't join a
-      # locked tailnet (tailscale/github-action README, "Tailnet Lock").
-      # The runner's "authkey has been deprecated" warning is expected here.
-      - name: Setup tailscale
-        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
+      - name: Join the tailnet
+        uses: ./.github/actions/tailnet
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-          # Required with Tailnet Lock: somewhere to keep the Tailnet Key
-          # Authority state (the default is in-memory)
-          statedir: ${{ runner.temp }}/tailscale-state
-          # Wait until attic is actually reachable (new peers propagate
-          # eventually) before anything tries the cache.
-          ping: attic.taileda465.ts.net
+          ping: ${{ env.ATTIC_HOST }}
       - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
         with:
           extra-conf: |
-            extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
+            extra-substituters = http://${{ env.ATTIC_HOST }}:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
       - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
         with:
@@ -148,7 +136,7 @@ jobs:
           max_attempts: 2
           command: |
             set -euo pipefail
-            nix run --inputs-from . nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+            nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
             nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   darwin-eval-check:
@@ -167,24 +155,15 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      # Tailnet Lock is enabled, so this must be a pre-signed, ephemeral,
-      # reusable auth key: OAuth clients / OIDC federation can't join a
-      # locked tailnet (tailscale/github-action README, "Tailnet Lock").
-      # The runner's "authkey has been deprecated" warning is expected here.
-      - name: Setup tailscale
-        uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
+      - name: Join the tailnet
+        uses: ./.github/actions/tailnet
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
-          # Required with Tailnet Lock: somewhere to keep the Tailnet Key
-          # Authority state (the default is in-memory)
-          statedir: ${{ runner.temp }}/tailscale-state
-          # Wait until attic is actually reachable (new peers propagate
-          # eventually) before anything tries the cache.
-          ping: attic.taileda465.ts.net
+          ping: ${{ env.ATTIC_HOST }}
       - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
         with:
           extra-conf: |
-            extra-substituters = http://attic.taileda465.ts.net:8080/home-cache
+            extra-substituters = http://${{ env.ATTIC_HOST }}:8080/home-cache
             extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
       - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
         with:
@@ -204,7 +183,7 @@ jobs:
           max_attempts: 2
           command: |
             set -euo pipefail
-            nix run --inputs-from . nixpkgs#attic-client -- login home http://attic.taileda465.ts.net:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+            nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
             nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   ci-gate:
