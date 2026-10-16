@@ -44,11 +44,6 @@ in
       recursive = true;
     };
 
-    "WebCord" = lib.mkIf isLinux {
-      source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/WebCord";
-      recursive = true;
-    };
-
     "OpenRGB/OpenRGB.json" = lib.mkIf isLinux {
       text = builtins.readFile ./files/openrgb/openrgb.json;
     };
