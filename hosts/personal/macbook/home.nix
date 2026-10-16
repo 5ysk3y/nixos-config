@@ -1,7 +1,6 @@
 {
   pkgs,
   vars,
-  hostname,
   ...
 }:
 {
@@ -10,12 +9,8 @@
 
     pointerCursor.enable = false;
 
-    sessionVariables = {
-    };
-
     packages = with pkgs; [
       attic-client
-      nixfmt
       syncthingtray
     ];
   };
@@ -50,7 +45,6 @@
     home = {
       syncthing = {
         enable = true;
-        deviceName = "${hostname}";
 
         folders.sync = {
           enable = true;

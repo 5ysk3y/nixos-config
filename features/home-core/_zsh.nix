@@ -67,7 +67,7 @@
     '';
 
     shellAliases = {
-      less = "bat $@";
+      less = "bat";
       ll = "ls -lash";
       ls = "ls --color";
     };

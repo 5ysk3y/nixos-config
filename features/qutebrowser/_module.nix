@@ -36,7 +36,7 @@ in
       enable = true;
 
       extraConfig = ''
-        # Load existing settings made via :set
+        # Ignore settings made via :set (autoconfig.yml); config lives here
         config.load_autoconfig(False)
 
         c.statusbar.padding = {"bottom": 6, "left": 8, "right": 8, "top": 6}

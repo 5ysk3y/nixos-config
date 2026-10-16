@@ -36,7 +36,7 @@
   # which drops hyprlock to the password prompt. Deliberate build choice, not
   # an upstream workaround, so it lives here rather than in the audited overlays.
   nixpkgs.overlays = [
-    (final: prev: {
+    (_final: prev: {
       pam_u2f = prev.pam_u2f.override {
         libfido2 = prev.libfido2.override { withPcsclite = false; };
       };
