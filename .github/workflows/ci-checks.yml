@@ -76,7 +76,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
+      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
       - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
       - name: Nix format check (nix fmt)
         run: |
@@ -102,7 +102,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
+      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
       - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
       - name: statix
         run: |
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
+      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
       - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
       - name: Run gitleaks (native)
         run: |
@@ -142,7 +142,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: DeterminateSystems/determinate-nix-action@d0c908e6cbe9f89f36ed8205a3ab6f092636916a
+      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
       - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
       - uses: ./.github/actions/private-flake-access
         with:
