@@ -30,7 +30,7 @@
       open = true;
       powerManagement.enable = true;
       nvidiaSettings = true;
-      package = config.boot.kernelPackages.nvidiaPackages.latest;
+      package = config.boot.kernelPackages.nvidiaPackages.production;
     };
     graphics.extraPackages = with pkgs; [ nvidia-vaapi-driver ];
   };
