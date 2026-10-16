@@ -1,7 +1,6 @@
 {
   lib,
   pkgs,
-  inputs,
   ...
 }:
 
@@ -18,7 +17,6 @@ let
 in
 {
   nix = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-    nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
     package = pkgs.nixVersions.latest;
 
     extraOptions = ''
