@@ -127,7 +127,7 @@ jobs:
       - name: Full build test
         run: |
           set -euo pipefail
-          nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file
+          nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
@@ -178,7 +178,7 @@ jobs:
       - name: Full build test
         run: |
           set -euo pipefail
-          nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file
+          nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
