@@ -1,0 +1,5 @@
+# Reviewed false positives, one gitleaks fingerprint per line
+# (<commit>:<file>:<rule>:<line>, from a finding's Fingerprint field).
+
+# GPG signing key ID in git.signing.key, not a secret
+64b30afa4929be3a0d822924bfd2ca2401042707:hosts/macbook/home.nix:generic-api-key:71
