@@ -45,6 +45,6 @@ push_secrets() {
     | ssh "${SSH_OPTS[@]}" "$TARGET" 'install -m 0600 /dev/stdin /var/lib/vaultwarden-secrets/env'
   sops --decrypt "$SECRETS_PATH/secrets/vaultwarden/restic.password" \
     | ssh "${SSH_OPTS[@]}" "$TARGET" 'install -m 0600 /dev/stdin /var/lib/vaultwarden-secrets/restic-password'
-  sops --decrypt "$SECRETS_PATH/secrets/vaultwarden/restic-sftp.key" \
+  sops --decrypt "$SECRETS_PATH/secrets/restic/sftp.key" \
     | ssh "${SSH_OPTS[@]}" "$TARGET" 'install -m 0600 /dev/stdin /var/lib/vaultwarden-secrets/restic-sftp-key'
 }
