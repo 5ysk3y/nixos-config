@@ -1,17 +1,13 @@
 title = "gitleaks config for nixos-config"
 
-[allowlist]
-description = "Ignore expected non-secret metadata and encrypted artifacts"
-paths = [
-  '''^\.sops\.yaml$''',
-  '''.*\.age$''',
-  '''.*\.enc$''',
-  '''.*\.gpg$''',
-  '''.*\.sarif$''',
-  '''^secrets/''',
-  '''^nix-secrets/''',
-]
+# Build on gitleaks' built-in ruleset. Without this, a custom config replaces
+# the defaults rather than adding to them, and a file with only allowlists
+# leaves no rules to match anything.
+[extend]
+useDefault = true
 
+[[allowlists]]
+description = "age recipients are public keys"
 regexes = [
   '''age1[0-9a-z]{10,}''',
 ]
