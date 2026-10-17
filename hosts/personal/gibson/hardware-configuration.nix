@@ -47,6 +47,9 @@
         devices = {
           "rootfs" = {
             device = "/dev/disk/by-label/ROOT";
+            # Pass TRIM through to the SSD, so the default weekly fstrim
+            # (services.fstrim) reaches it
+            allowDiscards = true;
             crypttabExtraOpts = [
               "fido2-device=auto"
               "token-timeout=30"
@@ -97,6 +100,11 @@
     "/boot" = {
       device = "/dev/disk/by-label/BOOT";
       fsType = "vfat";
+      # Root-only, so systemd-boot's random seed isn't world-readable
+      options = [
+        "fmask=0077"
+        "dmask=0077"
+      ];
     };
 
     "/home/${vars.username}/games" = {
