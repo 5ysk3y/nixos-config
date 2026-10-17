@@ -131,12 +131,16 @@ jobs:
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
+        # Passed via env rather than interpolated into the command, which the
+        # retry action logs in full at debug level.
+        env:
+          ATTIC_TOKEN: ${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}
         with:
           timeout_minutes: 60
           max_attempts: 2
           command: |
             set -euo pipefail
-            nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+            nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "$ATTIC_TOKEN"
             nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   darwin-eval-check:
@@ -178,12 +182,16 @@ jobs:
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
+        # Passed via env rather than interpolated into the command, which the
+        # retry action logs in full at debug level.
+        env:
+          ATTIC_TOKEN: ${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}
         with:
           timeout_minutes: 60
           max_attempts: 2
           command: |
             set -euo pipefail
-            nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}"
+            nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "$ATTIC_TOKEN"
             nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
 
   ci-gate:
