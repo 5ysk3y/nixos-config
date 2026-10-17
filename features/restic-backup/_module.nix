@@ -25,6 +25,16 @@ in
             type = types.listOf types.str;
             default = [ ];
           };
+          exclude = mkOption {
+            type = types.listOf types.str;
+            default = [ ];
+            description = "Patterns excluded from the backup, one restic exclude pattern per entry.";
+          };
+          inhibitsSleep = mkOption {
+            type = types.bool;
+            default = false;
+            description = "Block suspend and hibernate while the backup runs, for hosts that sleep.";
+          };
           backupPrepareCommand = mkOption {
             type = types.nullOr types.lines;
             default = null;
@@ -83,6 +93,8 @@ in
         passwordFile
         extraOptions
         extraBackupArgs
+        exclude
+        inhibitsSleep
         timerConfig
         pruneOpts
         ;
