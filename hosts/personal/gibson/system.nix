@@ -11,6 +11,8 @@
   imports = [
     ./hardware-configuration.nix
     ./backup.nix
+    ./disko.nix
+    inputs.disko.nixosModules.disko
     inputs.self.modules.nixos.nvidia
   ];
 
