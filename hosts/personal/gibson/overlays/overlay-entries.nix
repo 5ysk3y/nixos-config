@@ -105,13 +105,19 @@
         ];
         notes = "No upstream fix is proposed yet";
       };
+      # Wrapped rather than overrideAttrs'd: changing the package's own
+      # derivation turns every bitwarden release into a full source build,
+      # where wrapping the cached package only builds this small wrapper.
       overlay = _final: prev: {
-        bitwarden-desktop = prev.bitwarden-desktop.overrideAttrs (old: {
-          postFixup = (old.postFixup or "") + ''
+        bitwarden-desktop = prev.symlinkJoin {
+          inherit (prev.bitwarden-desktop) pname version meta;
+          paths = [ prev.bitwarden-desktop ];
+          nativeBuildInputs = [ prev.makeWrapper ];
+          postBuild = ''
             wrapProgram $out/bin/bitwarden \
-              --set SECURE_KEY_CONTAINER_BACKEND keyctl
+                --set SECURE_KEY_CONTAINER_BACKEND keyctl
           '';
-        });
+        };
       };
     }
   ];
