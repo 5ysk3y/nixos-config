@@ -10,6 +10,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ./backup.nix
     inputs.self.modules.nixos.nvidia
   ];
 
