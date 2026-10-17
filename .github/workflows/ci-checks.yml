@@ -112,10 +112,10 @@ jobs:
       - name: no ../ paths in Nix files
         run: bash .githooks/lib/no-parent-paths.sh
 
+  # Runs on every change, docs included: a skipped job reports success even
+  # as a required check, and a pasted token is as likely in a README as in Nix.
   gitleaks:
     name: gitleaks scan
-    needs: changes
-    if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
