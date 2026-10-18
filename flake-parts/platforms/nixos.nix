@@ -3,6 +3,7 @@
   lib,
   inputs,
   infraLib,
+  nixpkgsConfig,
   ...
 }:
 let
@@ -28,7 +29,7 @@ let
       modules =
         host.systemProfiles
         ++ host.modules
-        ++ [ { nixpkgs.config.allowUnfree = true; } ]
+        ++ [ { nixpkgs.config = nixpkgsConfig; } ]
         ++ lib.optionals hasSecretsAndHome [
           inputs.sops-nix.nixosModules.sops
         ]
