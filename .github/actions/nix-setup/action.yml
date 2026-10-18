@@ -1,0 +1,47 @@
+# Installs upstream Nix with the shared substituters. Optionally adds attic,
+# which is only reachable once the job has joined the tailnet, so callers
+# that don't join it simply omit `attic-host`.
+name: Nix setup
+description: Install upstream Nix with shared substituters (optionally attic over the tailnet)
+ 
+inputs:
+  attic-host:
+    description: Attic host to add as a substituter. 
+    required: false
+    default: ''
+  extra-nix-config:
+    description: Additional nix.conf lines, appended verbatim.
+    required: false
+    default: ''
+ 
+runs:
+  using: composite
+  steps:
+    - id: conf
+      shell: bash
+      # Inputs go in via env rather than being interpolated into the script.
+      env:
+        ATTIC_HOST: ${{ inputs.attic-host }}
+        EXTRA_CONF: ${{ inputs.extra-nix-config }}
+      run: |
+        set -euo pipefail
+        subs="https://nix-community.cachix.org"
+        keys="nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+        if [ -n "$ATTIC_HOST" ]; then
+          subs="http://${ATTIC_HOST}:8080/home-cache ${subs}"
+          keys="home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU= ${keys}"
+        fi
+        delim="NIXCONF_${RANDOM}${RANDOM}${RANDOM}"
+        {
+          echo "config<<${delim}"
+          echo "extra-substituters = ${subs}"
+          echo "extra-trusted-public-keys = ${keys}"
+          if [ -n "$EXTRA_CONF" ]; then
+            printf '%s\n' "$EXTRA_CONF"
+          fi
+          echo "${delim}"
+        } >> "$GITHUB_OUTPUT"
+ 
+    - uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702
+      with:
+        extra_nix_config: ${{ steps.conf.outputs.config }}

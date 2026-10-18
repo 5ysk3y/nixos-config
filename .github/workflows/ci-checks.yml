@@ -71,13 +71,9 @@ jobs:
     if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
-      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
+      - uses: ./.github/actions/nix-setup
       - name: Nix format check (nix fmt)
         run: |
           set -euo pipefail
@@ -97,13 +93,9 @@ jobs:
     if: needs.changes.outputs.ci_relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
-      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
+      - uses: ./.github/actions/nix-setup
       - name: statix
         run: |
           set -euo pipefail
@@ -118,14 +110,11 @@ jobs:
     name: gitleaks scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
-      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
-      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
+      - uses: ./.github/actions/nix-setup
       - name: Run gitleaks (native)
         run: |
           set -euo pipefail
@@ -137,13 +126,9 @@ jobs:
     if: needs.changes.outputs.ci_relevant == 'true' && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
-      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
+      - uses: ./.github/actions/nix-setup
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
