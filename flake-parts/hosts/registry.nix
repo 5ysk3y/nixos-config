@@ -1,6 +1,7 @@
 {
   lib,
   inputs,
+  nixpkgsConfig,
   ...
 }:
 let
@@ -120,7 +121,7 @@ in
       pkgsFor = system: {
         pkgs-stable = import inputs.nixpkgs-stable {
           inherit system;
-          config.allowUnfree = true;
+          config = nixpkgsConfig;
         };
       };
 

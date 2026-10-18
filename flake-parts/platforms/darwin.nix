@@ -2,6 +2,7 @@
   config,
   inputs,
   infraLib,
+  nixpkgsConfig,
   ...
 }:
 let
@@ -24,7 +25,7 @@ let
       modules =
         host.systemProfiles
         ++ host.modules
-        ++ [ { nixpkgs.config.allowUnfree = true; } ]
+        ++ [ { nixpkgs.config = nixpkgsConfig; } ]
         ++ [
           inputs.sops-nix.darwinModules.sops
         ]
