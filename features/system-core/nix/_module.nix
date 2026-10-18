@@ -16,12 +16,16 @@ let
   ];
 in
 {
-  nix = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+  nix = {
     package = pkgs.nixVersions.latest;
 
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
+
+    optimise = {
+      automatic = true;
+    };
 
     settings = {
       substituters = [ "https://cache.nixos.org" ] ++ extraSubstituters;
@@ -29,24 +33,15 @@ in
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       ]
       ++ extraTrustedPublicKeys;
-      auto-optimise-store = true;
       download-buffer-size = 1000000000;
       max-jobs = "auto";
     };
 
     gc = {
       automatic = true;
-      dates = "weekly";
-      persistent = true;
+      dates = lib.mkIf pkgs.stdenv.hostPlatform.isLinux "weekly";
+      persistent = lib.mkIf pkgs.stdenv.hostPlatform.isLinux true;
       options = "--delete-older-than 7d";
     };
-  };
-
-  environment.etc."nix/nix.custom.conf" = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-    text = ''
-      extra-substituters = ${lib.concatStringsSep " " extraSubstituters}
-      extra-trusted-public-keys = ${lib.concatStringsSep " " extraTrustedPublicKeys}
-      experimental-features = nix-command flakes
-    '';
   };
 }

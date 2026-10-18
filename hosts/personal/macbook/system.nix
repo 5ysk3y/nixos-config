@@ -8,10 +8,6 @@
 
   networking.hostName = hostname;
 
-  nix = {
-    enable = false;
-  };
-
   users.users.${vars.username} = {
     home = "/Users/${vars.username}";
     shell = pkgs.zsh;
