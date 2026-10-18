@@ -35,6 +35,19 @@
     };
   };
 
+  launchd.agents.syncthingtray = {
+    enable = true;
+    config = {
+      ProgramArguments = [
+        "${pkgs.syncthingtray}/Applications/syncthingtray.app/Contents/MacOS/syncthingtray"
+      ];
+      RunAtLoad = true;
+      # Restart on crash, but let "Quit" from the tray menu actually quit.
+      KeepAlive.SuccessfulExit = false;
+      ProcessType = "Interactive";
+    };
+  };
+
   features = {
     home = {
       syncthing = {
