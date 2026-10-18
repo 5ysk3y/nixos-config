@@ -99,7 +99,6 @@ jobs:
     timeout-minutes: 240
     permissions:
       contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Free up disk space
@@ -113,14 +112,9 @@ jobs:
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
           ping: ${{ env.ATTIC_HOST }}
-      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
+      - uses: ./.github/actions/nix-setup
         with:
-          extra-conf: |
-            extra-substituters = http://${{ env.ATTIC_HOST }}:8080/home-cache
-            extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
-        with:
-          use-gha-cache: disabled
+          attic-host: ${{ env.ATTIC_HOST }}
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
@@ -156,7 +150,6 @@ jobs:
     timeout-minutes: 240
     permissions:
       contents: read
-      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Join the tailnet
@@ -164,14 +157,9 @@ jobs:
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
           ping: ${{ env.ATTIC_HOST }}
-      - uses: DeterminateSystems/determinate-nix-action@e847f25223456b3058e12f7fc9d777b6a6f25060
+      - uses: ./.github/actions/nix-setup
         with:
-          extra-conf: |
-            extra-substituters = http://${{ env.ATTIC_HOST }}:8080/home-cache
-            extra-trusted-public-keys = home-cache:E1OhBtGAhOkDjZortT+YYKTyNZ5/gPCcaQ/ryGKUPdU=
-      - uses: DeterminateSystems/flakehub-cache-action@0975873945367f5239ebb5f49c133bf3543a08f6
-        with:
-          use-gha-cache: disabled
+          attic-host: ${{ env.ATTIC_HOST }}
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
