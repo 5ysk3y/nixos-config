@@ -134,6 +134,9 @@
 
 (add-hook 'magit-mode-hook #'change-magit-diff-faces)
 (add-hook 'doom-load-theme-hook #'change-magit-diff-faces)
+
+(custom-set-faces!
+  `(line-number-current-line :foreground ,(doom-color 'green) :weight bold))
  
 ;; increase character limit for max summary length
 (after! git-commit
