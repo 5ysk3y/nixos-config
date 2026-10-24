@@ -221,7 +221,11 @@ echo "Evaluating flake.overlayAudits ..."
 AUDIT_JSON=$(nix eval .#overlayAudits --json)
 
 echo "Resolving locked nixpkgs revision ..."
-LOCKED_NIXPKGS_REV=$(nix flake metadata --json | jq -r '.locks.nodes.nixpkgs.locked.rev')
+# Resolve via the root node's `nixpkgs` input, not the literal node name
+# "nixpkgs" — lock node names are assigned first-come, so a transitive
+# input (e.g. claude-code-nix's nixpkgs) can own "nixpkgs" while ours is
+# "nixpkgs_5".
+LOCKED_NIXPKGS_REV=$(nix flake metadata --json | jq -r '.locks as $l | $l.nodes[$l.nodes[$l.root].inputs.nixpkgs].locked.rev')
 echo "Locked nixpkgs rev: ${LOCKED_NIXPKGS_REV}"
 
 # entry_broken is set by ci_liveness_callback (see below) for
