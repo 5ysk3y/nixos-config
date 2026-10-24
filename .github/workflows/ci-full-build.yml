@@ -53,14 +53,14 @@ jobs:
           fork_point="$(git merge-base \
             "${{ github.event.pull_request.base.sha }}" \
             "${{ github.event.pull_request.head.sha }}")"
-          base_hash="$(git show "${fork_point}:flake.lock" 2>/dev/null | jq -r '.nodes.nixpkgs.locked.narHash // empty')" || base_hash=""
-          head_hash="$(git show "${{ github.event.pull_request.head.sha }}:flake.lock" 2>/dev/null | jq -r '.nodes.nixpkgs.locked.narHash // empty')" || head_hash=""
+          base_hash="$(git show "${fork_point}:flake.lock" 2>/dev/null | jq -r '.nodes[.root] as $r | .nodes[$r.inputs.nixpkgs].locked.narHash // empty')" || base_hash=""
+          head_hash="$(git show "${{ github.event.pull_request.head.sha }}:flake.lock" 2>/dev/null | jq -r '.nodes[.root] as $r | .nodes[$r.inputs.nixpkgs].locked.narHash // empty')" || head_hash=""
 
           echo "base nixpkgs narHash: ${base_hash:-<none>}"
           echo "head nixpkgs narHash: ${head_hash:-<none>}"
 
           if [ -z "$base_hash" ] || [ -z "$head_hash" ]; then
-            echo "::warning::couldn't read nodes.nixpkgs.locked.narHash from flake.lock on one side — running full build to be safe"
+            echo "::warning::couldn't read root nixpkgs narHash from flake.lock on one side — running full build to be safe"
             echo "lockfile_changed=true" >> "$GITHUB_OUTPUT"
           elif [ "$base_hash" != "$head_hash" ]; then
             echo "lockfile_changed=true" >> "$GITHUB_OUTPUT"
@@ -115,13 +115,16 @@ jobs:
       - uses: ./.github/actions/nix-setup
         with:
           attic-host: ${{ env.ATTIC_HOST }}
+          extra-nix-config: max-silent-time = 2700
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
       - name: Full build test
-        run: |
-          set -euo pipefail
-          nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
+        with:
+          timeout_minutes: 110
+          max_attempts: 2
+          command: nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
@@ -160,13 +163,16 @@ jobs:
       - uses: ./.github/actions/nix-setup
         with:
           attic-host: ${{ env.ATTIC_HOST }}
+          extra-nix-config: max-silent-time = 2700
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
       - name: Full build test
-        run: |
-          set -euo pipefail
-          nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
+        with:
+          timeout_minutes: 110
+          max_attempts: 2
+          command: nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
