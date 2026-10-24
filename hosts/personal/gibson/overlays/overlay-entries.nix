@@ -91,6 +91,54 @@
     }
 
     {
+      id = "xpad-noone";
+      meta = {
+        strategy = "nixpkgs-pr";
+        description = "Backport xpad-noone modules_install fix (missing .ko.cer breaks linux-zen modules build)";
+        evalAttr = "linuxPackages_zen.xpad-noone";
+        systems = [ "x86_64-linux" ];
+        trackingPRs = [
+          {
+            repo = "NixOS/nixpkgs";
+            numbers = [ 576469 ];
+          }
+        ];
+        notes = "Pulled in via hardware.xone (features/gaming) -> hardware.xpad-noone. Override is scoped to linuxPackages_zen only; widen it if boot.kernelPackages changes.";
+      };
+      # Mirrors the functional part of nixpkgs PR 576469: build-system
+      # modules_install instead of a hand-rolled `install *.ko`, so the
+      # .ko.cer the module aggregation step requires actually gets created.
+      # installPhase = null drops the old override so stdenv's default
+      # installPhase (make $installFlags $installTargets) runs instead.
+      overlay = _final: prev: {
+        linuxPackages_zen = prev.linuxPackages_zen.extend (
+          lfinal: lprev: {
+            xpad-noone = lprev.xpad-noone.overrideAttrs (
+              old:
+              let
+                kbuild = "${lfinal.kernel.dev}/lib/modules/${lfinal.kernel.modDirVersion}/build";
+              in
+              {
+                makeFlags = (old.makeFlags or [ ]) ++ [
+                  "KERNEL_SRC=${kbuild}"
+                  "INSTALL_MOD_PATH=${placeholder "out"}"
+                  "INSTALL_MOD_DIR=kernel/drivers/xpad-noone"
+                ];
+                installPhase = null;
+                installTargets = [ "modules_install" ];
+                installFlags = [
+                  "-C"
+                  kbuild
+                  "M=$(PWD)"
+                ];
+              }
+            );
+          }
+        );
+      };
+    }
+
+    {
       id = "bitwarden-desktop";
       meta = {
         strategy = "nixpkgs-issue";
