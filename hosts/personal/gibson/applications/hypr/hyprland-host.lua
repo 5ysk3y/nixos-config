@@ -24,7 +24,7 @@ return function(WS)
   })
   hl.monitor({
     output = "desc:BNQ BenQ EX2780Q 66L07726019",
-    mode = "2560x1440@120",
+    mode = "2560x1440@144",
     position = "1920x0",
     scale = 1.25,
     vrr = 2, 
