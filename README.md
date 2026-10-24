@@ -1,4 +1,6 @@
 # NixOS Configuration
+[![Nix CI — Checks](https://github.com/5ysk3y/nixos-config/actions/workflows/ci-checks.yml/badge.svg)](https://github.com/5ysk3y/nixos-config/actions/workflows/ci-checks.yml)
+[![Nix CI — Full Build](https://github.com/5ysk3y/nixos-config/actions/workflows/ci-full-build.yml/badge.svg)](https://github.com/5ysk3y/nixos-config/actions/workflows/ci-full-build.yml)
 
 Welcome to my NixOS config repo.
 
