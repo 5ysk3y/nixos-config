@@ -26,6 +26,7 @@ in
   programs.gh = {
     enable = true;
     package = ghWrapped;
+    extensions = with pkgs; [ gh-markdown-preview ];
     settings = {
       git_protocol = "ssh";
       aliases = {
