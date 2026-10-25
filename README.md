@@ -36,11 +36,8 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 ├── profiles/                  # Profile compositions — named groups of features per host class
 ├── pkgs/                      # Custom packages
 └── bootstrap/
-    ├── install.sh             # Bootstrap entrypoint for personal NixOS hosts
-    ├── install-darwin.sh      # Bootstrap entrypoint for personal Nix-Darwin hosts
-    ├── common.sh              # Shared functions sourced by both install scripts
+    ├── README.md              # Install checklists for the personal hosts (gibson, macbook)
     ├── deploy.sh              # Bootstrap entrypoint for server hosts
-    ├── test.sh                # Custom bootstrapping test suite
     └── servers/               # Individual server deployment scripts used by deploy.sh
 ```
 
@@ -50,7 +47,7 @@ The config follows the [dendritic pattern](https://saylesss88.github.io/flakes/d
 
 ## Secrets
 
-Nothing sensitive lives here. Secrets are managed via [sops-nix](https://github.com/Mic92/sops-nix) + `age`, sourced from a private `nix-secrets` repo. The age identity is encrypted to a YubiKey (PIV, via `age-plugin-yubikey`), which is also the root of trust for SSH and GPG. The bootstrap script handles cloning secrets and placing the decrypted age key on a fresh system that has a valid hardware key — see `bootstrap/install.sh --help`.
+Nothing sensitive lives here. Secrets are managed via [sops-nix](https://github.com/Mic92/sops-nix) + `age`, sourced from a private `nix-secrets` repo. The age identity is encrypted to a YubiKey (PIV, via `age-plugin-yubikey`), which is also the root of trust for SSH and GPG. Installing a personal host places the decrypted age key with upstream tools (nixos-anywhere, disko, restic) rather than custom scripts — see [`bootstrap/README.md`](bootstrap/README.md).
 
 ---
 
