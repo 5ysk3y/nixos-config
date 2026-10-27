@@ -4,6 +4,9 @@ return function(WS)
       direct_scanout = 1,
       non_shader_cm = 2,
     },
+   scrolling = {
+      follow_min_visible = 1.0,
+     },
   })
 
   hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Classic")
@@ -64,10 +67,10 @@ return function(WS)
   hl.bind("SUPER + SHIFT + C", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown --vt 1 || hyprctl dispatch 'hl.dsp.exit()'"))
   hl.bind("SUPER + SHIFT + SPACE", hl.dsp.window.float({ action = "toggle" }))
 
-  hl.bind("SUPER + h", hl.dsp.focus({ direction = "l" }))
-  hl.bind("SUPER + l", hl.dsp.focus({ direction = "r" }))
-  hl.bind("SUPER + k", hl.dsp.focus({ direction = "u" }))
-  hl.bind("SUPER + j", hl.dsp.focus({ direction = "d" }))
+  hl.bind("SUPER + h", hl.dsp.layout("focus l"))
+  hl.bind("SUPER + l", hl.dsp.layout("focus r"))
+  hl.bind("SUPER + k", hl.dsp.layout("focus u"))
+  hl.bind("SUPER + j", hl.dsp.layout("focus d"))
   hl.bind("SUPER + CTRL + h", hl.dsp.window.move({ direction = "l" }))
   hl.bind("SUPER + CTRL + l", hl.dsp.window.move({ direction = "r" }))
   hl.bind("SUPER + CTRL + k", hl.dsp.window.move({ direction = "u" }))
@@ -136,6 +139,7 @@ return function(WS)
   ------------------------------------------------------------------------
   -- WINDOW RULES: workspace placement
   ------------------------------------------------------------------------
+  hl.window_rule({ match = { class = ".*" }, suppress_event = "maximize" })
   hl.window_rule({ match = { class = "^(gcr-prompter)$" }, workspace = "name:" .. WS.WS1 })
   hl.window_rule({ match = { class = "^(kitty)$" }, workspace = "name:" .. WS.WS1 })
   hl.window_rule({ match = { class = "^(.*)(qutebrowser)(.*)" }, workspace = "name:" .. WS.WS2 })
