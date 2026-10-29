@@ -114,9 +114,22 @@ in
     systemd = {
       tmpfiles.rules = lib.mapAttrsToList (_: b: "f ${b.statusFile} 0644 root root -") cfg;
       services = lib.concatMapAttrs (name: b: {
-        "restic-backups-${name}".onFailure = [
-          "restic-backup-failure-${name}.service"
-        ];
+        "restic-backups-${name}" = {
+          onFailure = [
+            "restic-backup-failure-${name}.service"
+          ];
+          # A run that fell due during sleep starts on resume, while logind
+          # still refuses sleep inhibitors ("The operation inhibition has
+          # been requested for is already running"), so systemd-inhibit fails
+          # the run before restic starts. Waiting for the sleep job to finish
+          # first lets the inhibitor through.
+          after = lib.optionals b.inhibitsSleep [
+            "suspend.target"
+            "hibernate.target"
+            "hybrid-sleep.target"
+            "suspend-then-hibernate.target"
+          ];
+        };
         "restic-backup-failure-${name}" = {
           description = "Records restic backup failure for Zabbix monitoring (${name})";
           serviceConfig.Type = "oneshot";
