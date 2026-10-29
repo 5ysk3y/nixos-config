@@ -64,6 +64,7 @@ in
     # (Persistent, from the feature's default timerConfig), and sleep is
     # blocked while a run is in progress.
     inhibitsSleep = true;
+    notifyUser = vars.username;
 
     paths = [
       home
