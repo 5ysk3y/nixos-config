@@ -31,8 +31,6 @@
       enable = true;
     };
 
-    interfaces.enp7s0.useDHCP = false;
-
     nat = {
       enable = true;
       internalInterfaces = [ "ve-pentesting" ];
