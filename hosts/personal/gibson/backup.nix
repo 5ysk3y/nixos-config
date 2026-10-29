@@ -12,6 +12,8 @@
 {
   config,
   inputs,
+  lib,
+  pkgs,
   vars,
   ...
 }:
@@ -41,6 +43,14 @@ in
 
   features.system.resticBackups.gibson = {
     repository = "sftp:networkBackup@${backupHost}:Linux/gibson";
+    backupPrepareCommand = ''
+      for _ in $(seq 40); do
+        timeout 2 ${lib.getExe pkgs.bash} -c '</dev/tcp/${backupHost}/22' 2>/dev/null && exit 0
+        sleep 1
+      done
+      echo "backup server ${backupHost} unreachable" >&2
+      exit 1
+    '';
     passwordFile = config.sops.secrets.restic-password.path;
     extraOptions = [
       "sftp.command='ssh networkBackup@${backupHost} -i ${sftpKey} -o StrictHostKeyChecking=yes -s sftp'"
@@ -74,10 +84,15 @@ in
 
     exclude = [
       # Caches and rebuilt state
+      "${home}/Downloads/ISO*"
       "${home}/.cache"
       "${home}/.nv"
       "/root/.cache"
-      "${home}/.config/emacs" # Doom is re-synced from Nix at activation
+      "${home}/.config/emacs/*" # Doom's checkout, re-synced from Nix
+      "!${home}/.config/emacs/.local"
+      "${home}/.config/emacs/.local/straight" # packages, rebuilt by doom sync
+      "${home}/.config/emacs/.local/cache/eln" # native-compiled code
+      "${home}/.config/emacs/.local/cache/comp"
       "${home}/.wine" # user folders are empty; nothing in it is user data
 
       # Chat/music clients: caches plus a login
@@ -152,6 +167,7 @@ in
       "/var/lib/systemd/pstore"
       "/var/lib/flatpak" # flatpak isn't enabled in this config
       "/var/lib/libvirt/images"
+      "/var/lib/libvirt/qemu/ram"
     ];
   };
 }
