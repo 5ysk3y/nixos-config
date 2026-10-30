@@ -38,6 +38,10 @@ let
 
   emacsDir = "${config.xdg.configHome}/emacs";
   syncStamp = "${config.xdg.stateHome}/doom/sync-stamp";
+  hmUnit = "home-manager-${vars.username}.service";
+  # The InvocationID of the Home Manager run that last put Doom's files in
+  # place (see installDoomEmacs)
+  filesReady = "${config.xdg.stateHome}/doom/files-ready";
 
   # Sets $key to what the last `doom sync` must have been run against; a
   # different key in the stamp file means it's time to sync again.
@@ -46,26 +50,41 @@ let
     key="${emacsPkg}|${inputs.doomemacs}|${inputs.doomemacs-modules}|$doomcfg_hash"
   '';
 
-  # installDoomEmacs (below) runs via the system-level
-  # home-manager-${username}.service, which has no ordering relative to
-  # user-level units.  On a cold boot they race; this guards against starting
-  # before the doomemacs-modules rsync has completed.
+  # installDoomEmacs (below) runs via the system-level ${hmUnit}, which has
+  # no ordering relative to user-level units, and with linger the user
+  # manager starts at boot alongside it. On a cold boot they race; this
+  # guards against starting before the doomemacs-modules rsync has completed.
+  #
+  # Home Manager itself (re)starts units while still activating, after the
+  # rsync: the files-ready marker holding the running activation's
+  # InvocationID says so, rather than waiting on an activation that's
+  # waiting on us.
   waitForHomeManager = pkgs.writeShellScript "wait-for-home-manager-activation" ''
+    systemctl=${pkgs.systemd}/bin/systemctl
     for _ in $(seq 1 60); do
-    state=$(${pkgs.systemd}/bin/systemctl show -p ActiveState --value home-manager-${vars.username}.service 2>/dev/null || echo unknown)
+    state=$($systemctl show -p ActiveState --value ${hmUnit} 2>/dev/null || echo unknown)
     [ "$state" = "active" ] && exit 0
+    if [ "$state" = "activating" ] && [ -s "${filesReady}" ] &&
+      [ "$(cat "${filesReady}")" = "$($systemctl show -p InvocationID --value ${hmUnit} 2>/dev/null)" ]; then
+      exit 0
+    fi
     sleep 1
     done
-    echo "wait-for-home-manager-activation: home-manager-${vars.username}.service not active after 60s (state=$state)" >&2
+    echo "wait-for-home-manager-activation: ${hmUnit} not active after 60s (state=$state)" >&2
     exit 0
   '';
 
   # Installs Doom's packages when they're missing entirely (a restore or a
   # fresh install: the backup leaves .local/straight out). Cloning and
   # compiling every package needs the network and takes several minutes, too
-  # long for activation at boot, so it runs as a user service after login.
+  # long for activation at boot, so it runs as a user service after login,
+  # then starts Emacs.
   doomSync = pkgs.writeShellScript "doom-sync" ''
     set -euo pipefail
+    # Here rather than in ExecStartPre, so the wait doesn't hold up the
+    # service's start (see doom-sync below)
+    ${waitForHomeManager}
+
     export DOOMDIR="${config.xdg.configHome}/doom"
     export EMACSDIR="${emacsDir}"
     export PATH="${config.home.profileDirectory}/bin:/run/current-system/sw/bin:${emacsDir}/bin:$PATH"
@@ -101,6 +120,8 @@ let
     echo "$key" > "${syncStamp}"
 
     notify 10 "Doom Emacs packages installed" "Emacs is starting."
+    ${pkgs.systemd}/bin/systemctl --user start emacs.service ||
+      echo "doom-sync: emacs.service failed to start" >&2
   '';
 in
 mkMerge [
@@ -123,7 +144,9 @@ mkMerge [
         recursive = true;
       };
 
-      activation.installDoomEmacs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      # Before reloadSystemd, where Home Manager (re)starts user units, so
+      # Doom's files (and the files-ready marker) are in place by then
+      activation.installDoomEmacs = lib.hm.dag.entryBetween [ "reloadSystemd" ] [ "writeBoundary" ] ''
         set -euo pipefail
 
         export DOOMDIR="${config.xdg.configHome}/doom"
@@ -143,6 +166,10 @@ mkMerge [
           --chmod=D2755,F744 ${rsyncChown} \
           ${inputs.doomemacs-modules}/ "$EMACSDIR/sources/doom+/"
 
+        ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+          # For waitForHomeManager: this activation's files are in place
+          ${pkgs.systemd}/bin/systemctl show -p InvocationID --value ${hmUnit} > "${filesReady}" || true
+        ''}
         stamp="${syncStamp}"
         ${syncKey}
 
@@ -186,11 +213,9 @@ mkMerge [
 
     systemd.user.services = {
       emacs = {
-        # Start only once doom-sync has installed any missing packages
-        Unit = {
-          Wants = [ "doom-sync.service" ];
-          After = [ "doom-sync.service" ];
-        };
+        # Skipped while Doom's packages are missing; doom-sync starts it
+        # once they're installed
+        Unit.ConditionPathExists = "${emacsDir}/.local/straight";
         Service.ExecStartPre = [ "${waitForHomeManager}" ];
       };
 
@@ -201,12 +226,14 @@ mkMerge [
           ConditionPathExists = "!${emacsDir}/.local/straight";
         };
         Service = {
-          Type = "oneshot";
-          # A full sync clones and compiles every package
-          TimeoutStartSec = "infinity";
+          # Started as soon as the script runs, not once the sync is done:
+          # Home Manager's activation starts this unit and waits for the
+          # start to finish, so a oneshot here would hold activation (and
+          # home-manager-${username}.service's 5-minute timeout) for the
+          # whole sync
+          Type = "exec";
           # For notify-send: the user bus, in the user's runtime directory
           Environment = [ "DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus" ];
-          ExecStartPre = [ "${waitForHomeManager}" ];
           ExecStart = "${doomSync}";
         };
         Install.WantedBy = [ "default.target" ];
