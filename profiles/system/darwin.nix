@@ -5,6 +5,7 @@
       attic-client
       claude-code
       editor
+      linux-builder
       locale
       nix-settings
       overlays
