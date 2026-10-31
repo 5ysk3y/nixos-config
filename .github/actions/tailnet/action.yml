@@ -28,7 +28,7 @@ runs:
       run: echo "dir=${RUNNER_TEMP}/tailscale-state" >> "$GITHUB_OUTPUT"
 
     - name: Setup tailscale
-      uses: tailscale/github-action@d1b6cd204f8dceda5b3eaad7f1f767be390056cd
+      uses: tailscale/github-action@99a8333667fff04fdd6cffb46dfd409f8329a7bf
       with:
         authkey: ${{ inputs.authkey }}
         statedir: ${{ steps.state.outputs.dir }}
