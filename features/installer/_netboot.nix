@@ -9,7 +9,13 @@ let
   inherit (config.system) build;
 
   # Shown by netboot.xyz's "Custom URL Menu", which chains ${custom_url}/custom.ipxe.
-  # netboot.ipxe loads bzImage and initrd relative to its own URL.
+  #
+  # The installer entry boots the kernel itself instead of chaining
+  # netboot.ipxe, so it can imgfree first: on UEFI, iPXE hands the kernel
+  # every image it still has loaded as one initrd, netboot.xyz's own menu
+  # scripts included. Those come first, so the kernel stops unpacking at
+  # their text, never finds /init and panics. The kernel line is the one
+  # netboot.ipxe uses, with ${cmdline} kept for extra parameters.
   customMenu = pkgs.writeText "custom.ipxe" ''
     #!ipxe
     :custom
@@ -19,7 +25,10 @@ let
     goto ''${custom_choice}
 
     :installer
-    chain ''${custom_url}/netboot.ipxe || goto custom_exit
+    imgfree
+    kernel ''${custom_url}/bzImage init=${build.toplevel}/init initrd=initrd ${toString config.boot.kernelParams} ''${cmdline} || goto custom_exit
+    initrd ''${custom_url}/initrd || goto custom_exit
+    boot || goto custom_exit
 
     :custom_exit
     exit
