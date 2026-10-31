@@ -36,6 +36,26 @@ runs:
         # eventually) before anything tries to use it.
         ping: ${{ inputs.ping }}
 
+    # tailscale/github-action points macOS's system DNS at 100.100.100.100,
+    # which fails for public names (tailscale/github-action#315). Send only
+    # tailnet names there and give everything else back to the runner's DNS.
+    - name: Use split DNS on macOS
+      if: runner.os == 'macOS'
+      shell: bash
+      env:
+        PING_HOST: ${{ inputs.ping }}
+      run: |
+        set -euo pipefail
+        suffix=$(sudo tailscale status --json | jq -r .CurrentTailnet.MagicDNSSuffix)
+        sudo mkdir -p /etc/resolver
+        echo "nameserver 100.100.100.100" | sudo tee "/etc/resolver/$suffix" >/dev/null
+        sudo networksetup -setdnsservers Ethernet Empty
+        sudo networksetup -setsearchdomains Ethernet Empty
+        sudo dscacheutil -flushcache
+        sudo killall -HUP mDNSResponder
+        dscacheutil -q host -a name launch.actions.githubusercontent.com | grep -q address
+        dscacheutil -q host -a name "$PING_HOST" | grep -q address
+
     # A peer missing from the netmap (e.g. an auth key without the right tag)
     # surfaces as a DNS lookup failure in the ping above; these show the
     # actual state. Only node and peer names/addresses visible to this CI node
