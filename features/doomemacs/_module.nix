@@ -146,55 +146,54 @@ mkMerge [
 
       # Before reloadSystemd, where Home Manager (re)starts user units, so
       # Doom's files (and the files-ready marker) are in place by then
-      activation.installDoomEmacs = lib.hm.dag.entryBetween [ "reloadSystemd" ] [ "writeBoundary" ] ''
-        set -euo pipefail
+      activation.installDoomEmacs =
+        lib.hm.dag.entryBetween [ "reloadSystemd" "setupLaunchAgents" ] [ "writeBoundary" ]
+          ''
+            set -euo pipefail
 
-        export DOOMDIR="${config.xdg.configHome}/doom"
-        export EMACSDIR="${config.xdg.configHome}/emacs"
-        export PATH="${config.home.profileDirectory}/bin:${config.xdg.configHome}/emacs/bin:$PATH"
+            export DOOMDIR="${config.xdg.configHome}/doom"
+            export EMACSDIR="${config.xdg.configHome}/emacs"
+            export PATH="${config.home.profileDirectory}/bin:${config.xdg.configHome}/emacs/bin:$PATH"
 
-        mkdir -p "${config.xdg.configHome}"
-        mkdir -p "${config.xdg.stateHome}/doom"
+            mkdir -p "${config.xdg.configHome}"
+            mkdir -p "${config.xdg.stateHome}/doom"
 
-        ${pkgs.rsync}/bin/rsync -ogav --delete \
-          --exclude '.local' --exclude '.cache' \
-          --chmod=D2755,F744 ${rsyncChown} \
-          ${inputs.doomemacs}/ "$EMACSDIR/"
+            ${pkgs.rsync}/bin/rsync -ogav --delete \
+              --exclude '.local' --exclude '.cache' \
+              --chmod=D2755,F744 ${rsyncChown} \
+              ${inputs.doomemacs}/ "$EMACSDIR/"
 
-        mkdir -p "$EMACSDIR/sources/doom+"
-        ${pkgs.rsync}/bin/rsync -ogav --delete \
-          --chmod=D2755,F744 ${rsyncChown} \
-          ${inputs.doomemacs-modules}/ "$EMACSDIR/sources/doom+/"
+            mkdir -p "$EMACSDIR/sources/doom+"
+            ${pkgs.rsync}/bin/rsync -ogav --delete \
+              --chmod=D2755,F744 ${rsyncChown} \
+              ${inputs.doomemacs-modules}/ "$EMACSDIR/sources/doom+/"
 
-        ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
-          # For waitForHomeManager: this activation's files are in place
-          ${pkgs.systemd}/bin/systemctl show -p InvocationID --value ${hmUnit} > "${filesReady}" || true
-        ''}
-        stamp="${syncStamp}"
-        ${syncKey}
+            ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+              # For waitForHomeManager: this activation's files are in place
+              ${pkgs.systemd}/bin/systemctl show -p InvocationID --value ${hmUnit} > "${filesReady}" || true
+            ''}
+            stamp="${syncStamp}"
+            ${syncKey}
 
-        # Packages missing entirely (a restore or a fresh install): on Linux,
-        # doom-sync.service installs them after login, since a full sync is
-        # too long for activation at boot. Elsewhere, sync here as usual.
-        defer_to_service="${lib.optionalString pkgs.stdenv.hostPlatform.isLinux "1"}"
+            # Packages missing entirely (a restore or a fresh install): on Linux,
+            # doom-sync.service installs them after login, since a full sync is
+            # too long for activation at boot. Elsewhere, sync here as usual.
+            defer_to_service="${lib.optionalString pkgs.stdenv.hostPlatform.isLinux "1"}"
 
-        if [ -n "$defer_to_service" ] && [ ! -d "$EMACSDIR/.local/straight" ]; then
-          echo "doom: packages missing, leaving the sync to doom-sync.service"
-        elif [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ] || [ ! -d "$EMACSDIR/.local/straight" ]; then
-          echo "doom: inputs changed, running doom sync -u --force"
-          "${config.xdg.configHome}/emacs/bin/doom" sync -u --force
-          echo "$key" > "$stamp"
+            if [ -n "$defer_to_service" ] && [ ! -d "$EMACSDIR/.local/straight" ]; then
+              echo "doom: packages missing, leaving the sync to doom-sync.service"
+            elif [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ] || [ ! -d "$EMACSDIR/.local/straight" ]; then
+              echo "doom: inputs changed, running doom sync -u --force"
+              "${config.xdg.configHome}/emacs/bin/doom" sync -u --force
+              echo "$key" > "$stamp"
 
-          ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
-            /bin/launchctl kickstart -k gui/$(/usr/bin/id -u)/org.nixos.emacs-daemon || true
-          ''}
-          ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
-            systemctl --user restart emacs || true
-          ''}
-        else
-          echo "doom: inputs unchanged, skipping doom sync"
-        fi
-      '';
+              ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+                systemctl --user restart emacs || true
+              ''}
+            else
+              echo "doom: inputs unchanged, skipping doom sync"
+            fi
+          '';
     };
 
     programs.zsh.envExtra = envExtra;
@@ -270,6 +269,11 @@ mkMerge [
         KeepAlive = true;
         StandardOutPath = "/tmp/emacs-daemon.log";
         StandardErrorPath = "/tmp/emacs-daemon.err";
+        restartTriggers = [
+          inputs.doomemacs
+          inputs.doomemacs-modules
+          ./doom
+        ];
       };
     };
   })
