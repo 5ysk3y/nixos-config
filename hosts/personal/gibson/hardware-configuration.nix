@@ -66,7 +66,6 @@
       secrets = {
         "/swap.key" = "/etc/secrets/swap.key";
       };
-      systemd.enable = true;
       kernelModules = [
       ];
       availableKernelModules = [
@@ -76,7 +75,6 @@
         "usbhid"
         "sd_mod"
       ];
-      verbose = false;
     };
     resumeDevice = "/dev/disk/by-label/swap";
     plymouth = {
