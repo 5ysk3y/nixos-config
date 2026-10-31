@@ -11,6 +11,7 @@
       installVimSyntax = true;
       settings = {
         macos-option-as-alt = "left";
+        auto-update = "off";
       };
     };
   };
