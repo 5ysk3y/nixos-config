@@ -35,7 +35,8 @@ in
             listener = [
               {
                 timeout = 300;
-                on-timeout = "dim -d 0";
+                on-timeout = "dim -p -d 0";
+                on-resume = "pkill dim";
               }
               {
                 timeout = 360;
