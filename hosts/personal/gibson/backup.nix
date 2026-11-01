@@ -97,7 +97,9 @@ in
 
       # Discord and Cider (Electron): caches, logs and crash reports only.
       # Settings, logins (Local Storage, Cookies), Cider's themes, plugins
-      # and IndexedDB, and its Widevine DRM module are kept.
+      # and IndexedDB, and its Widevine DRM module are kept. So is Cider's
+      # update.cup: the interface it downloaded, which update.origin.json
+      # points to; without it Cider shows a 404 instead of its interface.
       "${home}/.config/discord.broken.*"
       "${home}/.config/sh.cider.genten.bak"
       "${home}/.config/discord/Cache"
@@ -116,7 +118,6 @@ in
       "${home}/.config/sh.cider.genten/GPUCache"
       "${home}/.config/sh.cider.genten/component_crx_cache"
       "${home}/.config/sh.cider.genten/Crashpad"
-      "${home}/.config/sh.cider.genten/update.cup" # app update download; the app comes from Nix
       "${home}/.config/sh.cider.genten/.org.chromium.Chromium.*" # temp files
       "${home}/.config/sh.cider.genten/Singleton*"
 
