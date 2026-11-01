@@ -70,7 +70,6 @@ in
       home
       "/root"
       "/var/lib"
-      "/etc/secrets"
       "/etc/ssh"
       "/etc/machine-id"
       "/etc/NetworkManager/system-connections"

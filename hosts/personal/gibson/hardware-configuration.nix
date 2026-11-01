@@ -42,30 +42,9 @@
       };
       efi.canTouchEfiVariables = true;
     };
+    # The system disk's LUKS device, filesystems, swap and resume device
+    # come from disko.nix
     initrd = {
-      luks = {
-        devices = {
-          "rootfs" = {
-            device = "/dev/disk/by-label/ROOT";
-            # Pass TRIM through to the SSD, so the default weekly fstrim
-            # (services.fstrim) reaches it
-            allowDiscards = true;
-            crypttabExtraOpts = [
-              "fido2-device=auto"
-              "token-timeout=30"
-            ];
-          };
-          "swap" = {
-            device = "/dev/disk/by-label/SWAP";
-            allowDiscards = true;
-            crypttabExtraOpts = [ "keyfile-timeout=10s" ];
-            keyFile = "/swap.key";
-          };
-        };
-      };
-      secrets = {
-        "/swap.key" = "/etc/secrets/swap.key";
-      };
       kernelModules = [
       ];
       availableKernelModules = [
@@ -76,7 +55,6 @@
         "sd_mod"
       ];
     };
-    resumeDevice = "/dev/disk/by-label/swap";
     plymouth = {
       enable = true;
       theme = "hexagon_hud";
@@ -89,29 +67,11 @@
     consoleLogLevel = 3;
   };
 
-  fileSystems = {
-    "/" = {
-      device = "/dev/disk/by-label/rootfs";
-      fsType = "xfs";
-    };
-
-    "/boot" = {
-      device = "/dev/disk/by-label/BOOT";
-      fsType = "vfat";
-      # Root-only, so systemd-boot's random seed isn't world-readable
-      options = [
-        "fmask=0077"
-        "dmask=0077"
-      ];
-    };
-
-    "/home/${vars.username}/games" = {
-      device = "/dev/disk/by-label/GAMES";
-      fsType = "ext4";
-    };
+  # The games disk; the system disk is in disko.nix
+  fileSystems."/home/${vars.username}/games" = {
+    device = "/dev/disk/by-label/GAMES";
+    fsType = "ext4";
   };
-
-  swapDevices = [ { device = "/dev/disk/by-label/swap"; } ];
 
   hardware = {
     enableAllFirmware = true;
