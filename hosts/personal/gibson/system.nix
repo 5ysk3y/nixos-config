@@ -11,6 +11,7 @@
   imports = [
     ./hardware-configuration.nix
     ./backup.nix
+    ./bootstrap.nix
     ./disko.nix
     inputs.disko.nixosModules.disko
     inputs.self.modules.nixos.nvidia
