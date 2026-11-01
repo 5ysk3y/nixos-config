@@ -50,3 +50,4 @@
 ;(unpin! t)
 
 (package! vterm :disable t)
+(package! kkp :disable t)

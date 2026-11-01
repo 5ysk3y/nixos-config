@@ -44,10 +44,12 @@ let
   filesReady = "${config.xdg.stateHome}/doom/files-ready";
 
   # Sets $key to what the last `doom sync` must have been run against; a
-  # different key in the stamp file means it's time to sync again.
+  # different key in the stamp file means it's time to sync again. The Doom
+  # config is keyed by its store path, which changes whenever any file in it
+  # does. (Hashing ~/.config/doom at runtime doesn't work: Home Manager links
+  # each file there into the store, and `find -type f` skips symlinks.)
   syncKey = ''
-    doomcfg_hash=$(find "${config.xdg.configHome}/doom" -type f | sort | xargs sha256sum | sha256sum | cut -d' ' -f1)
-    key="${emacsPkg}|${inputs.doomemacs}|${inputs.doomemacs-modules}|$doomcfg_hash"
+    key="${emacsPkg}|${inputs.doomemacs}|${inputs.doomemacs-modules}|${./doom}"
   '';
 
   # installDoomEmacs (below) runs via the system-level ${hmUnit}, which has
