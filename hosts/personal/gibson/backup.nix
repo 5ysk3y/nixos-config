@@ -96,11 +96,30 @@ in
       "${home}/.config/emacs/.local/cache/comp"
       "${home}/.wine" # user folders are empty; nothing in it is user data
 
-      # Chat/music clients: caches plus a login
-      "${home}/.config/discord"
+      # Discord and Cider (Electron): caches, logs and crash reports only.
+      # Settings, logins (Local Storage, Cookies), Cider's themes, plugins
+      # and IndexedDB, and its Widevine DRM module are kept.
       "${home}/.config/discord.broken.*"
-      "${home}/.config/sh.cider.genten"
       "${home}/.config/sh.cider.genten.bak"
+      "${home}/.config/discord/Cache"
+      "${home}/.config/discord/Code Cache"
+      "${home}/.config/discord/GPUCache"
+      "${home}/.config/discord/Dawn*Cache"
+      "${home}/.config/discord/Service Worker"
+      "${home}/.config/discord/Crashpad"
+      "${home}/.config/discord/Dictionaries" # spellcheck, re-downloaded
+      "${home}/.config/discord/logs"
+      "${home}/.config/discord/sentry"
+      "${home}/.config/discord/discord_asset_cache"
+      "${home}/.config/discord/Singleton*" # lock and socket, recreated at start
+      "${home}/.config/sh.cider.genten/Cache"
+      "${home}/.config/sh.cider.genten/Code Cache"
+      "${home}/.config/sh.cider.genten/GPUCache"
+      "${home}/.config/sh.cider.genten/component_crx_cache"
+      "${home}/.config/sh.cider.genten/Crashpad"
+      "${home}/.config/sh.cider.genten/update.cup" # app update download; the app comes from Nix
+      "${home}/.config/sh.cider.genten/.org.chromium.Chromium.*" # temp files
+      "${home}/.config/sh.cider.genten/Singleton*"
 
       # Heroic: Wine/Proton builds and web caches (configs and logins kept)
       "${home}/.config/heroic/tools"
