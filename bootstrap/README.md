@@ -17,10 +17,10 @@ Installed from the MacBook over SSH, while gibson runs the netboot or USB instal
 | What | Source |
 | --- | --- |
 | The system | This flake, built on gibson by the installer |
-| System disk layout | `hosts/personal/gibson/disko.nix`: wipes the main NVMe, pinned by ID |
+| System disk layout | `hosts/personal/gibson/disko.nix`: wipes the main NVMe, pinned by ID. One LUKS container (one unlock) holding LVM with swap and root |
 | Games disk (`~/games`) | Not touched; mounted again by its label (`GAMES`) |
 | sops key (`/var/lib/age/keys.txt`) | Decrypted from nix-secrets with a YubiKey |
-| Swap keyfile, SSH host keys, machine-id, NetworkManager connections, user/group ID maps | Restored from local restic backup **before** the install |
+| SSH host keys, machine-id, NetworkManager connections, user/group ID maps | Restored from local restic backup **before** the install |
 | `/home/rickie` (except `~/games`), `/root`, `/var/lib` | Restored from local restic backup **before** the first boot |
 | FIDO2 disk unlock | Enrolled again after the install |
 
@@ -31,10 +31,14 @@ The user/group ID maps (`/var/lib/nixos`) go in first so NixOS hands out the sam
 On gibson:
 
 1. Push any repo changes as they are not preserved unless Restic has backed them up.
-2. Note how the current FIDO2 enrolment is set up, so step 6 can enrol the new disk the same way. This prints each YubiKey's token (one per key); note its `fido2-clientPin-required`, `fido2-up-required` and `fido2-uv-required` values:
+2. Note how the current FIDO2 enrolment is set up, so step 6 can enrol the new disk the same way. This prints the token of each enrolled YubiKey (usually one; the passphrase is the fallback), whatever its token ID; note how many there are, and each one's `fido2-clientPin-required`, `fido2-up-required` and `fido2-uv-required` values:
    ```sh
-   ROOT_DEVICE=$(sudo cryptsetup status rootfs | awk '/device:/ {print $2}')
-   for id in 0 1; do sudo cryptsetup token export --token-id "$id" "$ROOT_DEVICE"; echo; done
+   # The partition the root filesystem sits on, through LUKS (and LVM)
+   ROOT_DEVICE=$(lsblk -rnso PATH,TYPE "$(findmnt -no SOURCE /)" | awk '$2 == "part" {print $1; exit}')
+   # The IDs of the systemd-fido2 tokens, from the header's Tokens section
+   for id in $(sudo cryptsetup luksDump "$ROOT_DEVICE" | awk '/^Tokens:/ {t = 1; next} /^[^ \t]/ {t = 0} t && $2 == "systemd-fido2" {sub(":", "", $1); print $1}'); do
+     sudo cryptsetup token export --token-id "$id" "$ROOT_DEVICE"; echo
+   done
    ```
 3. Make sure netboot.xyz serves a current installer: rebuild if `features/installer` has changed since last publication, i.e. from the repo root, on the Mac or gibson:
    ```sh
@@ -83,8 +87,7 @@ This sets the variables below and prints each one with its value, so the followi
 | `SOPS_KEY_FILE` | Where the system expects the sops key | `sops.age.keyFile` |
 | `INSTALL_DISK` | The disk disko formats: everything on it is erased | `disko.nix` (`default.nix` for the test configurations) |
 | `DISK_PASSWORD_FILE` | Where disko reads the disk passphrase during the install | `disko.nix` |
-| `SWAP_KEY`, `SWAP_KEY_SOURCE` | The swap keyfile as disko and the initrd see it, and where it's kept on the system | `disko.nix`, `hardware-configuration.nix` |
-| `ROOT_DEVICE` | The root LUKS device | `hardware-configuration.nix` (`test-install.nix` for the test configurations) |
+| `ROOT_DEVICE` | The LUKS container, by partition name | `disko.nix` (`test-install.nix` for the test configurations) |
 | `GAMES_DIR` | The games disk's mount point, left out of the restore | `hardware-configuration.nix` |
 | `PRE_INSTALL_INCLUDES` | What's restored before the install, as `restic --include` options | `bootstrap.nix` |
 
@@ -121,7 +124,7 @@ restic -o "$SFTP" --no-cache restore latest --target "$STAGE" "${PRE_INSTALL_INC
 find "$STAGE" -type f | sort
 ```
 
-The list should show the swap keyfile (`$SWAP_KEY_SOURCE`), the `etc/ssh/ssh_host_*` keys, `etc/machine-id`, the `.nmconnection` files, the sops key (`$SOPS_KEY_FILE`) and the files in `var/lib/nixos` (`uid-map`, `gid-map` and others).
+The list should show the `etc/ssh/ssh_host_*` keys, `etc/machine-id`, the `.nmconnection` files, the sops key (`$SOPS_KEY_FILE`) and the files in `var/lib/nixos` (`uid-map`, `gid-map` and others).
 
 ### 2. Boot the installer on gibson
 
@@ -146,10 +149,10 @@ ssh -fN -M -S "$TMP/ssh" -o ControlPersist=yes \
 Accept the host key only if it matches the fingerprint on gibson's screen, and touch the YubiKey to log in. Then check the disk that's about to be erased:
 
 ```sh
-ssh -S "$TMP/ssh" "root@$IP" "ls -l $INSTALL_DISK && lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL $INSTALL_DISK"
+ssh -S "$TMP/ssh" "root@$IP" "ls -l $INSTALL_DISK && lsblk -o NAME,SIZE,TYPE,FSTYPE,LABEL,PARTLABEL $INSTALL_DISK"
 ```
 
-It should be the system disk (for gibson, the 476.9G NVMe with the `BOOT`, `ROOT` and `SWAP` partitions), never the one labelled `GAMES`. The `nvme0`/`nvme1` names can swap between boots, which is why the config names the disk by its ID. If `ls` can't find it, stop: the config names a disk that isn't attached.
+It should be the system disk (for gibson, the 476.9G NVMe: partitions `disk-main-ESP` and `disk-main-ROOT`, or `BOOT`, `ROOT` and `SWAP` on a disk from before the current layout), never the one labelled `GAMES`. The `nvme0`/`nvme1` names can swap between boots, which is why the config names the disk by its ID. If `ls` can't find it, stop: the config names a disk that isn't attached.
 
 Then install through that connection:
 
@@ -161,8 +164,7 @@ nixos-anywhere --flake ".#$HOST" --target-host "root@$IP" \
   --build-on remote \
   --phases kexec,disko,install \
   --extra-files "$STAGE" \
-  --disk-encryption-keys "$DISK_PASSWORD_FILE" <(printf '%s' "$PASS") \
-  --disk-encryption-keys "$SWAP_KEY" "$STAGE$SWAP_KEY_SOURCE"
+  --disk-encryption-keys "$DISK_PASSWORD_FILE" <(printf '%s' "$PASS")
 ```
 
 - Why the separate connection: nixos-anywhere turns host key checking off (`StrictHostKeyChecking=no`, `UserKnownHostsFile=/dev/null`), and passes those options before any `--ssh-option`, so they can't be overridden (ssh takes the first value it's given). Through `ControlPath`, every connection it makes reuses the one checked above, so the passphrase and the sops key only go to the verified host.
@@ -190,7 +192,7 @@ ssh -S "$TMP/ssh" "root@$IP" reboot
 
 ### 5. First boot
 
-- The root disk asks for the passphrase (no FIDO2 token is enrolled yet); swap unlocks by itself with its keyfile.
+- The disk asks for the passphrase once (no FIDO2 token is enrolled yet); root and swap are both inside it.
 - Log in as usual, then check:
   ```sh
   swapon --show
@@ -198,23 +200,27 @@ ssh -S "$TMP/ssh" "root@$IP" reboot
   systemctl --failed
   systemctl status "home-manager-$USER.service"
   ```
+- Then hibernate once (`systemctl hibernate`) and start gibson again: after the one unlock, it should resume the session rather than boot afresh.
 
-### 6. Enrol the YubiKeys for unlocking
+### 6. Enrol the YubiKey for unlocking
 
-With **one** YubiKey plugged in, then again with the other (each asks for the disk passphrase, then the key's FIDO2 PIN and a touch):
+With gibson's YubiKey plugged in (it asks for the disk passphrase, then the key's FIDO2 PIN and a touch). If step 0 found more than one key enrolled, run it again with each of the others plugged in instead:
 
 ```sh
-ROOT_DEVICE=$(sudo cryptsetup status rootfs | awk '/device:/ {print $2}')
+# The partition the root filesystem sits on, through LUKS and LVM
+ROOT_DEVICE=$(lsblk -rnso PATH,TYPE "$(findmnt -no SOURCE /)" | awk '$2 == "part" {print $1; exit}')
 sudo systemd-cryptenroll --fido2-device=auto "$ROOT_DEVICE"
 ```
 
 systemd-cryptenroll requires the PIN and a touch by default (`--fido2-with-client-pin=yes`, `--fido2-with-user-presence=yes`, `--fido2-with-user-verification=no`). Compare these with the `fido2-clientPin-required`, `fido2-up-required` and `fido2-uv-required` values noted before starting (step 0): if any differ, add the matching option to the command above, e.g. `--fido2-with-user-verification=yes` for `"fido2-uv-required": true`.
 
-Then check both tokens are there, and the passphrase is still in slot 0:
+Then check there's a `systemd-fido2` token for each key, and the passphrase is still in slot 0:
 
 ```sh
 sudo cryptsetup luksDump "$ROOT_DEVICE" | sed -n '/^Keyslots:/,/^Digests:/p'
 ```
+
+Reboot to check: the disk should unlock with the key's PIN and a touch, and nothing else.
 
 ### 7. Clean up on the Mac
 
@@ -238,7 +244,7 @@ The same steps run on gibson itself, from the installer, with the YubiKey plugge
 
 The whole checklist can be run against a disk that isn't gibson's NVMe, with `HOST=gibson-test-usb` or `HOST=gibson-test-vm` in step 1 in place of `HOST=gibson`; the values it loads, and the install in step 3, then follow. Both are gibson's own config with the changes in `hosts/personal/gibson/test-install.nix`:
 
-- Only the test disk is touched, and its partitions and filesystems have their own names (`gibson-test-*`, `TBOOT`, `TROOT`, `TSWAP`, `trootfs`, `tswap`). The install can't format the live NVMe, and the test system can't mount or unlock it, even with both attached.
+- Only the test disk is touched, and everything on it has its own name (partitions `gibson-test-*`, LUKS `tcryptroot`, volume group `tgibson`, labels `TBOOT`, `trootfs`, `tswap`). The install can't format the live NVMe, and the test system can't unlock or mount it, even with both attached.
 - The firmware's boot entries are left alone; the test disk is booted from the firmware's boot menu.
 - The games disk isn't mounted. (Even a read-only ext4 mount can write to it, which would corrupt it if gibson is hibernated with it mounted.)
 - Tailscale, Syncthing, the scheduled backup and the pushes to attic are off, so the copy never acts as gibson on the network. It still has gibson's SSH host keys and machine-id once restored.
@@ -257,7 +263,7 @@ In step 0, skip the final backup: the restore uses whatever the latest backup is
 
 1. Build the installer ISO on gibson, from the repo root: `nix run .#build-installer -- iso` prints its path. Then create a VM in virt-manager: UEFI firmware (Overview → Firmware, before the first start), 8 GB of RAM or more, the ISO as a CD-ROM, the default network, and a virtio disk sized as above, with the serial number `gibson-test` (Advanced options → Serial number). The disk image counts towards gibson's own disk space.
 2. Boot the ISO; on the VM's console, `ip -br a` gives `IP`.
-3. Follow steps 1–4 on gibson with `HOST=gibson-test-vm`, then boot the VM from its disk. Without an NVIDIA GPU the desktop may not start: check from a text console or over SSH instead. There's no FIDO2 to test (step 6).
+3. Follow steps 1–4 on gibson with `HOST=gibson-test-vm`, then boot the VM from its disk. Without an NVIDIA GPU the desktop may not start: check from a text console or over SSH instead. There's no FIDO2 to test (step 6). Hibernation (step 5) can be tried in the VM.
 
 ---
 

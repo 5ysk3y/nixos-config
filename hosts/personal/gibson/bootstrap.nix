@@ -4,7 +4,8 @@
 #   eval "$(nix eval --raw .#nixosConfigurations.$HOST.config.system.build.bootstrapEnv)"
 #
 # which sets the variables below and prints them. The gibson-test-*
-# configurations extend this one, so their values (TROOT and so on) follow.
+# configurations extend this one, so their values (the test disk, and so on)
+# follow.
 {
   config,
   lib,
@@ -22,20 +23,18 @@ let
   backupHost = builtins.elemAt repoParts 1;
 
   partitions = config.disko.devices.disk.main.content.partitions;
-  swapKey = partitions.SWAP.content.settings.keyFile;
   ageKeys = "${vars.secretsPath}/bootstrap/age-keys.txt.age";
   gamesDir = "/home/${vars.username}/games";
 
   # Restored on the Mac and copied in by nixos-anywhere, because the install
   # or the first boot needs them: the user/group ID maps, so restored files
-  # keep their owners; the SSH host keys and machine-id; NetworkManager's
-  # connections; and the swap keyfile.
+  # keep their owners; the SSH host keys and machine-id; and NetworkManager's
+  # connections.
   preInstallRestore = [
     "/var/lib/nixos"
     "/etc/ssh/ssh_host_*"
     "/etc/machine-id"
     "/etc/NetworkManager/system-connections"
-    "/etc/secrets"
   ];
 
   # The fixed part of a path, up to any glob
@@ -59,9 +58,7 @@ let
     SOPS_KEY_FILE = config.sops.age.keyFile;
     INSTALL_DISK = config.disko.devices.disk.main.device;
     DISK_PASSWORD_FILE = partitions.ROOT.content.passwordFile;
-    SWAP_KEY = swapKey;
-    SWAP_KEY_SOURCE = toString config.boot.initrd.secrets.${swapKey};
-    ROOT_DEVICE = config.boot.initrd.luks.devices.rootfs.device;
+    ROOT_DEVICE = config.boot.initrd.luks.devices.${config.gibson.disk.names.luks}.device;
     GAMES_DIR = gamesDir;
   };
 
@@ -79,10 +76,6 @@ in
     {
       assertion = builtins.all backedUp preInstallRestore;
       message = "bootstrap.nix: every pre-install restore path must be under the backup's paths (backup.nix).";
-    }
-    {
-      assertion = config.boot.initrd.luks.devices.swap.keyFile == swapKey;
-      message = "bootstrap.nix: disko formats swap with ${swapKey}, but the initrd unlocks it with ${toString config.boot.initrd.luks.devices.swap.keyFile}.";
     }
     {
       assertion = config.fileSystems ? ${gamesDir};

@@ -4,10 +4,11 @@
 # configurations in default.nix.
 #
 # Everything else is gibson's own config, except:
-#   - the disk, and its labels: partitions gibson-test-{ESP,SWAP,ROOT} and
-#     filesystems/LUKS TBOOT, TROOT, TSWAP, trootfs and tswap. Neither the
-#     install nor the test system can then format, mount or unlock the live
-#     disk (disk-main-*, BOOT, ROOT, ...) while both are attached
+#   - the disk, and every name on it: partitions gibson-test-{ESP,ROOT}, the
+#     LUKS container tcryptroot, volume group tgibson, and labels TBOOT,
+#     trootfs and tswap. Neither the install nor the test system can then
+#     format, unlock or mount the live disk (disk-main-*, cryptroot, gibson)
+#     while both are attached
 #   - the firmware's boot entries are left alone; boot the test disk from the
 #     firmware's boot menu instead
 #   - the games disk isn't mounted: even a read-only ext4 mount can write
@@ -20,70 +21,27 @@
   initrdModules,
 }:
 { lib, vars, ... }:
-let
-  label = {
-    boot = "TBOOT";
-    root = "TROOT";
-    swap = "TSWAP";
-    rootfs = "trootfs";
-    swapfs = "tswap";
-  };
-in
 {
-  disko.devices.disk.main = {
-    device = lib.mkForce device;
-    content.partitions = {
-      ESP = {
-        label = "gibson-test-ESP";
-        content.extraArgs = lib.mkForce [
-          "-n"
-          label.boot
-        ];
-      };
-      SWAP.label = "gibson-test-SWAP";
-      SWAP.content = {
-        extraFormatArgs = lib.mkForce [
-          "--label"
-          label.swap
-        ];
-        content.extraArgs = lib.mkForce [
-          "-L"
-          label.swapfs
-        ];
-      };
-      ROOT.label = "gibson-test-ROOT";
-      ROOT.content = {
-        extraFormatArgs = lib.mkForce [
-          "--label"
-          label.root
-        ];
-        content.extraArgs = lib.mkForce [
-          "-L"
-          label.rootfs
-        ];
-      };
+  gibson.disk = {
+    inherit device;
+    names = {
+      espPartition = "gibson-test-ESP";
+      luksPartition = "gibson-test-ROOT";
+      espLabel = "TBOOT";
+      luks = "tcryptroot";
+      vg = "tgibson";
+      rootLabel = "trootfs";
+      swapLabel = "tswap";
     };
   };
 
   boot = {
-    initrd = {
-      luks.devices = {
-        rootfs.device = lib.mkForce "/dev/disk/by-label/${label.root}";
-        swap.device = lib.mkForce "/dev/disk/by-label/${label.swap}";
-      };
-      # The test disk's controller, which gibson's own initrd doesn't need
-      availableKernelModules = initrdModules;
-    };
-    resumeDevice = lib.mkForce "/dev/disk/by-label/${label.swapfs}";
+    # The test disk's controller, which gibson's own initrd doesn't need
+    initrd.availableKernelModules = initrdModules;
     loader.efi.canTouchEfiVariables = lib.mkForce false;
   };
 
-  fileSystems = {
-    "/".device = lib.mkForce "/dev/disk/by-label/${label.rootfs}";
-    "/boot".device = lib.mkForce "/dev/disk/by-label/${label.boot}";
-    "/home/${vars.username}/games".options = [ "noauto" ];
-  };
-  swapDevices = lib.mkForce [ { device = "/dev/disk/by-label/${label.swapfs}"; } ];
+  fileSystems."/home/${vars.username}/games".options = [ "noauto" ];
 
   services.tailscale.enable = lib.mkForce false;
   services.restic.backups.gibson.timerConfig = lib.mkForce null;
