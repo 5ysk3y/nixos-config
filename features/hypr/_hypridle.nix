@@ -7,11 +7,10 @@
 let
   resumeDpms = pkgs.writeShellScript "hypr-resume-dpms" ''
     sid=$(${pkgs.systemd}/bin/loginctl show-user "$(id -un)" -p Display --value)
-    for i in $(seq 1 60); do
+    for _ in $(seq 1 60); do
       [ "$(${pkgs.systemd}/bin/loginctl show-session "$sid" -p Active --value)" = yes ] && break
       sleep 0.5
     done
-    echo "resume-dpms: session $sid active after ''${i} polls"
     sleep 3
     hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })'
     sleep 1

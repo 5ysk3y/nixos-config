@@ -25,7 +25,6 @@ _: {
     pulseaudio = {
       "ignored-sinks" = [
         "Starship/Matisse HD Audio Controller Analog Stereo"
-        "Navi 21/23 HDMI/DP Audio Controller Digital Stereo (HDMI 5)"
       ];
     };
   };
