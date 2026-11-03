@@ -154,11 +154,7 @@ in
         }
       ];
 
-      home.packages = with pkgs; [
-        syncthing
-        curl
-        jq
-      ];
+      home.packages = [ pkgs.syncthing ];
 
       services.syncthing = {
         enable = true;

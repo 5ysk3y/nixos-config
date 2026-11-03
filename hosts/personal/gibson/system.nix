@@ -103,9 +103,7 @@
       expect
       i2c-tools
       libmodule
-      linux-firmware
       lm_sensors
-      nixos-container
       nix-prefetch-github
       openssl
       pulseaudio
@@ -123,11 +121,6 @@
       GSETTINGS_BACKEND = "keyfile";
       GTK_THEME = "adw-gtk3:dark";
     };
-
-    pathsToLink = [
-      "/share/xdg-desktop-portal"
-      "/share/applications"
-    ];
   };
 
   # Security Ruleset
@@ -176,7 +169,6 @@
     };
 
     udev = {
-      enable = true;
       extraRules = ''
         # SteelSeries Aerox 5
         SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1850", MODE="0666"

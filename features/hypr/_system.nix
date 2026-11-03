@@ -9,11 +9,7 @@
 
   services.displayManager.defaultSession = "hyprland";
 
-  services.xserver = {
-    enable = true;
-    xkb.layout = "us";
-    xkb.variant = "";
-  };
+  services.xserver.enable = true;
 
   security = {
     pam.services.hyprlock.rules.auth.u2f-retry = {

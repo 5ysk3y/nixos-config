@@ -24,7 +24,6 @@
       discord
       fontconfig
       grimblast
-      hyprpolkitagent
       jq
       keyutils
       libnotify
