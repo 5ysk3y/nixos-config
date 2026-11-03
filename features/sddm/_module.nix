@@ -38,7 +38,6 @@ in
         enable = true;
         compositor = "kwin";
       };
-      package = pkgs.kdePackages.sddm;
       extraPackages = with pkgs; [ kdePackages.qtmultimedia ];
       theme = "sddm-astronaut-theme";
     };

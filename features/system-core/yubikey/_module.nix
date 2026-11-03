@@ -1,6 +1,5 @@
 {
   config,
-  pkgs,
   vars,
   hostname,
   ...
@@ -15,13 +14,6 @@
       appid = "pam://${hostname}";
       authfile = config.sops.secrets."system/pam/yubikeyPub".path;
     };
-  };
-
-  security.pam.services = {
-    login.u2fAuth = true;
-    sudo.u2fAuth = true;
-    sddm.u2fAuth = true;
-    hyprlock.u2fAuth = true;
   };
 
   sops.secrets."system/pam/yubikeyPub".owner = vars.username;
@@ -41,9 +33,5 @@
         libfido2 = prev.libfido2.override { withPcsclite = false; };
       };
     })
-  ];
-
-  services.udev.packages = with pkgs; [
-    yubikey-manager
   ];
 }

@@ -8,7 +8,6 @@
 {
   stylix = {
     enable = true;
-    autoEnable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
     polarity = "dark";
 
@@ -61,9 +60,7 @@
       })
 
       (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-        gtk.enable = true;
         kitty = {
-          enable = true;
           fonts.override = {
             monospace = {
               package = pkgs.hack-font;
@@ -71,9 +68,7 @@
             };
           };
         };
-        rofi.enable = true;
         mako = {
-          enable = true;
           fonts.override = {
             sansSerif = {
               package = pkgs.tamzen;

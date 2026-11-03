@@ -67,12 +67,9 @@ in
           })
         ];
 
-        insert = lib.mkMerge [
-          { }
-          (lib.mkIf isLinux {
-            "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${quteRbw}/bin/qute-rbw";
-          })
-        ];
+        insert = lib.mkIf isLinux {
+          "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${quteRbw}/bin/qute-rbw";
+        };
 
         passthrough = {
           "<Ctrl+x>" = "mode-leave";
@@ -144,9 +141,6 @@ in
 
     };
 
-    rofi = lib.mkIf isLinux {
-      enable = true;
-      package = pkgs.rofi;
-    };
+    rofi.enable = isLinux;
   };
 }

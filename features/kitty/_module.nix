@@ -2,9 +2,6 @@ _: {
   programs = {
     kitty = {
       enable = true;
-      shellIntegration = {
-        enableZshIntegration = true;
-      };
       settings = {
         enabled_layouts = "stack";
         window_padding_width = 9;
