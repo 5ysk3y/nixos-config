@@ -55,7 +55,7 @@ in
 
     "jellyfin-mpv-shim/input.json" = lib.mkIf isLinux {
       text = ''
-        q run "/bin/sh" "-c" "hyprctl --batch 'dispatch killactive; dispatch workspace m-1'"
+        q run "/bin/sh" "-c" "hyprctl --batch 'dispatch hl.dsp.window.close(); dispatch hl.dsp.focus({ workspace = [[m-1]] })'"
       '';
     };
 
