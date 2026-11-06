@@ -39,11 +39,6 @@
   programs = {
     zsh = {
       dotDir = "${config.xdg.configHome}/zsh";
-      loginExtra = ''
-        if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-        start-hyprland && exit
-        fi
-      '';
 
       shellAliases = {
         build-nix = "nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'";
