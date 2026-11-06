@@ -45,6 +45,16 @@
             WS0 = "10-ext3",
           }
 
+          -- Keep Hyprland off realtime scheduling. With nixpkgs' module (no
+          -- cap_sys_nice wrapper) 0.57 gets SCHED_RR from rtkit, which needs
+          -- a 200ms RLIMIT_RTTIME. A long driver call while outputs come back
+          -- (DPMS wake, resume, VT switch) overruns it and the kernel SIGKILLs
+          -- the compositor: no crash report, no core dump, safe-mode restart.
+          -- hl.env sets it in Hyprland's own process before it asks for
+          -- realtime. Remove once 0.57.2 releases as it removes RT scheduling
+          -- entirely
+          hl.env("HYPRLAND_NO_RT", "1")
+
           hl.config({
             input = {
               kb_file = "",
