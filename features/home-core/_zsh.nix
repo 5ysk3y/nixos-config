@@ -44,6 +44,9 @@ in
         ${rebuildCmd} "$action" --flake '${flake}' --show-trace "$@"
       }
 
+      # commit-msg [--amend|-a]: have Claude fill in .github/gitmessage for the
+      # staged changes, open it in the editor, and credit Claude with one
+      # Co-authored-by trailer. Only commits made this way get the trailer.
       commit-msg() {
         local amend=false
         [[ "$1" == "--amend" || "$1" == "-a" ]] && amend=true
@@ -52,34 +55,67 @@ in
           echo "commit-msg --amend: no existing commit to amend" >&2
           return 1
         fi
+        if ! $amend && git diff --cached --quiet; then
+          echo "commit-msg: nothing staged" >&2
+          return 1
+        fi
 
-        local template template_path task rules context msg tmpfile
+        local template template_path task context diff msg tmpfile
+        local trailer='Co-authored-by: Claude <noreply@anthropic.com>'
+        local -a rules
         template_path=$(git config commit.template)
         template_path="''${template_path/#\~/$HOME}"
         template=$(cat "$template_path")
 
-        rules="Follow this template, replacing placeholder lines. Output the filled message as plain text — use markdown code fences only for code snippets or references, not for the commit message itself. Do NOT use # comment prefixes on the Why/What/Notes lines, only strip the comment lines from the template itself. Output the commit related context only, in line with the template structure, no preamble or explanation before it.\n\nFormatting rules:\n- Keep the entire first line (type(scope): description) to 72 characters total, including the type and scope.\n- Use imperative mood for the description (e.g. add, fix, refactor), not past tense.\n- Don't capitalize the first letter of the description and don't end it with a period.\n- Omit the scope entirely (no parentheses) if no single aspect, host, or area clearly applies — don't invent one.\n- Leave exactly one blank line between the subject line and the body.\n- Wrap Why/What/Notes body lines at 72 characters. If a '-' bullet wraps to a second line, indent the continuation by 2 spaces so it aligns under the bullet text, not the dash."
+        rules=(
+          "Fill in the commit message template below for the staged changes. Output only the commit message, as plain text: no preamble, no code fences around it, and no trailers such as Co-authored-by (one is added for you)."
+          ""
+          "Subject line: type(scope): summary"
+          "- type is one of the template's types."
+          "- scope is the host name, the features/ directory name, or the repo area (flake, ci, bootstrap, pkgs, githooks). Reuse a scope from the recent subjects below where one fits; leave out the scope and its parentheses if none does."
+          "- Imperative mood, lowercase first letter, no full stop."
+          "- Aim for 65 characters or fewer, and never more than 72 in total: GitHub adds the PR number when merging."
+          ""
+          "Body: one blank line after the subject, every line wrapped at 72 characters. Write the section names as plain text (Why:, What:, Notes:) without the template's # markers, and leave out the template's comment lines."
+          "- Why: what was wrong or needed, its cause, and why this approach. Don't list the changes here."
+          "- What: one bullet per change, naming the option, file or package. Leave the section out when there's a single change the subject already describes. When a bullet wraps, indent the continuation by 2 spaces so it lines up under the text."
+          "- Notes: caveats, follow-ups or what to check after switching. Leave it out if there's nothing to say."
+          "- Don't say the same thing in Why and What."
+        )
+
+        # flake.lock's diff is all hashes; --stat still lists the file
+        diff=$(git diff --cached -- . ':(exclude)flake.lock')
 
         if $amend; then
-          local prev_msg
-          prev_msg=$(git log -1 --pretty=%B)
-          task="This is an amend: the diff below is being folded into the existing commit shown as 'Previous commit message'. Update that message to accurately describe the commit as a whole after the amend — extend the What bullets for the new changes, and only adjust Why/Notes if the new changes actually affect the rationale or caveats. Don't discard accurate parts of the original message just to sound different."
+          task="This is an amend: the diff below is being folded into the existing commit shown as 'Previous commit message'. Update that message to describe the commit as a whole after the amend: extend the What bullets for the new changes, and only adjust Why/Notes if the new changes affect the rationale or caveats. Don't discard accurate parts of the original message just to sound different."
           context=$(printf 'Previous commit message (being amended):\n%s\n\nNewly staged changes to fold in:\nStaged files:\n%s\n\nDiff:\n%s' \
-            "$prev_msg" \
+            "$(git log -1 --pretty=%B)" \
             "$(git diff --cached --stat)" \
-            "$(git diff --cached)")
+            "$diff")
         else
           task="Suggest a commit message for these changes."
           context=$(printf 'Staged files:\n%s\n\nDiff:\n%s' \
             "$(git diff --cached --stat)" \
-            "$(git diff --cached)")
+            "$diff")
+        fi
+        context=$(printf 'Recent commit subjects:\n%s\n\n%s' \
+          "$(git log -20 --format=%s 2>/dev/null)" \
+          "$context")
+
+        if ! msg=$(printf '%s' "$context" \
+          | claude -p "$task"$'\n\n'"''${(F)rules}"$'\n\n'"$template"); then
+          echo "commit-msg: claude failed" >&2
+          return 1
+        fi
+        # One trailer, added below as its own paragraph, whatever Claude wrote
+        msg=$(grep -viE '^co-authored-by:.*noreply@anthropic\.com' <<< "$msg" | git stripspace)
+        if [[ -z $msg ]]; then
+          echo "commit-msg: claude returned no message" >&2
+          return 1
         fi
 
-        msg=$(printf '%s' "$context" \
-          | claude -p "$task $rules\n\n''${template}")
-
         tmpfile=$(mktemp /tmp/COMMIT_EDITMSG.XXXXXX)
-        printf '%s\n\n# Template reference:\n%s\n' "$msg" \
+        printf '%s\n\n%s\n\n# Template reference:\n%s\n' "$msg" "$trailer" \
           "$(sed 's/^/# /' <<< "$template")" > "$tmpfile"
 
         if $amend; then

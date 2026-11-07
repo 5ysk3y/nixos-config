@@ -1,11 +1,16 @@
-# <type>(<scope>): <description>  [max 72 chars]
-# Valid types: feat fix refactor chore docs test revert
-# Scopes: e.g - gibson darwin sops yubikey bootstrap flake pkgs
+# <type>(<scope>): <summary>
+#   type:  feat fix refactor chore docs test revert
+#   scope: the host, the features/ directory, or the repo area
+#          (flake, ci, bootstrap, pkgs, githooks); leave it out if none fits
+#   imperative, lowercase start, no full stop; aim for <= 65 chars,
+#   72 at most (GitHub adds " (#123)" when merging)
 
-# Why: (motivation — what was wrong or needed)
+# Why: what was wrong or needed, its cause, and why this approach.
+#   Not the changes themselves.
 
-# What:
+# What: one bullet per change, naming the option, file or package.
+#   Leave it out for a single change the subject already describes.
 # -
-# -
 
-# Notes: (caveats, follow-ups, nixos-specific gotchas)
+# Notes: caveats, follow-ups, what to check after switching.
+#   Leave it out if there's nothing to say.
