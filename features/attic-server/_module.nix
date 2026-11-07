@@ -24,10 +24,16 @@
         type = "local";
         path = "/mnt/attic-cache";
       };
+      # attic's documented sizes (book/src/admin-guide/chunking.md). Each
+      # chunk is its own database writes, and the server uploads up to 10
+      # of a NAR's chunks at once against SQLite's single writer; smaller
+      # chunks made large NARs fail with "database is locked" and
+      # connection-pool timeouts. Changing these stops existing chunks
+      # being reused until the cache turns over (2-week retention).
       chunking = {
-        nar-size-threshold = 65536;
-        min-size = 16384;
-        avg-size = 65536;
+        nar-size-threshold = 131072;
+        min-size = 65536;
+        avg-size = 131072;
         max-size = 262144;
       };
       garbage-collection = {
