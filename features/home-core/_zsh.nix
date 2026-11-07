@@ -15,6 +15,15 @@ let
       "sudo darwin-rebuild"
     else
       "systemd-inhibit --no-pager --no-legend --mode=block --who='${vars.username}' --why='NixOS Upgrades' sudo nixos-rebuild";
+
+  # Starts attic-push-system (features/attic-client) without waiting for
+  # it, where the host has it, so a new system reaches the cache straight
+  # away rather than at the next timer.
+  pushToCache =
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      "sudo launchctl print system/org.nixos.attic-push-system >/dev/null 2>&1 && sudo launchctl kickstart system/org.nixos.attic-push-system"
+    else
+      "systemctl cat attic-push-system.service >/dev/null 2>&1 && sudo systemctl start --no-block attic-push-system.service";
 in
 {
   programs.zsh = {
@@ -38,10 +47,14 @@ in
       # rebuild [action] [args...]: run this host's config from
       # ${vars.configDir} with any rebuild action (switch, boot, build,
       # test, ...), defaulting to switch. Extra args are passed through.
+      # After a switch or test, the new system is pushed to attic.
       rebuild() {
         local action="''${1:-switch}"
         (( $# )) && shift
-        ${rebuildCmd} "$action" --flake '${flake}' --show-trace "$@"
+        ${rebuildCmd} "$action" --flake '${flake}' --show-trace "$@" || return
+        if [[ $action == (switch|test) ]]; then
+          ${pushToCache} || true
+        fi
       }
 
       # commit-msg [--amend|-a]: have Claude fill in .github/gitmessage for the
