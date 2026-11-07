@@ -146,6 +146,14 @@
           hl.animation({ leaf = "fade",       enabled = true, speed = 6, bezier = "default" })
           hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default", style = "fade" })
 
+          ${lib.optionalString config.home.pointerCursor.enable ''
+            -- Inherit the cursor from home.pointerCursor (set by Stylix), so Hyprland
+            -- and the apps it starts match GTK and XWayland.
+            hl.env("XCURSOR_THEME", "${config.home.pointerCursor.name}")
+            hl.env("XCURSOR_SIZE", "${toString config.home.pointerCursor.size}")
+            hl.env("HYPRCURSOR_THEME", "${config.home.pointerCursor.name}")
+            hl.env("HYPRCURSOR_SIZE", "${toString config.home.pointerCursor.size}")
+          ''}
           require("hyprland-host")(WS)
         '';
       };
