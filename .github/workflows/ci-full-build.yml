@@ -119,12 +119,17 @@ jobs:
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
+      # One attempt: Nix keeps no record of failed builds, so a retry
+      # rebuilds a broken derivation from scratch and doubles the wait for
+      # a red result. Weekly-update builds here: mean 31 min, longest 75.
       - name: Full build test
-        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
-        with:
-          timeout_minutes: 110
-          max_attempts: 2
-          command: nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L
+        timeout-minutes: 120
+        run: nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L
+      # Only what CI built: attic skips paths signed by the cache's upstream
+      # (cache.nixos.org), which machines fetch from there or their own
+      # watch-store pushes over the LAN. Those were 75-88% of push time
+      # over the tailnet, and both failed uploads seen. -j 1 keeps the load
+      # on attic down; a retried attempt skips paths already pushed.
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
@@ -133,12 +138,12 @@ jobs:
         env:
           ATTIC_TOKEN: ${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}
         with:
-          timeout_minutes: 60
+          timeout_minutes: 40
           max_attempts: 2
           command: |
             set -euo pipefail
             nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "$ATTIC_TOKEN"
-            nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
+            nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache -j 1 ./result
 
   darwin-eval-check:
     name: full build check (darwin)
@@ -167,12 +172,17 @@ jobs:
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
+      # One attempt: Nix keeps no record of failed builds, so a retry
+      # rebuilds a broken derivation from scratch and doubles the wait for
+      # a red result. Weekly-update builds here: mean 5 min, longest 9.
       - name: Full build test
-        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
-        with:
-          timeout_minutes: 110
-          max_attempts: 2
-          command: nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L
+        timeout-minutes: 60
+        run: nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L
+      # Only what CI built: attic skips paths signed by the cache's upstream
+      # (cache.nixos.org), which machines fetch from there or their own
+      # watch-store pushes over the LAN. Those were 75-88% of push time
+      # over the tailnet, and both failed uploads seen. -j 1 keeps the load
+      # on attic down; a retried attempt skips paths already pushed.
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
@@ -181,12 +191,12 @@ jobs:
         env:
           ATTIC_TOKEN: ${{ secrets.TS_CI_ATTIC_PUSH_TOKEN }}
         with:
-          timeout_minutes: 60
+          timeout_minutes: 15
           max_attempts: 2
           command: |
             set -euo pipefail
             nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "$ATTIC_TOKEN"
-            nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache --ignore-upstream-cache-filter -j 1 ./result
+            nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache -j 1 ./result
 
   ci-gate:
     name: CI required status
