@@ -27,7 +27,7 @@ in
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock";
-              after_sleep_cmd = "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'; wtype -k escape; openrgb -p ${config.xdg.configHome}/OpenRGB/MainBlue.orp; ${resumeDpms}";
+              after_sleep_cmd = "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'; wtype -k escape; openrgb -c 0000FF -m Direct; ${resumeDpms}";
               on_unlock_cmd = "wtype -k escape";
             };
 

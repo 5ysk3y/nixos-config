@@ -218,6 +218,6 @@ return function(WS)
     hl.exec_cmd("sleep 3 && signal-desktop")
     hl.exec_cmd([[sleep 0.5 && hyprctl dispatch 'hl.dsp.window.move({ into_group = "l" })']])
     hl.exec_cmd("jellyfin-mpv-shim")
-    hl.exec_cmd("openrgb --profile MainBlue.orp > /dev/null 2>&1")
+    hl.exec_cmd("openrgb -c 0000FF -m Direct > /dev/null 2>&1")
   end)
 end
