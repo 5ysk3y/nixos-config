@@ -54,7 +54,7 @@
               package = pkgs.hack-font;
               name = "Hack";
             };
-            sizes.terminal = 11;
+            sizes.terminal = 10.875;
           };
         };
       })
