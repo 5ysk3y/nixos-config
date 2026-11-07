@@ -1,10 +1,29 @@
 #!/usr/bin/env bash
-MSG=$(cat "$1")
-PATTERN='^(feat|fix|refactor|chore|docs|test|revert)(\([a-z0-9_-]+\))?: .{1,72}$'
+# Commit titles: <type>(<scope>): <summary>, 72 characters at most in all
+# (.github/gitmessage). Git's own merge, revert and fixup/squash/amend
+# titles pass as git writes them: this hook also runs for `git merge`.
+first=$(head -n 1 "$1")
 
-if ! echo "$MSG" | head -1 | grep -Eq "$PATTERN"; then
+case "$first" in
+  "Merge "* | "Revert \""* | "fixup! "* | "squash! "* | "amend! "*) exit 0 ;;
+esac
+
+PATTERN='^(feat|fix|refactor|chore|docs|test|revert)(\([a-z0-9_-]+\))?: .+$'
+
+if ! grep -Eq "$PATTERN" <<<"$first"; then
   echo "✗ Commit title doesn't match convention:"
   echo "  <type>(<scope>): <description>"
   echo "  Allowed types: feat fix refactor chore docs test revert"
+  exit 1
+fi
+
+if (( ${#first} > 72 )); then
+  echo "✗ Commit title is ${#first} characters; 72 at most, including type and scope."
+  exit 1
+fi
+
+second=$(sed -n 2p "$1")
+if [[ -n $second && $second != \#* ]]; then
+  echo "✗ Leave a blank line between the title and the body."
   exit 1
 fi
