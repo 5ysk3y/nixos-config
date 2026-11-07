@@ -8,6 +8,24 @@ let
     inherit pkgs;
     tokenFile = config.sops.secrets."services/attic/token".path;
   };
+
+  # Both units run as attic-watch-store, with its config and state
+  serviceDefaults = {
+    User = "attic-watch-store";
+    Group = "attic-watch-store";
+    StateDirectory = "attic-watch-store";
+    Environment = [
+      "HOME=%S/attic-watch-store"
+      "XDG_CONFIG_HOME=${atticConfig}"
+    ];
+  };
+
+  sleepTargets = [
+    "suspend.target"
+    "hibernate.target"
+    "hybrid-sleep.target"
+    "suspend-then-hibernate.target"
+  ];
 in
 {
   users.groups.attic-watch-store = { };
@@ -20,23 +38,56 @@ in
     owner = config.users.users.attic-watch-store.name;
   };
 
-  systemd.services.attic-watch-store = {
-    description = "Push new Nix store paths to attic";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    serviceConfig = {
-      User = "attic-watch-store";
-      Group = "attic-watch-store";
-      Type = "simple";
-      StateDirectory = "attic-watch-store";
-      Environment = [
-        "HOME=%S/attic-watch-store"
-        "XDG_CONFIG_HOME=${atticConfig}"
-      ];
-      ExecStart = "${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache";
-      Restart = "on-failure";
-      RestartSec = 10;
+  systemd = {
+    services = {
+      attic-watch-store = {
+        description = "Push new Nix store paths to attic";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network-online.target" ];
+        wants = [ "network-online.target" ];
+        serviceConfig = serviceDefaults // {
+          Type = "simple";
+          ExecStart = "${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache";
+          Restart = "on-failure";
+          RestartSec = 10;
+        };
+      };
+
+      # watch-store tries each new path once: an upload cut off by sleep, or
+      # made while attic was unreachable, is never retried. This catches up by
+      # pushing the running system's closure; attic asks the server which
+      # paths are missing and uploads only those, so a complete cache costs
+      # one query. Started after every resume, daily, and by `rebuild`
+      # (features/home-core/_zsh.nix). An interrupted run is finished by the
+      # next, so it never holds off sleep.
+      attic-push-system = {
+        description = "Push the running system's closure to attic";
+        # Wanted by and ordered after the sleep targets: runs on resume
+        wantedBy = sleepTargets;
+        after = [ "network-online.target" ] ++ sleepTargets;
+        wants = [ "network-online.target" ];
+        # The network can still be coming up just after resume
+        startLimitBurst = 5;
+        startLimitIntervalSec = 600;
+        serviceConfig = serviceDefaults // {
+          Type = "oneshot";
+          ExecStart = "${pkgs.attic-client}/bin/attic push --ignore-upstream-cache-filter -j 2 home:home-cache /run/current-system";
+          Restart = "on-failure";
+          RestartSec = 30;
+          TimeoutStartSec = "2h";
+        };
+      };
+    };
+
+    timers = {
+      attic-push-system = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = "daily";
+          Persistent = true;
+          RandomizedDelaySec = "1h";
+        };
+      };
     };
   };
 }

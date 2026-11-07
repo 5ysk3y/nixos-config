@@ -45,6 +45,10 @@
 
   services.tailscale.enable = lib.mkForce false;
   services.restic.backups.gibson.timerConfig = lib.mkForce null;
-  systemd.services.attic-watch-store.enable = lib.mkForce false;
+  systemd = {
+    services.attic-watch-store.enable = lib.mkForce false;
+    services.attic-push-system.enable = lib.mkForce false;
+    timers.attic-push-system.enable = lib.mkForce false;
+  };
   home-manager.users.${vars.username}.features.home.syncthing.enable = lib.mkForce false;
 }
