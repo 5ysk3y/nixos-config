@@ -186,6 +186,7 @@ mkMerge [
               echo "doom: packages missing, leaving the sync to doom-sync.service"
             elif [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ] || [ ! -d "$EMACSDIR/.local/straight" ]; then
               echo "doom: inputs changed, running doom sync -u --force"
+              rm -f "$EMACSDIR/.local/etc/sync"
               "${config.xdg.configHome}/emacs/bin/doom" sync -u --force
               echo "$key" > "$stamp"
 
