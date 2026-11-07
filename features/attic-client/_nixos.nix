@@ -38,6 +38,12 @@ in
     owner = config.users.users.attic-watch-store.name;
   };
 
+  # Both units push only paths cache.nixos.org doesn't serve (attic's
+  # upstream filter, so no --ignore-upstream-cache-filter), one NAR at a
+  # time. atticd writes every chunk to SQLite, which takes one writer at
+  # once; anything more, and upstream paths it needn't hold, made uploads
+  # fail with "database is locked". Upstream paths come from
+  # cache.nixos.org instead.
   systemd = {
     services = {
       attic-watch-store = {
@@ -47,7 +53,7 @@ in
         wants = [ "network-online.target" ];
         serviceConfig = serviceDefaults // {
           Type = "simple";
-          ExecStart = "${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache";
+          ExecStart = "${pkgs.attic-client}/bin/attic watch-store -j 1 home:home-cache";
           Restart = "on-failure";
           RestartSec = 10;
         };
@@ -71,7 +77,7 @@ in
         startLimitIntervalSec = 600;
         serviceConfig = serviceDefaults // {
           Type = "oneshot";
-          ExecStart = "${pkgs.attic-client}/bin/attic push --ignore-upstream-cache-filter -j 2 home:home-cache /run/current-system";
+          ExecStart = "${pkgs.attic-client}/bin/attic push -j 1 home:home-cache /run/current-system";
           Restart = "on-failure";
           RestartSec = 30;
           TimeoutStartSec = "2h";
