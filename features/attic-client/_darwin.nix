@@ -8,13 +8,14 @@ in
 {
   sops.secrets."services/attic/token" = { };
 
+  # Only paths cache.nixos.org doesn't serve, one at a time: see _nixos.nix
   launchd.daemons.attic-watch-store = {
     script = ''
       set -euo pipefail
       export HOME=/var/lib/attic-watch-store
       export XDG_CONFIG_HOME=${atticConfig}
       mkdir -p "$HOME"
-      exec ${pkgs.attic-client}/bin/attic watch-store --ignore-upstream-cache-filter -j 2 home:home-cache
+      exec ${pkgs.attic-client}/bin/attic watch-store -j 1 home:home-cache
     '';
     serviceConfig = {
       KeepAlive = true;
@@ -34,7 +35,7 @@ in
       export HOME=/var/lib/attic-watch-store
       export XDG_CONFIG_HOME=${atticConfig}
       mkdir -p "$HOME"
-      exec ${pkgs.attic-client}/bin/attic push --ignore-upstream-cache-filter -j 2 home:home-cache /run/current-system
+      exec ${pkgs.attic-client}/bin/attic push -j 1 home:home-cache /run/current-system
     '';
     serviceConfig = {
       StartCalendarInterval = [

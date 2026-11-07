@@ -126,10 +126,10 @@ jobs:
         timeout-minutes: 120
         run: nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L
       # Only what CI built: attic skips paths signed by the cache's upstream
-      # (cache.nixos.org), which machines fetch from there or their own
-      # watch-store pushes over the LAN. Those were 75-88% of push time
-      # over the tailnet, and both failed uploads seen. -j 1 keeps the load
-      # on attic down; a retried attempt skips paths already pushed.
+      # (cache.nixos.org), which machines fetch from there. Those were
+      # 75-88% of push time over the tailnet, and both failed uploads seen.
+      # -j 1 keeps the load on attic down; a retried attempt skips paths
+      # already pushed.
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
@@ -179,10 +179,10 @@ jobs:
         timeout-minutes: 60
         run: nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L
       # Only what CI built: attic skips paths signed by the cache's upstream
-      # (cache.nixos.org), which machines fetch from there or their own
-      # watch-store pushes over the LAN. Those were 75-88% of push time
-      # over the tailnet, and both failed uploads seen. -j 1 keeps the load
-      # on attic down; a retried attempt skips paths already pushed.
+      # (cache.nixos.org), which machines fetch from there. Those were
+      # 75-88% of push time over the tailnet, and both failed uploads seen.
+      # -j 1 keeps the load on attic down; a retried attempt skips paths
+      # already pushed.
       - name: Push built closure to attic
         continue-on-error: true
         uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60
