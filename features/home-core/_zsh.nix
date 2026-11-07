@@ -89,11 +89,12 @@ in
           "- Imperative mood, lowercase first letter, no full stop."
           "- Aim for 65 characters or fewer, and never more than 72 in total: GitHub adds the PR number when merging."
           ""
-          "Body: one blank line after the subject, every line wrapped at 72 characters. Write the section names as plain text (Why:, What:, Notes:) without the template's # markers, and leave out the template's comment lines."
+          "Body: one blank line after the subject, every line wrapped at 72 characters, and one blank line between sections. Put each section heading (Why:, What:, Notes:) on a line of its own, as plain text without the template's # markers, with the section's text starting on the next line. Leave out the template's comment lines."
           "- Why: what was wrong or needed, its cause, and why this approach. Don't list the changes here."
           "- What: one bullet per change, naming the option, file or package. Leave the section out when there's a single change the subject already describes. When a bullet wraps, indent the continuation by 2 spaces so it lines up under the text."
-          "- Notes: caveats, follow-ups or what to check after switching. Leave it out if there's nothing to say."
+          "- Notes: caveats, follow-ups, or what to check before switching (a build, a closure diff) or after. Only suggest checks that apply to this repo's hosts. Leave it out if there's nothing to say."
           "- Don't say the same thing in Why and What."
+          "- Describe only what the diff does: don't present code it leaves unchanged as changed, in the subject or the body."
         )
 
         # flake.lock's diff is all hashes; --stat still lists the file

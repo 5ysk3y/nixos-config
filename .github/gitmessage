@@ -4,13 +4,18 @@
 #          (flake, ci, bootstrap, pkgs, githooks); leave it out if none fits
 #   imperative, lowercase start, no full stop; aim for <= 65 chars,
 #   72 at most (GitHub adds " (#123)" when merging)
+#
+# Each section's heading goes on a line of its own, its text below it.
 
-# Why: what was wrong or needed, its cause, and why this approach.
+# Why:
+#   What was wrong or needed, its cause, and why this approach.
 #   Not the changes themselves.
 
-# What: one bullet per change, naming the option, file or package.
+# What:
+#   One bullet per change, naming the option, file or package.
 #   Leave it out for a single change the subject already describes.
 # -
 
-# Notes: caveats, follow-ups, what to check after switching.
+# Notes:
+#   Caveats, follow-ups, what to check before or after switching.
 #   Leave it out if there's nothing to say.
