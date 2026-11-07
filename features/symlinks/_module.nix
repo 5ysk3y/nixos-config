@@ -26,10 +26,6 @@ in
   };
 
   xdg.configFile = {
-    "OpenRGB/MainBlue.orp" = lib.mkIf isLinux {
-      source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/OpenRGB/MainBlue.orp";
-    };
-
     "mako/notification.wav" = lib.mkIf (config.services.mako.enable && isLinux) {
       source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/mako/notification.wav";
     };
