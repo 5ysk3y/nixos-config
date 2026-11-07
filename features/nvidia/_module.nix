@@ -4,6 +4,10 @@
   ...
 }:
 {
+  # Loaded here because the NVIDIA module only adds nvidia, nvidia_modeset
+  # and nvidia_drm to boot.kernelModules while services.xserver.enable is on,
+  # and there's no X server (features/hypr). nvidia_drm is what gives
+  # Hyprland its DRM device.
   boot.kernelModules = [
     "nvidia"
     "nvidia_modeset"
@@ -11,6 +15,7 @@
     "nvidia_drm"
   ];
 
+  # How the NVIDIA module is switched on, X server or not
   services.xserver.videoDrivers = [ "nvidia" ];
 
   environment.sessionVariables = {

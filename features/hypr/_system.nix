@@ -9,7 +9,11 @@
 
   services.displayManager.defaultSession = "hyprland";
 
-  services.xserver.enable = true;
+  # No X server: Hyprland and the SDDM greeter (kwin) are Wayland, and X11
+  # apps run under XWayland. services.libinput defaults to
+  # services.xserver.enable, and it's what installs libinput's udev rules
+  # (device groups, quirks) that Hyprland's libinput reads, so it's kept on.
+  services.libinput.enable = true;
 
   security = {
     pam.services.hyprlock.rules.auth.u2f-retry = {
