@@ -31,9 +31,6 @@
     };
   };
 
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_GB.UTF-8";
-
   users = {
     # The account itself is features/core/user
     users."${vars.username}" = {
