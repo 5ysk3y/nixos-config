@@ -4,8 +4,8 @@
 {
   infra.profiles.nixos.desktop = {
     imports = with config.flake.modules.nixos; [
-      containers-pentesting
-      containers-virtualisation
+      pentesting
+      virtualisation
       desktop-services
       fonts
       gaming

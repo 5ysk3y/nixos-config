@@ -10,152 +10,150 @@
     description = "Host level hyprland.lua config file";
   };
 
-  config =
-    with lib;
-    mkIf pkgs.stdenv.hostPlatform.isLinux {
+  config = {
 
-      # Host-level hyprland configuration
-      xdg.configFile."hypr/hyprland-host.lua".source = config.features.home.hyprland.luaConfig;
+    # Host-level hyprland configuration
+    xdg.configFile."hypr/hyprland-host.lua".source = config.features.home.hyprland.luaConfig;
 
-      home.packages = with pkgs; [ hyprshutdown ];
+    home.packages = with pkgs; [ hyprshutdown ];
 
-      services.hyprpolkitagent.enable = true;
+    services.hyprpolkitagent.enable = true;
 
-      wayland.windowManager.hyprland = {
+    wayland.windowManager.hyprland = {
+      enable = true;
+      sourceFirst = false;
+      configType = "lua";
+
+      systemd = {
         enable = true;
-        sourceFirst = false;
-        configType = "lua";
-
-        systemd = {
-          enable = true;
-          variables = [ "--all" ];
-        };
-
-        extraConfig = ''
-          local WS = {
-            WS1 = "1-main",
-            WS2 = "2-web",
-            WS3 = "3-game",
-            WS4 = "4-h4x0r",
-            WS5 = "5-social",
-            WS6 = "6-media",
-            WS7 = "7-passwd",
-            WS8 = "8-ext1",
-            WS9 = "9-ext2",
-            WS0 = "10-ext3",
-          }
-
-          -- Keep Hyprland off realtime scheduling. With nixpkgs' module (no
-          -- cap_sys_nice wrapper) 0.57 gets SCHED_RR from rtkit, which needs
-          -- a 200ms RLIMIT_RTTIME. A long driver call while outputs come back
-          -- (DPMS wake, resume, VT switch) overruns it and the kernel SIGKILLs
-          -- the compositor: no crash report, no core dump, safe-mode restart.
-          -- hl.env sets it in Hyprland's own process before it asks for
-          -- realtime. Remove once 0.57.2 releases as it removes RT scheduling
-          -- entirely
-          hl.env("HYPRLAND_NO_RT", "1")
-
-          hl.config({
-            input = {
-              kb_file = "",
-              kb_layout = "us",
-              kb_variant = "",
-              kb_model = "",
-              kb_options = "caps:escape",
-              kb_rules = "",
-              follow_mouse = 1,
-
-              touchpad = {
-                natural_scroll = false,
-              },
-
-              sensitivity = 0,
-            },
-
-            general = {
-              gaps_in = 5,
-              gaps_out = 10,
-              border_size = 1,
-              col = {
-                active_border = 0xffbd93f9,
-                inactive_border = 0xff44475a,
-              },
-              layout = "scrolling",
-            },
-
-            cursor = {
-              default_monitor = "DP-2",
-              inactive_timeout = 5,
-            },
-
-            decoration = {
-              rounding = 4,
-              blur = {
-                enabled = true,
-                size = 5,
-                passes = 1,
-                new_optimizations = true,
-              },
-            },
-
-            animations = {
-              enabled = true,
-            },
-
-            misc = {
-              mouse_move_enables_dpms = true,
-              key_press_enables_dpms = true,
-              force_default_wallpaper = 0,
-              allow_session_lock_restore = true,
-              initial_workspace_tracking = 0,
-            },
-
-            group = {
-              groupbar = {
-                render_titles = false,
-                col = {
-                  active = 0xffbd93f9,
-                  inactive = 0xff44475a,
-                  locked_active = 0xffbd93f9,
-                  locked_inactive = 0xff44475a,
-                },
-                height = 1,
-              },
-
-              col = {
-                border_active = 0xffbd93f9,
-                border_inactive = 0xff44475a,
-                border_locked_active = 0xffbd93f9,
-                border_locked_inactive = 0xff44475a,
-              },
-            },
-
-            binds = {
-              workspace_center_on = 1,
-            },
-
-            xwayland = {
-              enabled = true,
-              force_zero_scaling = true
-            },
-          })
-
-          hl.animation({ leaf = "windows",    enabled = true, speed = 2, bezier = "default", style = "popin" })
-          hl.animation({ leaf = "windowsOut", enabled = true, speed = 2, bezier = "default", style = "popin" })
-          hl.animation({ leaf = "border",     enabled = true, speed = 6, bezier = "default" })
-          hl.animation({ leaf = "fade",       enabled = true, speed = 6, bezier = "default" })
-          hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default", style = "fade" })
-
-          ${lib.optionalString config.home.pointerCursor.enable ''
-            -- Inherit the cursor from home.pointerCursor (set by Stylix), so Hyprland
-            -- and the apps it starts match GTK and XWayland.
-            hl.env("XCURSOR_THEME", "${config.home.pointerCursor.name}")
-            hl.env("XCURSOR_SIZE", "${toString config.home.pointerCursor.size}")
-            hl.env("HYPRCURSOR_THEME", "${config.home.pointerCursor.name}")
-            hl.env("HYPRCURSOR_SIZE", "${toString config.home.pointerCursor.size}")
-          ''}
-          require("hyprland-host")(WS)
-        '';
+        variables = [ "--all" ];
       };
+
+      extraConfig = ''
+        local WS = {
+          WS1 = "1-main",
+          WS2 = "2-web",
+          WS3 = "3-game",
+          WS4 = "4-h4x0r",
+          WS5 = "5-social",
+          WS6 = "6-media",
+          WS7 = "7-passwd",
+          WS8 = "8-ext1",
+          WS9 = "9-ext2",
+          WS0 = "10-ext3",
+        }
+
+        -- Keep Hyprland off realtime scheduling. With nixpkgs' module (no
+        -- cap_sys_nice wrapper) 0.57 gets SCHED_RR from rtkit, which needs
+        -- a 200ms RLIMIT_RTTIME. A long driver call while outputs come back
+        -- (DPMS wake, resume, VT switch) overruns it and the kernel SIGKILLs
+        -- the compositor: no crash report, no core dump, safe-mode restart.
+        -- hl.env sets it in Hyprland's own process before it asks for
+        -- realtime. Remove once 0.57.2 releases as it removes RT scheduling
+        -- entirely
+        hl.env("HYPRLAND_NO_RT", "1")
+
+        hl.config({
+          input = {
+            kb_file = "",
+            kb_layout = "us",
+            kb_variant = "",
+            kb_model = "",
+            kb_options = "caps:escape",
+            kb_rules = "",
+            follow_mouse = 1,
+
+            touchpad = {
+              natural_scroll = false,
+            },
+
+            sensitivity = 0,
+          },
+
+          general = {
+            gaps_in = 5,
+            gaps_out = 10,
+            border_size = 1,
+            col = {
+              active_border = 0xffbd93f9,
+              inactive_border = 0xff44475a,
+            },
+            layout = "scrolling",
+          },
+
+          cursor = {
+            default_monitor = "DP-2",
+            inactive_timeout = 5,
+          },
+
+          decoration = {
+            rounding = 4,
+            blur = {
+              enabled = true,
+              size = 5,
+              passes = 1,
+              new_optimizations = true,
+            },
+          },
+
+          animations = {
+            enabled = true,
+          },
+
+          misc = {
+            mouse_move_enables_dpms = true,
+            key_press_enables_dpms = true,
+            force_default_wallpaper = 0,
+            allow_session_lock_restore = true,
+            initial_workspace_tracking = 0,
+          },
+
+          group = {
+            groupbar = {
+              render_titles = false,
+              col = {
+                active = 0xffbd93f9,
+                inactive = 0xff44475a,
+                locked_active = 0xffbd93f9,
+                locked_inactive = 0xff44475a,
+              },
+              height = 1,
+            },
+
+            col = {
+              border_active = 0xffbd93f9,
+              border_inactive = 0xff44475a,
+              border_locked_active = 0xffbd93f9,
+              border_locked_inactive = 0xff44475a,
+            },
+          },
+
+          binds = {
+            workspace_center_on = 1,
+          },
+
+          xwayland = {
+            enabled = true,
+            force_zero_scaling = true
+          },
+        })
+
+        hl.animation({ leaf = "windows",    enabled = true, speed = 2, bezier = "default", style = "popin" })
+        hl.animation({ leaf = "windowsOut", enabled = true, speed = 2, bezier = "default", style = "popin" })
+        hl.animation({ leaf = "border",     enabled = true, speed = 6, bezier = "default" })
+        hl.animation({ leaf = "fade",       enabled = true, speed = 6, bezier = "default" })
+        hl.animation({ leaf = "workspaces", enabled = true, speed = 6, bezier = "default", style = "fade" })
+
+        ${lib.optionalString config.home.pointerCursor.enable ''
+          -- Inherit the cursor from home.pointerCursor (set by Stylix), so Hyprland
+          -- and the apps it starts match GTK and XWayland.
+          hl.env("XCURSOR_THEME", "${config.home.pointerCursor.name}")
+          hl.env("XCURSOR_SIZE", "${toString config.home.pointerCursor.size}")
+          hl.env("HYPRCURSOR_THEME", "${config.home.pointerCursor.name}")
+          hl.env("HYPRCURSOR_SIZE", "${toString config.home.pointerCursor.size}")
+        ''}
+        require("hyprland-host")(WS)
+      '';
     };
+  };
 }

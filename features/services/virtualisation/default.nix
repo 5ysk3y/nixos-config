@@ -1,5 +1,5 @@
 _:
 
 {
-  flake.modules.nixos.containers-virtualisation = ./_module.nix;
+  flake.modules.nixos.virtualisation = ./_module.nix;
 }

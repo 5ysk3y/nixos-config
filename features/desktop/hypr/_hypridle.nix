@@ -25,48 +25,46 @@ in
     description = "Commands run after waking from sleep, before the displays are cycled.";
   };
 
-  config =
-    with lib;
-    mkIf pkgs.stdenv.hostPlatform.isLinux {
-      services = {
-        hypridle = {
-          enable = true;
-          settings = {
-            general = {
-              lock_cmd = "pidof hyprlock || hyprlock";
-              after_sleep_cmd = concatStringsSep "; " (
-                [
-                  "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'"
-                  "wtype -k escape"
-                ]
-                ++ config.features.home.hyprland.resumeCommands
-                ++ [ "${resumeDpms}" ]
-              );
-              on_unlock_cmd = "wtype -k escape";
-            };
-
-            listener = [
-              {
-                timeout = 300;
-                on-timeout = "dim -p -d 0";
-                on-resume = "pkill dim";
-              }
-              {
-                timeout = 360;
-                on-timeout = "loginctl lock-session";
-              }
-              {
-                timeout = 600;
-                on-timeout = "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"disable\" })'";
-                on-resume = "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'";
-              }
-              {
-                timeout = 900;
-                on-timeout = "systemctl hibernate";
-              }
-            ];
+  config = {
+    services = {
+      hypridle = {
+        enable = true;
+        settings = {
+          general = {
+            lock_cmd = "pidof hyprlock || hyprlock";
+            after_sleep_cmd = lib.concatStringsSep "; " (
+              [
+                "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'"
+                "wtype -k escape"
+              ]
+              ++ config.features.home.hyprland.resumeCommands
+              ++ [ "${resumeDpms}" ]
+            );
+            on_unlock_cmd = "wtype -k escape";
           };
+
+          listener = [
+            {
+              timeout = 300;
+              on-timeout = "dim -p -d 0";
+              on-resume = "pkill dim";
+            }
+            {
+              timeout = 360;
+              on-timeout = "loginctl lock-session";
+            }
+            {
+              timeout = 600;
+              on-timeout = "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"disable\" })'";
+              on-resume = "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'";
+            }
+            {
+              timeout = 900;
+              on-timeout = "systemctl hibernate";
+            }
+          ];
         };
       };
     };
+  };
 }

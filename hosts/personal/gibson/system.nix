@@ -17,10 +17,6 @@
     inputs.self.modules.nixos.steelseries
   ];
 
-  security.sudo.extraConfig = ''
-    Defaults env_keep+=NIX_SSHOPTS
-  '';
-
   networking = {
     useDHCP = false;
     dhcpcd.enable = false;

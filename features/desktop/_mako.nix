@@ -17,7 +17,7 @@ in
     };
   };
 
-  config = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+  config = {
     # The sound played on notify (below), kept in Syncthing
     xdg.configFile."mako/notification.wav".source =
       config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/mako/notification.wav";
