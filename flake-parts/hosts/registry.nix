@@ -7,6 +7,18 @@
 let
   username = "rickie";
 
+  # Applies an overlay-entries.nix: its permanent overlay, then every tracked
+  # one, in order
+  overlaysModule =
+    entriesFile:
+    let
+      entries = import entriesFile { inherit inputs; };
+    in
+    {
+      _file = entriesFile;
+      nixpkgs.overlays = [ entries.permanent ] ++ map (e: e.overlay) entries.tracked;
+    };
+
   # Per-host values handed to every module as the `vars` special arg.
   mkVars =
     system:
@@ -76,19 +88,24 @@ in
                 description = "Not required for kind = \"nixos-minimal\" — those hosts get no Home Manager module at all.";
               };
 
-              overlaysModule = lib.mkOption {
+              overlayEntries = lib.mkOption {
                 type = lib.types.nullOr lib.types.path;
                 default = null;
-                description = "Host-specific overlays directory (default.nix + overlay-entries.nix); null if the host has none.";
+                description = ''
+                  The host's overlay-entries.nix: its permanent overlay and its
+                  tracked, audited ones (see flake-parts/exports/overlay-audits.nix).
+                  Applied to the host's nixpkgs by the module below; null if the
+                  host has none.
+                '';
               };
 
               modules = lib.mkOption {
-                type = lib.types.listOf lib.types.path;
+                type = lib.types.listOf lib.types.raw;
                 readOnly = true;
                 default = [
                   config.systemModule
                 ]
-                ++ lib.optional (config.overlaysModule != null) config.overlaysModule;
+                ++ lib.optional (config.overlayEntries != null) (overlaysModule config.overlayEntries);
               };
 
               systemProfiles = lib.mkOption {
