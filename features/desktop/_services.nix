@@ -1,4 +1,10 @@
 _: {
+  security = {
+    polkit.enable = true;
+    # Lets PipeWire raise its threads to realtime priority
+    rtkit.enable = true;
+  };
+
   services = {
     pipewire = {
       enable = true;

@@ -6,6 +6,7 @@
       inputs.stylix.homeModules.stylix
     ]
     ++ (with config.flake.modules.homeManager; [
+      bitwarden
       claude-code
       doomemacs
       github-cli

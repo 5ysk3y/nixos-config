@@ -14,6 +14,7 @@
         kitty
         mako
         media
+        messaging
         obs-studio
         password-management
         playerctld

@@ -9,5 +9,8 @@
     };
 
     rbw.enable = true;
+
+    # Copies a password from the main store
+    zsh.shellAliases.pass = "pass -c main";
   };
 }
