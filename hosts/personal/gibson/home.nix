@@ -28,6 +28,9 @@
     ];
   };
 
+  # OpenRGB's device and profile settings (services.hardware.openrgb)
+  xdg.configFile."OpenRGB/OpenRGB.json".text = builtins.readFile ./applications/openrgb/openrgb.json;
+
   programs = {
     git.settings.user.signingKey = "7D73BA8CF10F7F67";
   };

@@ -1,5 +1,9 @@
-{ config, ... }:
+{ config, vars, ... }:
 {
+  # The main store's key file, kept in Syncthing
+  home.file.".local/share/pass/main.gpg".source =
+    config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/gnupg/main.gpg";
+
   programs = {
     password-store = {
       enable = true;
