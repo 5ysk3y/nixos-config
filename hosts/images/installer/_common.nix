@@ -17,7 +17,7 @@ in
 
   # YubiKey: pcscd for age-plugin-yubikey (PIV), gpg-agent for SSH via the
   # OpenPGP applet. disable-ccid leaves the card to pcscd so both can use it,
-  # as on gibson (hosts/personal/gibson/home.nix). scdaemon reads this
+  # as on gibson (features/core/home/_gpg.nix). scdaemon reads this
   # system-wide file before ~/.gnupg/scdaemon.conf.
   services.pcscd.enable = true;
   programs.gnupg.agent = {

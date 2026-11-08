@@ -25,14 +25,6 @@
     '';
   };
 
-  services = {
-    gpg-agent = {
-      pinentry = {
-        package = pkgs.pinentry_mac;
-      };
-    };
-  };
-
   launchd.agents.syncthingtray = {
     enable = true;
     config = {
