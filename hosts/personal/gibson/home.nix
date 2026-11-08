@@ -1,4 +1,5 @@
 {
+  config,
   vars,
   pkgs,
   ...
@@ -41,6 +42,21 @@
         luaConfig = ./applications/hypr/hyprland-host.lua;
         # Back to the desk lighting OpenRGB keeps (services.hardware.openrgb)
         resumeCommands = [ "openrgb -c 0000FF -m Direct" ];
+      };
+
+      # The clock and password field on the middle monitor, and the
+      # three-monitor wallpaper across all three
+      hyprlock = {
+        primaryMonitor = "DP-1";
+        wallpapers =
+          let
+            dir = "${config.xdg.configHome}/Wallpapers/3monitor";
+          in
+          {
+            DP-1 = "${dir}/hackers_middle.png";
+            DP-2 = "${dir}/hackers_left.png";
+            HDMI-A-1 = "${dir}/hackers_right.png";
+          };
       };
 
       media.hwdec = "nvdec";
