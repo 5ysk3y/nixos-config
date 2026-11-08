@@ -31,8 +31,15 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 ├── flake-parts/               # Flake-parts modules (host registry, platforms, exports, formatter)
 ├── hosts/
 │   ├── personal/<host>/       # default.nix registers the host; system/home/overlays alongside it
-│   └── servers/<host>/        # Same, for servers
+│   ├── servers/<host>/        # Same, for servers
+│   └── images/<image>/        # Installer and LXC staging images (nixosConfigurations, not hosts)
 ├── features/                  # Feature modules — home and system, published by name
+│   ├── core/                  # Shared foundations: nix, locale, secrets, shell, git, theming, Tailscale
+│   ├── desktop/               # The Linux desktop: Hyprland, Waybar, SDDM, notifications
+│   ├── apps/                  # Applications: editors, browser, terminals, media, gaming
+│   ├── services/              # Background services and VMs: attic push, Syncthing, backups
+│   ├── servers/               # Server roles: the LXC baseline, attic, Vaultwarden, Zabbix
+│   └── hardware/              # Hardware support: NVIDIA
 ├── profiles/                  # Profile compositions — named groups of features per host class
 ├── pkgs/                      # Custom packages
 └── bootstrap/

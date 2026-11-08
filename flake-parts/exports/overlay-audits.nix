@@ -117,7 +117,7 @@ in
     description = ''
       overlay-entries files not owned by a single host, keyed by the audit
       group name they appear under in flake.overlayAudits. Set by the
-      feature that owns the file, e.g. features/system-core/overlays.
+      feature that owns the file, e.g. features/core/system/overlays.
     '';
   };
 
@@ -173,7 +173,7 @@ in
               description = ''
                 Explicit list of hosts to run the liveness check against.
                 Required for shared/cross-host entries (e.g. under
-                features/system-core/overlays) where the entry's own grouping key
+                features/core/system/overlays) where the entry's own grouping key
                 isn't itself a host name. Defaults to just the entry's own host
                 when unset and that key resolves to a real host.
               '';
@@ -224,7 +224,7 @@ in
     description = ''
       Audit metadata for temporary overlays, sourced directly from each
       host's overlays/overlay-entries.nix (and the system-wide
-      features/system-core/overlays/_overlay-entries.nix) — the same file
+      features/core/system/overlays/_overlay-entries.nix) — the same file
       that builds nixpkgs.overlays. Every entry in that file's `tracked` list
       must declare either `exempt = true` or `meta`, enforced by an eval-time
       assertion, so a temporary override can't silently exist untracked.

@@ -40,7 +40,7 @@
     wayland-pipewire-idle-inhibit.inputs.nixpkgs.follows = "nixpkgs";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
 
-    # Used as a Nix store path in features/doomemacs/_module.nix for the
+    # Used as a Nix store path in features/apps/doomemacs/_module.nix for the
     # rsync-based activation script. The input hash drives the stamp-based
     # doom sync-skip logic — keeping as a flake input is intentional.
     doomemacs.url = "github:doomemacs/core";
