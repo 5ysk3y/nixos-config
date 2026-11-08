@@ -272,10 +272,14 @@ mkMerge [
         KeepAlive = true;
         StandardOutPath = "/tmp/emacs-daemon.log";
         StandardErrorPath = "/tmp/emacs-daemon.err";
+        # ./doom is copied to the store on its own: as a
+        # bare path it was written as its location in this repo's source,
+        # which changes with every commit, so every switch reloaded the
+        # daemon.
         restartTriggers = [
-          inputs.doomemacs
-          inputs.doomemacs-modules
-          ./doom
+          "${inputs.doomemacs}"
+          "${inputs.doomemacs-modules}"
+          "${./doom}"
         ];
       };
     };
