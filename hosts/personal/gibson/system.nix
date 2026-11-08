@@ -29,12 +29,6 @@
     networkmanager = {
       enable = true;
     };
-
-    nat = {
-      enable = true;
-      internalInterfaces = [ "ve-pentesting" ];
-      externalInterface = "enp7s0";
-    };
   };
 
   # Select internationalisation properties.
@@ -77,7 +71,6 @@
   # List packages installed in system profile. To search, run: $ nix search wget
   environment = {
     systemPackages = with pkgs; [
-      cider-2
       ddcutil
       expect
       i2c-tools
@@ -94,7 +87,6 @@
     sessionVariables = {
       ADW_DISABLE_PORTAL = "1";
       CLIPBOARD_NOGUI = "1";
-      DOCKER_HOST = "unix://\${XDG_RUNTIME_DIR}/podman/podman.sock";
       ENABLE_DPMS = "1";
       ENABLE_DDC = "1";
       GSETTINGS_BACKEND = "keyfile";
@@ -103,11 +95,6 @@
   };
 
   # Security Ruleset
-  security = {
-    polkit.enable = true;
-    rtkit.enable = true;
-  };
-
   services = {
     pipewire = {
       wireplumber = {
@@ -220,6 +207,8 @@
     };
 
   };
+
+  features.system.pentesting.externalInterface = "enp7s0";
 
   features.system.sddm = {
     theme = "cyberpunk";

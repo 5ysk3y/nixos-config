@@ -18,8 +18,6 @@
     };
 
     packages = with pkgs; [
-      bitwarden-desktop
-      discord
       fontconfig
       grimblast
       jq
@@ -27,8 +25,6 @@
       libnotify
       fastfetch
       rivalcfg
-      signal-desktop
-      spice-gtk
       wl-clipboard
       wtype
     ];
@@ -43,8 +39,6 @@
         cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
         mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
         shred = "shred -zfu";
-        spicy = "spicy --spice-ca-file=/etc/pki/libvirt-spice/ca-cert.pem --uri 'spice://127.0.0.1' -p 5900 -s 5901 --title 'th3h4x0r' -f > /dev/null 2>&1 &|";
-        pass = "pass -c main";
       };
 
       history.path = "${config.xdg.dataHome}/zsh/zsh_history";

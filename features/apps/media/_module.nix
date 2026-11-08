@@ -4,6 +4,7 @@
 }:
 {
   home.packages = with pkgs; [
+    cider-2
     jellyfin-desktop
     jellyfin-mpv-shim
     mpvpaper
