@@ -1,5 +1,4 @@
 {
-  config,
   vars,
   pkgs,
   ...
@@ -31,19 +30,6 @@
   };
 
   programs = {
-    zsh = {
-      dotDir = "${config.xdg.configHome}/zsh";
-
-      shellAliases = {
-        build-nix = "nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'";
-        cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
-        mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
-        shred = "shred -zfu";
-      };
-
-      history.path = "${config.xdg.dataHome}/zsh/zsh_history";
-    };
-
     git.settings.user.signingKey = "7D73BA8CF10F7F67";
   };
 

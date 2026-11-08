@@ -1,4 +1,6 @@
 {
+  config,
+  lib,
   pkgs,
   vars,
   hostname,
@@ -29,6 +31,11 @@ in
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
+
+    # Keeps zsh's files out of ~: .zshrc and friends in ~/.config/zsh (with
+    # a ~/.zshenv that points there), history in ~/.local/share/zsh
+    dotDir = "${config.xdg.configHome}/zsh";
+    history.path = "${config.xdg.dataHome}/zsh/zsh_history";
 
     sessionVariables = {
       GNUMAKEFLAGS = "-j12";
@@ -143,9 +150,16 @@ in
     '';
 
     shellAliases = {
+      build-nix = "nix-build -E 'with import <nixpkgs> {}; callPackage ./default.nix {}'";
       less = "bat";
       ll = "ls -lash";
       ls = "ls --color";
+    }
+    # GNU ps and shred, which macOS doesn't have
+    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+      cpu_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%cpu | head";
+      mem_usage = "ps -eo pid,ppid,%mem,%cpu,cmd --sort=-%mem | head";
+      shred = "shred -zfu";
     };
 
     oh-my-zsh = {
