@@ -1,9 +1,4 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, lib, ... }:
 let
   cfg = config.features.home.hyprlock;
 
@@ -36,7 +31,7 @@ in
     };
   };
 
-  config = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+  config = {
     programs.hyprlock = {
       enable = true;
 

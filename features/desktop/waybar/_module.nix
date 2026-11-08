@@ -9,7 +9,7 @@ let
     scroll_mpris = import ./_scripts/scroll-mpris { inherit pkgs; };
   };
 in
-lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+{
   programs.waybar = {
     enable = true;
     systemd.enable = true;

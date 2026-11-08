@@ -1,9 +1,4 @@
-{
-  lib,
-  pkgs,
-  ...
-}:
-lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+_: {
   programs.fuzzel = {
     enable = true;
 
