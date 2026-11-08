@@ -1,8 +1,16 @@
 {
+  config,
   pkgs,
+  vars,
   ...
 }:
 {
+  # Scenes and profiles, kept in Syncthing
+  xdg.configFile."obs-studio" = {
+    source = config.lib.file.mkOutOfStoreSymlink "${vars.syncthingPath}/Files/nix/obs-studio";
+    recursive = true;
+  };
+
   programs.obs-studio = {
     enable = true;
     plugins = with pkgs; [

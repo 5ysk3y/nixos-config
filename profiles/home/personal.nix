@@ -14,7 +14,6 @@
       qutebrowser
       sops-nix
       stylix
-      symlinks
       syncthing
     ]);
   };

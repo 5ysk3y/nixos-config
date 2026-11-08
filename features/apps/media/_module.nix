@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  hostname,
   ...
 }:
 let
@@ -20,6 +21,27 @@ in
   };
 
   config = {
+    xdg.configFile = {
+      # Settings, with the player named after this machine in Jellyfin.
+      # force replaces a conf.json that isn't Home Manager's, such as one
+      # the app wrote itself.
+      "jellyfin-mpv-shim/conf.json" = {
+        text = builtins.toJSON (
+          builtins.fromJSON (builtins.readFile ./files/jellyfin-mpv-shim/conf.json)
+          // {
+            player_name = hostname;
+          }
+        );
+        force = true;
+      };
+
+      "jellyfin-mpv-shim/input.json".text = ''
+        q run "/bin/sh" "-c" "hyprctl --batch 'dispatch hl.dsp.window.close(); dispatch hl.dsp.focus({ workspace = [[m-1]] })'"
+      '';
+
+      "jellyfin-mpv-shim/mpv.conf".text = builtins.readFile ./files/jellyfin-mpv-shim/mpv.conf;
+    };
+
     home.packages = with pkgs; [
       cider-2
       jellyfin-desktop
