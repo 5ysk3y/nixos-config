@@ -8,6 +8,7 @@ let
       claude-code
       sops-nix
       tailscale
+      user
     ];
 in
 {

@@ -5,7 +5,7 @@
 }:
 {
   home = {
-    inherit (vars) username;
+    inherit (vars) username homeDirectory;
 
     packages = with pkgs; [
       bat

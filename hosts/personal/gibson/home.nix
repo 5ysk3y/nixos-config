@@ -10,8 +10,6 @@
   ];
 
   home = {
-    homeDirectory = "/home/${vars.username}";
-
     pointerCursor.enable = true;
 
     sessionVariables = {

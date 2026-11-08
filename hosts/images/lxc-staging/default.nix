@@ -22,11 +22,11 @@
   # host's first real `bootstrap/deploy.sh <host>` run moves it onto its own
   # permanent static IP, freeing .150 for the next one.
   flake.nixosConfigurations.lxc-staging = inputs.nixpkgs.lib.nixosSystem {
-    specialArgs.hostname = "lxc-staging";
     modules = [
       config.flake.modules.nixos.proxmox-lxc-server
       {
         nixpkgs.hostPlatform = "x86_64-linux";
+        networking.hostName = "lxc-staging";
         features.system.proxmoxLxcServer.address = "192.168.1.150";
         system.stateVersion = "25.05";
       }

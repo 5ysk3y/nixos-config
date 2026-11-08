@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, vars, ... }:
 {
   # The home module installs pkgs.xivlauncher-rb, which this repo's own
   # overlay provides. Applied here, at system level, because with
@@ -7,6 +7,8 @@
   nixpkgs.overlays = [ inputs.self.overlays.default ];
 
   hardware.xone.enable = true;
+
+  users.users.${vars.username}.extraGroups = [ "gamemode" ];
 
   programs = {
     dconf.enable = true;

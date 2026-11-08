@@ -5,7 +5,6 @@
   config,
   lib,
   pkgs,
-  hostname,
   modulesPath,
   ...
 }:
@@ -43,7 +42,6 @@ in
 
   config = {
     networking = {
-      hostName = hostname;
       useDHCP = false;
       interfaces.eth0.ipv4.addresses = [
         {
