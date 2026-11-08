@@ -21,6 +21,10 @@ in
   };
 
   config = {
+    # jellyfin-mpv-shim's login to the Jellyfin server
+    sops.secrets."services/jellyfin/creds".path =
+      "${config.xdg.configHome}/jellyfin-mpv-shim/cred.json";
+
     xdg.configFile = {
       # Settings, with the player named after this machine in Jellyfin.
       # force replaces a conf.json that isn't Home Manager's, such as one

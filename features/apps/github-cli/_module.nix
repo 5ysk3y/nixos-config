@@ -23,6 +23,9 @@ let
 in
 
 {
+  # The token gh authenticates with (ghWrapped reads it)
+  sops.secrets."services/github-cli/token" = { };
+
   programs.gh = {
     enable = true;
     package = ghWrapped;

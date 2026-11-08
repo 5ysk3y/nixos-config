@@ -156,6 +156,21 @@ in
 
       home.packages = [ pkgs.syncthing ];
 
+      # This machine's device identity, and the GUI password
+      sops.secrets = {
+        "services/syncthing/pass" = { };
+
+        syncthing-cert = {
+          format = "binary";
+          sopsFile = "${vars.secretsPath}/secrets/syncthing/${hostname}.cert";
+        };
+
+        syncthing-key = {
+          format = "binary";
+          sopsFile = "${vars.secretsPath}/secrets/syncthing/${hostname}.key";
+        };
+      };
+
       services.syncthing = {
         enable = true;
 
