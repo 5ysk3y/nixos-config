@@ -21,6 +21,7 @@
   };
 
   users.users.${vars.username} = {
+    extraGroups = [ "libvirtd" ];
     subUidRanges = [
       {
         startUid = 100000;

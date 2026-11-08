@@ -29,7 +29,12 @@ let
       modules =
         host.systemProfiles
         ++ host.modules
-        ++ [ { nixpkgs.config = nixpkgsConfig; } ]
+        ++ [
+          {
+            nixpkgs.config = nixpkgsConfig;
+            networking.hostName = host.hostname;
+          }
+        ]
         ++ lib.optionals hasSecretsAndHome [
           inputs.sops-nix.nixosModules.sops
         ]

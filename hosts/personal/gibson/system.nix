@@ -2,7 +2,6 @@
 {
   config,
   pkgs,
-  hostname,
   vars,
   inputs,
   ...
@@ -25,7 +24,6 @@
     useDHCP = false;
     dhcpcd.enable = false;
 
-    hostName = hostname;
     timeServers = [ "192.168.1.1" ];
 
     networkmanager = {
@@ -43,20 +41,14 @@
   i18n.defaultLocale = "en_GB.UTF-8";
 
   users = {
+    # The account itself is features/core/user
     users."${vars.username}" = {
-      isNormalUser = true;
-      description = "${vars.username}";
       linger = true;
       extraGroups = [
         "networkmanager"
-        "wheel"
-        "audio"
         "i2c"
-        "libvirtd"
-        "gamemode"
         "sops"
       ];
-      shell = pkgs.zsh;
       hashedPasswordFile = config.sops.secrets."system/gibson_user_pass".path;
     };
     groups = {
@@ -203,9 +195,6 @@
   # Start Programs
 
   programs = {
-
-    zsh.enable = true;
-
     ssh.extraConfig = ''
       Match host * exec "gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1"
     '';

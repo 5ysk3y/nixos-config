@@ -5,8 +5,6 @@
 }:
 {
   home = {
-    homeDirectory = "/Users/${vars.username}";
-
     pointerCursor.enable = false;
 
     packages = with pkgs; [

@@ -24,18 +24,18 @@ let
     system:
     let
       isDarwin = builtins.match ".*-darwin" system != null;
-      homePrefix = if isDarwin then "/Users" else "/home";
+      homeDirectory = "${if isDarwin then "/Users" else "/home"}/${username}";
     in
     {
-      inherit username;
+      inherit username homeDirectory;
       secretsPath = toString inputs.nix-secrets;
-      syncthingPath = "${homePrefix}/${username}/Sync";
+      syncthingPath = "${homeDirectory}/Sync";
       # Where this repo is cloned. bootstrap/README.md clones to the same
       # place — keep the two in step.
-      configDir = "${homePrefix}/${username}/nixos-config";
+      configDir = "${homeDirectory}/nixos-config";
       age.keyFile =
         if isDarwin then
-          "${homePrefix}/${username}/Library/Application Support/sops/age/keys.txt"
+          "${homeDirectory}/Library/Application Support/sops/age/keys.txt"
         else
           "/var/lib/age/keys.txt";
     };
