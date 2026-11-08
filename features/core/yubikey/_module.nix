@@ -18,9 +18,15 @@
 
   sops.secrets."system/pam/yubikeyPub".owner = vars.username;
 
-  services.pcscd = {
-    enable = true;
-  };
+  services.pcscd.enable = true;
+  # Started at boot as well as on demand from its socket
+  systemd.services.pcscd.wantedBy = [ "multi-user.target" ];
+
+  # gpg-agent serves SSH keys from the YubiKey: point it at the terminal
+  # ssh runs in, so its PIN prompt appears there
+  programs.ssh.extraConfig = ''
+    Match host * exec "gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1"
+  '';
 
   # pam_u2f: build its libfido2 without PC/SC so FIDO auth never socket-activates
   # pcscd. pcscd initialising the YubiKey's CCID reader after hibernate resume

@@ -47,26 +47,13 @@
       extraGroups = [
         "networkmanager"
         "i2c"
-        "sops"
       ];
       hashedPasswordFile = config.sops.secrets."system/gibson_user_pass".path;
-    };
-    groups = {
-      sops = { };
     };
   };
 
   systemd = {
-    tmpfiles = {
-      rules = [
-        "d /var/lib/age 0750 root sops - -"
-        "f /var/lib/age/keys.txt 0640 root sops - -"
-      ];
-    };
     services = {
-      pcscd = {
-        wantedBy = [ "multi-user.target" ];
-      };
       reenable-monitors = {
         description = "Re-enable DRM outputs forced off for Plymouth boot splash";
         after = [ "plymouth-quit.service" ];
@@ -195,10 +182,6 @@
   # Start Programs
 
   programs = {
-    ssh.extraConfig = ''
-      Match host * exec "gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1"
-    '';
-
     gamemode.settings.gpu = {
       apply_gpu_optimisations = "accept-responsibility";
       gpu_device = 1;
