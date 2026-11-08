@@ -4,6 +4,9 @@
 {
   users.users.${vars.username} = {
     isNormalUser = true;
+    # What NixOS gives the first normal user. Fixed so features can use it
+    # (the pentesting container's user shares it).
+    uid = 1000;
     description = vars.username;
     shell = pkgs.zsh;
     extraGroups = [

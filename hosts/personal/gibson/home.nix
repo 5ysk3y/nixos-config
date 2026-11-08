@@ -23,7 +23,6 @@
       keyutils
       libnotify
       fastfetch
-      rivalcfg
       wl-clipboard
       wtype
     ];
@@ -35,7 +34,16 @@
 
   features = {
     home = {
-      hyprland.luaConfig = ./applications/hypr/hyprland-host.lua;
+      hyprland = {
+        luaConfig = ./applications/hypr/hyprland-host.lua;
+        # Back to the desk lighting OpenRGB keeps (services.hardware.openrgb)
+        resumeCommands = [ "openrgb -c 0000FF -m Direct" ];
+      };
+
+      media.hwdec = "nvdec";
+
+      # The combined HDMI / external-speaker sink (system.nix's PipeWire)
+      waylandIdleInhibit.sinks = [ "HDMI / External" ];
 
       mako = {
         output = "DP-1";
