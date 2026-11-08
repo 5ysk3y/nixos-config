@@ -8,6 +8,7 @@
       git
       gpg
       nix-settings
+      ssh
       zsh
       zoxide
     ];
