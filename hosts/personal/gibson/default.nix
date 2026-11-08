@@ -13,15 +13,17 @@ in
 
     systemModule = ./system.nix;
     homeModule = ./home.nix;
-    overlaysModule = ./overlays;
+    overlayEntries = ./overlays/overlay-entries.nix;
 
     systemProfiles = with config.infra.profiles.nixos; [
-      nixos
+      base
+      personal
       desktop
     ];
 
     homeProfiles = with config.infra.profiles.homeManager; [
       common
+      personal
       desktop
     ];
   };

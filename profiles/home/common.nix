@@ -1,3 +1,5 @@
+# Home configuration for every machine with Home Manager: shell, git, GPG,
+# Nix tooling
 { config, ... }:
 {
   infra.profiles.homeManager.common = {

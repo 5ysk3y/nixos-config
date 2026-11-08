@@ -6,14 +6,16 @@
 
     systemModule = ./system.nix;
     homeModule = ./home.nix;
-    overlaysModule = ./overlays;
+    overlayEntries = ./overlays/overlay-entries.nix;
 
     systemProfiles = with config.infra.profiles.darwin; [
-      darwin
+      base
+      personal
     ];
 
     homeProfiles = with config.infra.profiles.homeManager; [
       common
+      personal
       darwin
     ];
   };

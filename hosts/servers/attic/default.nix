@@ -9,8 +9,8 @@
     systemModule = ./system.nix;
 
     systemProfiles = with config.infra.profiles.nixos; [
-      nixos
-      attic-server
+      base
+      lxc-server
     ];
   };
 }

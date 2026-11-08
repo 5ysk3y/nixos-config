@@ -13,8 +13,9 @@
 # It plays no part in LAN admin/deploy access.
 { inputs, ... }:
 {
-  imports = [
-    inputs.self.modules.nixos.proxmox-lxc-server
+  imports = with inputs.self.modules.nixos; [
+    attic-server
+    tailscale
   ];
 
   features.system.proxmoxLxcServer.address = "192.168.1.110";

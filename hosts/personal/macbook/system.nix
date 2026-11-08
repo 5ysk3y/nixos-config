@@ -1,10 +1,12 @@
 {
+  inputs,
   pkgs,
   vars,
   hostname,
   ...
 }:
 {
+  imports = [ inputs.self.modules.darwin.linux-builder ];
 
   networking.hostName = hostname;
 

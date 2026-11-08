@@ -45,7 +45,7 @@ let
   # Every entry in an overlay-entries.nix `tracked` list must declare either
   # `exempt = true` (a conscious, visible opt-out) or `meta` (real audit
   # metadata). Without this assertion, an entry with neither would still
-  # apply its override completely normally via default.nix's composition —
+  # apply its override completely normally via the overlays module —
   # it just wouldn't show up in flake.overlayAudits at all, silently
   # invisible to both the liveness check and CI. This is what actually makes
   # "there's no third way for an override to exist untracked" true, rather
@@ -72,8 +72,9 @@ let
   # exempt) never forces evaluation of the `overlay` function bodies, so a
   # host whose overlay-entries.nix also wants a real `pkgs` (e.g. for
   # deriving `system`) still works correctly here via laziness; it only
-  # needs the real value when actually building, which happens through that
-  # host's own default.nix, not through this metadata-only import.
+  # needs the real value when actually building, which happens through the
+  # registry's overlaysModule (flake-parts/hosts/registry.nix), not through
+  # this metadata-only import.
   readAudits =
     key: entriesFile:
     let
@@ -88,22 +89,14 @@ let
       }) withMeta
     );
 
-  # Per-host audits come from host.overlaysModule + "/overlay-entries.nix",
-  # keyed by hostname so the CI script can report which host each overlay
-  # belongs to. Hosts without an overlaysModule (or without an entries file
-  # in it) get an empty set.
+  # Per-host audits come from each host's overlayEntries file, keyed by
+  # hostname so the CI script can report which host each overlay belongs
+  # to. Hosts without one get an empty set.
   readHostAudits =
-    hostKey: host:
-    let
-      entriesFile = host.overlaysModule + "/overlay-entries.nix";
-    in
-    if host.overlaysModule != null && builtins.pathExists entriesFile then
-      readAudits hostKey entriesFile
-    else
-      { };
+    hostKey: host: if host.overlayEntries != null then readAudits hostKey host.overlayEntries else { };
   hostAudits = lib.mapAttrs readHostAudits hosts;
 
-  # Entry files that aren't a host's own overlaysModule — e.g. the
+  # Entry files that aren't a host's own overlayEntries — e.g. the
   # system-wide overlays feature, which reaches hosts via their profiles —
   # register themselves under infra.sharedOverlayEntries (keyed by audit group
   # name) and get the same treatment.

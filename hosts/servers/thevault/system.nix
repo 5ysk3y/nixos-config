@@ -13,8 +13,9 @@
 # outside the store by bootstrap/servers/thevault.sh (via bootstrap/deploy.sh).
 { inputs, ... }:
 {
-  imports = [
-    inputs.self.modules.nixos.proxmox-lxc-server
+  imports = with inputs.self.modules.nixos; [
+    vaultwarden
+    zabbix-agent
   ];
 
   features.system.proxmoxLxcServer.address = "192.168.1.9";

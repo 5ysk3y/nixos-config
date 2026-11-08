@@ -50,6 +50,14 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 
 The config follows the [dendritic pattern](https://saylesss88.github.io/flakes/dendritic_flake_parts.html) — features are small, self-contained modules composed into hosts via profiles rather than monolithic per-host config files. Nothing references another directory by path (`../`); modules, profiles and hosts are referenced by name, so directories can be moved without breaking the wiring (enforced by a check in CI and the pre-commit hook). [flake-parts](https://github.com/hercules-ci/flake-parts) and [import-tree](https://github.com/denful/import-tree) handle the wiring.
 
+Profiles group the features that a kind of machine shares. A feature only one host uses is imported by that host's own `system.nix` or `home.nix` instead (NVIDIA and backups on gibson, the linux-builder on the macbook, each server's role).
+
+| Host | System profiles | Home profiles |
+|---|---|---|
+| `gibson` | `base`, `personal`, `desktop` | `common`, `personal`, `desktop` |
+| `macbook` | `base`, `personal` | `common`, `personal`, `darwin` |
+| `attic`, `theVault` | `base`, `lxc-server` | none (no Home Manager) |
+
 ---
 
 ## Secrets
