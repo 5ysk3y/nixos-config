@@ -25,10 +25,13 @@ in
     };
     rootAuthorizedKeys = lib.mkOption {
       type = lib.types.listOf lib.types.str;
-      default = [
+      default = config.features.system.sshKeys.yubikeys ++ [
+        # The old deploy key, until bootstrap/deploy.sh has put the YubiKey
+        # keys on every server
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHDYsCglDjOEYHw6fpBL7KorictTA8314+K5VA6QaOko"
       ];
-      description = "Keys allowed to SSH in as root (the deploy key used by bootstrap/deploy.sh).";
+      defaultText = lib.literalExpression "config.features.system.sshKeys.yubikeys";
+      description = "Keys allowed to SSH in as root: what bootstrap/deploy.sh connects with.";
     };
     sshAllowedSources = lib.mkOption {
       type = lib.types.listOf lib.types.str;

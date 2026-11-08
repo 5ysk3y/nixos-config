@@ -8,6 +8,8 @@ let
         # The home root CA, so a remote build can substitute from attic
         # in the same way as the installed/live system does.
         inputs.self.modules.nixos.security
+        # Both YubiKeys' SSH keys, which can log in (_common.nix)
+        inputs.self.modules.nixos.ssh-keys
         { nixpkgs.hostPlatform = "x86_64-linux"; }
       ];
     };

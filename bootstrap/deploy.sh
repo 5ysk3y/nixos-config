@@ -51,15 +51,24 @@ fi
 source "$SERVER_SCRIPT"
 : "${TARGET:?bootstrap/servers/$HOST.sh must set TARGET (root@<ip>)}"
 
-# DEPLOY_KEY is passphrase-less on disk by design (root's authorized_keys on
-# the servers is scoped to this key; no human is present at automation time
-# to type a passphrase). -i reads it directly and never touches any agent —
-# deliberately: the local SSH agent is gpg-agent, which imports anything
-# handed to it via ssh-add into its own key store and demands a *separate*
-# storage passphrase for it, which is exactly the friction a bare -i avoids.
-DEPLOY_KEY="${DEPLOY_KEY:-$HOME/.ssh/deploy}"
+# SSH authenticates with the YubiKey through gpg-agent: root's
+# authorized_keys on the servers holds both YubiKeys' keys
+# (features/core/ssh-keys). Expect a PIN prompt or a touch per connection.
+# DEPLOY_KEY=<file> uses a key file instead, with -i so the file never
+# reaches gpg-agent (which would import it and ask for a passphrase to
+# store it under).
 if [ -z "${NIX_SSHOPTS:-}" ]; then
-  export NIX_SSHOPTS="-i $DEPLOY_KEY"
+  if [ -n "${DEPLOY_KEY:-}" ]; then
+    export NIX_SSHOPTS="-i $DEPLOY_KEY"
+  elif [ -n "${SSH_AUTH_SOCK:-}" ]; then
+    # Named explicitly so SSH_OPTS below is never empty, which bash 3.2
+    # (macOS's /bin/bash) treats as unbound under set -u
+    export NIX_SSHOPTS="-o IdentityAgent=$SSH_AUTH_SOCK"
+  else
+    echo "error: SSH_AUTH_SOCK isn't set, so gpg-agent can't offer the YubiKey;" >&2
+    echo "       start a new login shell, or set DEPLOY_KEY=<key file>" >&2
+    exit 1
+  fi
 fi
 # shellcheck disable=SC2206
 SSH_OPTS=($NIX_SSHOPTS)
