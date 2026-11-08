@@ -10,7 +10,7 @@ Servers are deployed differently: see `deploy.sh`.
 
 ## gibson
 
-Installed from the MacBook over SSH, while gibson runs the netboot or USB installer (`features/installer`). If the Mac isn't available, see [Without the Mac](#without-the-mac).
+Installed from the MacBook over SSH, while gibson runs the netboot or USB installer (`hosts/images/installer`). If the Mac isn't available, see [Without the Mac](#without-the-mac).
 
 ### Where everything comes from
 
@@ -40,7 +40,7 @@ On gibson:
      sudo cryptsetup token export --token-id "$id" "$ROOT_DEVICE"; echo
    done
    ```
-3. Make sure netboot.xyz serves a current installer: rebuild if `features/installer` has changed since last publication, i.e. from the repo root, on the Mac or gibson:
+3. Make sure netboot.xyz serves a current installer: rebuild if `hosts/images/installer` has changed since last publication, i.e. from the repo root, on the Mac or gibson:
    ```sh
    nix run .#build-installer -- netboot
    ```

@@ -1,7 +1,7 @@
 # theVault — Vaultwarden, Proxmox LXC, deployed remotely over the LAN
 # from any machine which already has nix-secrets access:
 #   bootstrap/deploy.sh thevault
-# (root SSH is key-only, see features/proxmox-lxc-server).
+# (root SSH is key-only, see features/servers/proxmox-lxc-server).
 #
 # Never `switch` locally on this host — same reasoning as attic: it has no
 # access to fetch the private nix-secrets flake input, so local flake

@@ -37,7 +37,7 @@ preflight_check() {
 push_secrets() {
   SECRETS_PATH="$(nix eval --impure --raw --expr '(builtins.getFlake (toString ./.)).inputs.nix-secrets.outPath')"
   # mkdir defensively rather than relying on deploy ordering vs. the
-  # tmpfiles.rules declaration in features/vaultwarden/_module.nix — on a
+  # tmpfiles.rules declaration in features/servers/vaultwarden/_module.nix — on a
   # genuinely fresh host, push_secrets runs before the first switch has
   # ever created this directory.
   ssh "${SSH_OPTS[@]}" "$TARGET" 'mkdir -p -m 0700 /var/lib/vaultwarden-secrets'
