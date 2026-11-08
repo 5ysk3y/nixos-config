@@ -14,6 +14,7 @@
     ./disko.nix
     inputs.disko.nixosModules.disko
     inputs.self.modules.nixos.nvidia
+    inputs.self.modules.nixos.steelseries
   ];
 
   security.sudo.extraConfig = ''
@@ -133,18 +134,6 @@
 
     udev = {
       extraRules = ''
-        # SteelSeries Aerox 5
-        SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1850", MODE="0666"
-        SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1850", MODE="0666"
-
-        # SteelSeries Aerox 5 Wireless (wired mode)
-        SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1854", MODE="0666"
-        SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1854", MODE="0666"
-
-        # SteelSeries Aerox 5 Wireless (2.4 GHz wireless mode)
-        SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1852", MODE="0666"
-        SUBSYSTEM=="usb", ATTRS{idVendor}=="1038", ATTRS{idProduct}=="1852", MODE="0666"
-
         # Logitech C920 HD Pro Webcam Default Settings
         SUBSYSTEM=="video4linux", KERNEL=="video[0-9]*", ATTR{index}=="0", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl -d $devnode -c tilt_absolute=20000 -c zoom_absolute=150"
 

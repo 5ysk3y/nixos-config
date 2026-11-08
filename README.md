@@ -39,7 +39,7 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 │   ├── apps/                  # Applications: editors, browser, terminals, media, gaming
 │   ├── services/              # Background services and VMs: attic push, Syncthing, backups
 │   ├── servers/               # Server roles: the LXC baseline, attic, Vaultwarden, Zabbix
-│   └── hardware/              # Hardware support: NVIDIA
+│   └── hardware/              # Hardware support: NVIDIA, SteelSeries mice
 ├── profiles/                  # Profile compositions — named groups of features per host class
 ├── pkgs/                      # Custom packages
 └── bootstrap/

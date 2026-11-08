@@ -18,6 +18,13 @@ let
   '';
 in
 {
+  options.features.home.hyprland.resumeCommands = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = [ ];
+    example = [ "openrgb -c 0000FF -m Direct" ];
+    description = "Commands run after waking from sleep, before the displays are cycled.";
+  };
+
   config =
     with lib;
     mkIf pkgs.stdenv.hostPlatform.isLinux {
@@ -27,7 +34,14 @@ in
           settings = {
             general = {
               lock_cmd = "pidof hyprlock || hyprlock";
-              after_sleep_cmd = "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'; wtype -k escape; openrgb -c 0000FF -m Direct; ${resumeDpms}";
+              after_sleep_cmd = concatStringsSep "; " (
+                [
+                  "hyprctl dispatch 'hl.dsp.dpms({ action = \"enable\" })'"
+                  "wtype -k escape"
+                ]
+                ++ config.features.home.hyprland.resumeCommands
+                ++ [ "${resumeDpms}" ]
+              );
               on_unlock_cmd = "wtype -k escape";
             };
 
