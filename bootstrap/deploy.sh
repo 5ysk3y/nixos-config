@@ -47,6 +47,31 @@ if [ -n "$(git status --porcelain)" ]; then
   exit 1
 fi
 
+# For push_secrets(): write stdin to <dest> on $TARGET as a root-only file,
+# creating its directory if needed. If the content changed and <unit> is
+# given, try-restart it (a restart only if it's running), so the service
+# picks up a rotated secret even when the switch below leaves the unit
+# itself unchanged.
+push_secret() {
+  local dest="$1" unit="${2:-}" remote
+  read -r -d '' remote <<'REMOTE' || true
+set -eu
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+cat >"$tmp"
+mkdir -p -m 0700 "$(dirname "$dest")"
+if ! cmp -s "$tmp" "$dest"; then
+  install -m 0600 "$tmp" "$dest"
+  echo "    updated $dest"
+  if [ -n "$unit" ]; then
+    systemctl try-restart "$unit"
+  fi
+fi
+REMOTE
+  # shellcheck disable=SC2029 # dest/unit are meant to expand here, %q-quoted
+  ssh "${SSH_OPTS[@]}" "$TARGET" "dest=$(printf '%q' "$dest"); unit=$(printf '%q' "$unit"); $remote"
+}
+
 # shellcheck source=/dev/null
 source "$SERVER_SCRIPT"
 : "${TARGET:?bootstrap/servers/$HOST.sh must set TARGET (root@<ip>)}"
