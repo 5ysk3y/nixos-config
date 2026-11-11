@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Scratch space for this run, removed on exit. A directory from mktemp -d,
+# since BSD mktemp (macOS) only randomises trailing Xs in a file template
+hook_tmp=$(mktemp -d "${TMPDIR:-/tmp}/pre-commit.XXXXXX")
+trap 'rm -rf "$hook_tmp"' EXIT
+
 staged_nix_files=()
 while IFS= read -r -d '' f; do
   case "$f" in
@@ -10,22 +15,23 @@ done < <(git diff --cached --name-only -z --diff-filter=ACMR)
 
 if (( ${#staged_nix_files[@]} > 0 )); then
   echo "Formatting staged Nix files"
-  for f in "${staged_nix_files[@]}"; do
-    staged_tmp=$(mktemp /tmp/nixfmt-staged.XXXXXX.nix)
-    original_tmp=$(mktemp /tmp/nixfmt-original.XXXXXX.nix)
-    workdir_tmp=$(mktemp /tmp/nixfmt-workdir.XXXXXX.nix)
-    git show ":${f}" > "$staged_tmp"
-    cp "$staged_tmp" "$original_tmp"   # snapshot pre-format staged content
-    cp -- "$f" "$workdir_tmp"          # snapshot working tree
-    nix run --inputs-from . nixpkgs#nixfmt -- "$staged_tmp"
-    new_blob=$(git hash-object -w "$staged_tmp")
+  staged_tmps=()
+  for i in "${!staged_nix_files[@]}"; do
+    git show ":${staged_nix_files[$i]}" > "$hook_tmp/$i.nix"
+    cp "$hook_tmp/$i.nix" "$hook_tmp/$i.orig"   # snapshot pre-format staged content
+    staged_tmps+=("$hook_tmp/$i.nix")
+  done
+  # One nixfmt run for all files: each `nix run` pays its own startup and eval
+  nix run --inputs-from . nixpkgs#nixfmt -- "${staged_tmps[@]}"
+  for i in "${!staged_nix_files[@]}"; do
+    f=${staged_nix_files[$i]}
+    new_blob=$(git hash-object -w "$hook_tmp/$i.nix")
     git update-index --cacheinfo "100644,${new_blob},${f}"
     # Working tree matched pre-format staged content → no real unstaged changes
     # → safe to sync working tree to the formatted version
-    if cmp -s "$workdir_tmp" "$original_tmp"; then
-      cp -- "$staged_tmp" "$f"
+    if cmp -s "$f" "$hook_tmp/$i.orig"; then
+      cp -- "$hook_tmp/$i.nix" "$f"
     fi
-    rm -f "$staged_tmp" "$original_tmp" "$workdir_tmp"
   done
 else
   echo "No staged Nix files to format"
@@ -58,7 +64,9 @@ source "${repo_root}/.githooks/lib/overlay-liveness.sh"
 # overlays/ directory, any (_)overlay-entries.nix wherever it lives, and the
 # audit logic itself (overlay-audits.nix).
 overlay_files_touched=false
-for f in "${staged_nix_files[@]}"; do
+# The +"..." form: bash < 4.4 (macOS /bin/bash) treats "${a[@]}" of an
+# empty array as unbound under set -u
+for f in ${staged_nix_files[@]+"${staged_nix_files[@]}"}; do
   case "$f" in
     *overlay*.nix) overlay_files_touched=true ;;
   esac
@@ -85,10 +93,10 @@ hook_liveness_callback() {
 
 if [ "$overlay_files_touched" = true ]; then
   echo "Validating flake.overlayAudits ..."
-  if ! AUDIT_JSON=$(nix eval .#overlayAudits --json 2>/tmp/overlay-audits-eval-err); then
+  if ! AUDIT_JSON=$(nix eval .#overlayAudits --json 2>"$hook_tmp/overlay-audits-eval-err"); then
     echo ""
     echo "flake.overlayAudits eval failed — an overlay-entries.nix has invalid or missing meta fields."
-    cat /tmp/overlay-audits-eval-err
+    cat "$hook_tmp/overlay-audits-eval-err"
     overlay_errors=true
   else
     echo "  flake.overlayAudits: valid ✓"
