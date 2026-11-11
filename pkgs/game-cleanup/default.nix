@@ -1,13 +1,27 @@
 { pkgs }:
 pkgs.writeShellApplication {
   name = "game_cleanup";
-  runtimeInputs = with pkgs; [
-    gnugrep
-    gawk
-    procps
-  ];
+  runtimeInputs = [ pkgs.coreutils ];
+  # Matched on each process's executable rather than grepping `ps aux`
+  # lines, which also hit anything with "wine" or ".exe" in its arguments.
+  # Every Wine/Proton process, the game's .exe included, runs the Wine
+  # loader or wineserver. readlink fails on other users' processes, so
+  # only the caller's own are touched.
   text = ''
-    # shellcheck disable=SC2009
-    for i in $(ps aux | grep -i "wine\|gamescope\|defunct\|\.exe" | grep -iv grep | awk '{print $2}'); do kill -9 "$i"; done
+    for exe in /proc/[0-9]*/exe; do
+      target=$(readlink "$exe" 2>/dev/null) || continue
+      name=''${target##*/}
+      # nixpkgs wrappers exec .<name>-wrapped
+      name=''${name#.}
+      name=''${name%-wrapped}
+      case "$name" in
+        wine | wine64 | wine-preloader | wine64-preloader | wineserver | gamescope | gamescopereaper)
+          pid=''${exe#/proc/}
+          pid=''${pid%/exe}
+          # The process may already be gone, taken down with wineserver
+          kill -9 "$pid" 2>/dev/null || true
+          ;;
+      esac
+    done
   '';
 }
