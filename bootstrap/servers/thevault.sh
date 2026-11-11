@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Host-specific config for bootstrap/deploy.sh thevault
 #
 # TARGET defaults to the permanent address, but the very first deploy must
@@ -36,15 +37,14 @@ preflight_check() {
 
 push_secrets() {
   SECRETS_PATH="$(nix eval --impure --raw --expr '(builtins.getFlake (toString ./.)).inputs.nix-secrets.outPath')"
-  # mkdir defensively rather than relying on deploy ordering vs. the
-  # tmpfiles.rules declaration in features/servers/vaultwarden/_module.nix — on a
-  # genuinely fresh host, push_secrets runs before the first switch has
-  # ever created this directory.
-  ssh "${SSH_OPTS[@]}" "$TARGET" 'mkdir -p -m 0700 /var/lib/vaultwarden-secrets'
+  # push_secret (deploy.sh) creates /var/lib/vaultwarden-secrets itself:
+  # on a genuinely fresh host this runs before the first switch has
+  # applied the tmpfiles rule in features/servers/vaultwarden/_module.nix.
   sops --decrypt "$SECRETS_PATH/secrets/vaultwarden/theVault.env" \
-    | ssh "${SSH_OPTS[@]}" "$TARGET" 'install -m 0600 /dev/stdin /var/lib/vaultwarden-secrets/env'
+    | push_secret /var/lib/vaultwarden-secrets/env vaultwarden.service
+  # Read by restic at each run, so nothing to restart
   sops --decrypt "$SECRETS_PATH/secrets/vaultwarden/restic.password" \
-    | ssh "${SSH_OPTS[@]}" "$TARGET" 'install -m 0600 /dev/stdin /var/lib/vaultwarden-secrets/restic-password'
+    | push_secret /var/lib/vaultwarden-secrets/restic-password
   sops --decrypt "$SECRETS_PATH/secrets/restic/sftp.key" \
-    | ssh "${SSH_OPTS[@]}" "$TARGET" 'install -m 0600 /dev/stdin /var/lib/vaultwarden-secrets/restic-sftp-key'
+    | push_secret /var/lib/vaultwarden-secrets/restic-sftp-key
 }
