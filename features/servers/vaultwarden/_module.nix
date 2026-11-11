@@ -8,13 +8,18 @@
     inputs.self.modules.nixos.restic-backup
   ];
 
+  # Backup the whole data folder, so anything Vaultwarden adds is covered
+  # without editing this: config.json (admin-panel settings, which override the
+  # environment) only appears once a setting is saved there. The live database
+  # is excluded in favour of the consistent copy in backup data.
   features.system.resticBackups.vaultwarden = {
-    paths = [
-      "/var/lib/vaultwarden/backup/db.sqlite3"
-      "/var/lib/vaultwarden/rsa_key.pem"
-      "/var/lib/vaultwarden/rsa_key.pub.pem"
-      "/var/lib/vaultwarden/attachments"
-      "/var/lib/vaultwarden/sends"
+    paths = [ "/var/lib/vaultwarden" ];
+    exclude = [
+      "/var/lib/vaultwarden/db.sqlite3"
+      "/var/lib/vaultwarden/db.sqlite3-shm"
+      "/var/lib/vaultwarden/db.sqlite3-wal"
+      "/var/lib/vaultwarden/icon_cache" # re-downloaded on demand
+      "/var/lib/vaultwarden/tmp"
     ];
     repository = "sftp:networkBackup@backupServer.home.arpa:Linux/bitwarden";
     passwordFile = "/var/lib/vaultwarden-secrets/restic-password";
