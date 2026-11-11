@@ -54,8 +54,11 @@
     stylix.url = "github:nix-community/stylix";
     stylix.inputs.nixpkgs.follows = "nixpkgs";
 
-    waybar-patched.url = "github:Alexays/Waybar/0594574";
-    waybar-patched.flake = false;
+    # waybar 0.16.0 from nixpkgs PR #583754 (pending merge). Only the
+    # package.nix is fetched; it's called against our own nixpkgs in
+    # gibson's overlays.
+    waybar-pr.url = "file+https://raw.githubusercontent.com/NixOS/nixpkgs/0987880e58964420e8ce164b45b5e75cefd6c7d3/pkgs/by-name/wa/waybar/package.nix";
+    waybar-pr.flake = false;
   };
 
   outputs =
