@@ -8,6 +8,7 @@
         inputs.wayland-pipewire-idle-inhibit.homeModules.default
       ]
       ++ (with config.flake.modules.homeManager; [
+        dimland
         fuzzel
         gaming
         hypr
@@ -21,9 +22,5 @@
         waybar
         wayland-idle-inhibit
       ]);
-
-      home.packages = [
-        inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.dim-screen
-      ];
     };
 }

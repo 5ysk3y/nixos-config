@@ -39,6 +39,8 @@
     wayland-pipewire-idle-inhibit.url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
     wayland-pipewire-idle-inhibit.inputs.nixpkgs.follows = "nixpkgs";
     claude-code-nix.url = "github:sadjow/claude-code-nix";
+    dimland.url = "github:keifufu/dimland";
+    dimland.inputs.nixpkgs.follows = "nixpkgs";
 
     # Used as a Nix store path in features/apps/doomemacs/_module.nix for the
     # rsync-based activation script. The input hash drives the stamp-based

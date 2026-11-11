@@ -46,8 +46,8 @@ in
           listener = [
             {
               timeout = 300;
-              on-timeout = "dim -p -d 0";
-              on-resume = "pkill dim";
+              on-timeout = "dimland -a 0.5";
+              on-resume = "dimland stop";
             }
             {
               timeout = 360;
