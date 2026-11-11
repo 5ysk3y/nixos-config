@@ -37,10 +37,6 @@ in
     };
   };
 
-  # Pinned so the backup never accepts an unverified host key.
-  programs.ssh.knownHosts.${backupHost}.publicKey =
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPF26LRZNEBi4ufLCnxehiKa26R5JBh3+JIUop4C6MtH";
-
   features.system.resticBackups.gibson = {
     repository = "sftp:networkBackup@${backupHost}:Linux/gibson";
     backupPrepareCommand = ''
