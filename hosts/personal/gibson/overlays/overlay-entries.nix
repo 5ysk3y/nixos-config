@@ -70,23 +70,14 @@
       id = "waybar";
       meta = {
         strategy = "nixpkgs-version";
-        description = "Pin waybar to git-0594574 pending next tagged release";
+        description = "waybar 0.16.0 from nixpkgs PR #583754 pending merge";
         evalAttr = "waybar";
         systems = [ "x86_64-linux" ];
         threshold = "0.16.0";
-        notes = "Also remove waybar-patched flake input from flake.nix. Release cadence has been strictly minor bumps since 0.11.0.";
+        notes = "Also remove the waybar-pr flake input from flake.nix. The PR's package.nix is called against our locked nixpkgs, so it can drift from it; if the PR is force-pushed, re-pin the input to the new head commit.";
       };
       overlay = _final: prev: {
-        waybar = prev.waybar.overrideAttrs (old: {
-          src = inputs.waybar-patched;
-          version = "git-0594574";
-          mesonFlags = (builtins.filter (f: f != "-Dcava=enabled") (old.mesonFlags or [ ])) ++ [
-            "-Dcava=disabled"
-          ];
-          doInstallCheck = false;
-          doCheck = false;
-          nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.catch2_3 ];
-        });
+        waybar = prev.callPackage inputs.waybar-pr { };
       };
     }
 
