@@ -101,6 +101,12 @@ in
   };
 
   config = lib.mkIf (cfg != { }) {
+    # The home backup server that every repository here is on (gibson's and
+    # thevault's). Pinned so ssh verifies it from the first run on a rebuilt
+    # host, rather than failing until someone accepts the key by hand.
+    programs.ssh.knownHosts."backupServer.home.arpa".publicKey =
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPF26LRZNEBi4ufLCnxehiKa26R5JBh3+JIUop4C6MtH";
+
     assertions = [
       {
         assertion = lib.allUnique (lib.mapAttrsToList (_: b: b.statusFile) cfg);

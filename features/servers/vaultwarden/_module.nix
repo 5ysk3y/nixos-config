@@ -19,7 +19,7 @@
     repository = "sftp:networkBackup@backupServer.home.arpa:Linux/bitwarden";
     passwordFile = "/var/lib/vaultwarden-secrets/restic-password";
     extraOptions = [
-      "sftp.command='ssh networkBackup@backupServer.home.arpa -i /var/lib/vaultwarden-secrets/restic-sftp-key -s sftp'"
+      "sftp.command='ssh networkBackup@backupServer.home.arpa -i /var/lib/vaultwarden-secrets/restic-sftp-key -o StrictHostKeyChecking=yes -s sftp'"
     ];
     extraBackupArgs = [
       "--tag nix"
