@@ -4,7 +4,6 @@
     {
       packages =
         lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-          dim-screen = pkgs.callPackage ./dim-screen { };
           game-cleanup = pkgs.callPackage ./game-cleanup { };
           xivlauncher-rb = pkgs.callPackage ./nixos-xivlauncher-rb { };
         }
