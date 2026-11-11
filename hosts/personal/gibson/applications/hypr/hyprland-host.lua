@@ -7,6 +7,9 @@ return function(WS)
    scrolling = {
       follow_min_visible = 1.0,
      },
+   cursor = {
+     default_monitor = "desc:BNQ BenQ EX2780Q 66L07726019",
+   };
   })
 
   hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
