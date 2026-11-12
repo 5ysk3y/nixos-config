@@ -32,7 +32,7 @@ in
       ]
       ++ extraTrustedPublicKeys;
       download-buffer-size = 1000000000;
-      max-jobs = "auto";
+      max-jobs = lib.mkDefault "auto";
     };
 
     gc = {
