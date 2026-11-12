@@ -157,10 +157,11 @@
     };
   };
 
-  nix = {
-    settings = {
-      cores = 16;
-    };
+  # Up to max-jobs × cores build processes run at once (Nix manual,
+  # "Tuning Cores and Jobs"). 4 × 4 matches the 16 hardware threads
+  nix.settings = {
+    max-jobs = 4;
+    cores = 4;
   };
 
   hardware = {
