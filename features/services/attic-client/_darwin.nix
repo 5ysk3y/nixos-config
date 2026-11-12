@@ -15,7 +15,12 @@ in
       export HOME=/var/lib/attic-watch-store
       export XDG_CONFIG_HOME=${atticConfig}
       mkdir -p "$HOME"
-      exec ${pkgs.attic-client}/bin/attic watch-store -j 1 home:home-cache
+      # attic prints a line to stderr for every path it pushes. launchd
+      # opens the log once, so this long-running daemon keeps writing to
+      # the same file even after newsyslog renames it. Keep only the
+      # failures and other messages, so the file stays small.
+      ${pkgs.attic-client}/bin/attic watch-store -j 1 home:home-cache 2>&1 \
+        | ${pkgs.gnugrep}/bin/grep --line-buffered -v '^✅'
     '';
     serviceConfig = {
       KeepAlive = true;
@@ -23,6 +28,31 @@ in
       StandardOutPath = "/var/log/attic-watch-store.stdout.log";
       StandardErrorPath = "/var/log/attic-watch-store.stderr.log";
     };
+  };
+
+  # launchd appends to these and nothing trims them. Rotated by size: N
+  # because neither job has a PID file to signal. attic-push-system exits
+  # after each run, so its next run opens a fresh file. watch-store only
+  # does so when it restarts (boot, or a switch that changes it).
+  system.newsyslog = {
+    enable = true;
+    files.attic =
+      map
+        (logfilename: {
+          inherit logfilename;
+          size = "1024";
+          count = 3;
+          flags = [
+            "Z"
+            "N"
+          ];
+        })
+        [
+          "/var/log/attic-watch-store.stdout.log"
+          "/var/log/attic-watch-store.stderr.log"
+          "/var/log/attic-push-system.stdout.log"
+          "/var/log/attic-push-system.stderr.log"
+        ];
   };
 
   # Catches up on whatever watch-store missed (see _nixos.nix): pushes the
