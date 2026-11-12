@@ -3,13 +3,14 @@ return function(WS)
     render = {
       direct_scanout = 1,
       non_shader_cm = 2,
+      cm_auto_hdr = 1,
     },
    scrolling = {
       follow_min_visible = 1.0,
      },
    cursor = {
      default_monitor = "desc:BNQ BenQ EX2780Q 66L07726019",
-   };
+   },
   })
 
   hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
@@ -30,11 +31,15 @@ return function(WS)
     position = "1920x0",
     scale = 1.25,
     vrr = 2, 
-    cm = "hdredid",
+    cm = "hdr",
+    bitdepth = 10,
+    supports_hdr = 1,
+    supports_wide_color = 1,
+    max_luminance = 400,
+    sdr_max_luminance = 350,
+    sdr_min_luminance = 0.2,
     sdrbrightness = 1.25,
     sdrsaturation = 1.0,
-    sdr_max_luminance = 203,
-    bitdepth = 10,
   })
   hl.monitor({
     output = "desc:BNQ BenQ GL2460 F1D09565SL0",
