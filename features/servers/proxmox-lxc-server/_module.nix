@@ -69,6 +69,7 @@ in
 
     services.openssh = {
       enable = true;
+      authorizedKeysInHomedir = false;
       openFirewall = false;
       settings = {
         PasswordAuthentication = false;
