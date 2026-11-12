@@ -209,7 +209,6 @@ return function(WS)
   -- AUTOSTART
   ------------------------------------------------------------------------
   hl.on("hyprland.start", function()
-    hl.exec_cmd("mako")
     hl.exec_cmd("[group new lock] discord")
     hl.exec_cmd("[group new lock] cider-2")
     hl.exec_cmd([[mpvpaper '*' /home/rickie/.config/Wallpapers/Cyberpunk/Cyberpunk-2077-Game-4K-Animated-Desktop.mp4 --mpv-options="profile=wallpaper" -f]])

@@ -53,5 +53,27 @@ in
         inherit (cfg) output;
       };
     };
+
+    # nixpkgs' mako routes D-Bus activation through mako.service
+    # (SystemdService= in its D-Bus file), but ships the unit in
+    # lib/systemd/user, which systemd's user search path never reads, and
+    # home-manager's module doesn't link it. Without this unit, activation
+    # fails with "unknown unit". Mirrors upstream contrib/systemd/mako.service.
+    systemd.user.services.mako = {
+      Unit = {
+        Description = "Lightweight Wayland notification daemon";
+        Documentation = "man:mako(1)";
+        PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
+      };
+      Service = {
+        Type = "dbus";
+        BusName = "org.freedesktop.Notifications";
+        ExecCondition = "${pkgs.runtimeShell} -c '[ -n \"$WAYLAND_DISPLAY\" ]'";
+        ExecStart = lib.getExe config.services.mako.package;
+        ExecReload = "${lib.getExe' config.services.mako.package "makoctl"} reload";
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
   };
 }
