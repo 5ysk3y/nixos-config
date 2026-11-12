@@ -68,9 +68,13 @@
   };
 
   # The games disk; the system disk is in disko.nix
+  # nofail: if the disk is missing or fails, boot carries on without it
+  # instead of dropping to emergency mode (systemd.mount(5)). The mount
+  # still waits the default 90s for the device.
   fileSystems."/home/${vars.username}/games" = {
     device = "/dev/disk/by-label/GAMES";
     fsType = "ext4";
+    options = [ "nofail" ];
   };
 
   hardware = {
