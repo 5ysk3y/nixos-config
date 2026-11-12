@@ -4,19 +4,6 @@
   pkgs,
   ...
 }:
-let
-  resumeDpms = pkgs.writeShellScript "hypr-resume-dpms" ''
-    sid=$(${pkgs.systemd}/bin/loginctl show-user "$(id -un)" -p Display --value)
-    for _ in $(seq 1 60); do
-      [ "$(${pkgs.systemd}/bin/loginctl show-session "$sid" -p Active --value)" = yes ] && break
-      sleep 0.5
-    done
-    sleep 3
-    hyprctl dispatch 'hl.dsp.dpms({ action = "disable" })'
-    sleep 1
-    hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'
-  '';
-in
 {
   options.features.home.hyprland.resumeCommands = lib.mkOption {
     type = lib.types.listOf lib.types.str;
@@ -26,6 +13,7 @@ in
   };
 
   config = {
+    home.packages = with pkgs; [ wtype ];
     services = {
       hypridle = {
         enable = true;
@@ -38,7 +26,6 @@ in
                 "wtype -k escape"
               ]
               ++ config.features.home.hyprland.resumeCommands
-              ++ [ "${resumeDpms}" ]
             );
             on_unlock_cmd = "wtype -k escape";
           };

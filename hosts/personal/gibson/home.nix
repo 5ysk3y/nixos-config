@@ -25,7 +25,6 @@
       libnotify
       fastfetch
       wl-clipboard
-      wtype
     ];
   };
 
