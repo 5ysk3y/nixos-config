@@ -79,10 +79,10 @@ This sets the variables below and prints each one with its value, so the followi
 
 | Variable | What it is | Where it's set |
 | --- | --- | --- |
-| `BACKUP_HOST`, `BACKUP_HOST_KEY` | The backup server, and its pinned host key | `backup.nix` |
-| `RESTIC_REPOSITORY`, `RESTIC_SFTP_USER` | The restic repository, and the sftp user in it | `backup.nix` |
+| `BACKUP_HOST` | The backup server (rest-server, over TLS) | `backup.nix` |
+| `RESTIC_REPOSITORY` | The restic repository, a `rest:https://` URL | `backup.nix` |
 | `RESTIC_WRAPPER` | The `restic` wrapper the installed system has (`restic-gibson`) | `backup.nix` (the backup's name) |
-| `RESTIC_PASSWORD_SOPS`, `RESTIC_SFTP_KEY_SOPS` | The sops-encrypted repository password and sftp key | `backup.nix`, from nix-secrets |
+| `RESTIC_PASSWORD_SOPS`, `RESTIC_REST_CREDENTIALS_SOPS` | The sops-encrypted repository password, and rest-server login (`RESTIC_REST_USERNAME`/`RESTIC_REST_PASSWORD` lines) | `backup.nix`, from nix-secrets |
 | `AGE_KEYS` | The sops key, encrypted to the YubiKeys | nix-secrets, `bootstrap/age-keys.txt.age` |
 | `SOPS_KEY_FILE` | Where the system expects the sops key | `sops.age.keyFile` |
 | `INSTALL_DISK` | The disk disko formats: everything on it is erased | `disko.nix` (`default.nix` for the test configurations) |
@@ -113,14 +113,17 @@ Then the files that have to be in place before the install, from the backup:
 ```sh
 export SOPS_AGE_KEY_FILE="$STAGE$SOPS_KEY_FILE"
 sops -d --input-type binary --output-type binary "$RESTIC_PASSWORD_SOPS" > "$TMP/restic.password"
-sops -d --input-type binary --output-type binary "$RESTIC_SFTP_KEY_SOPS" > "$TMP/sftp.key"
-echo "$BACKUP_HOST_KEY" > "$TMP/known_hosts"
+sops -d --input-type binary --output-type binary "$RESTIC_REST_CREDENTIALS_SOPS" > "$TMP/rest-credentials"
 
 export RESTIC_PASSWORD_FILE="$TMP/restic.password"
-SFTP="sftp.command=ssh $RESTIC_SFTP_USER@$BACKUP_HOST -i $TMP/sftp.key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$TMP/known_hosts -s sftp"
+set -a; . "$TMP/rest-credentials"; set +a   # RESTIC_REST_USERNAME, RESTIC_REST_PASSWORD
+# rest-server's certificate is signed by the home CA. Trusted explicitly
+# here, since the Mac's keychain may not hold it (restic then trusts only
+# this CA, which is all this session talks to).
+export RESTIC_CACERT="$PWD/features/core/system/security/certs/root-ca.crt"
 
-restic -o "$SFTP" --no-cache snapshots --latest 1   # the backup from step 0
-restic -o "$SFTP" --no-cache restore latest --target "$STAGE" "${PRE_INSTALL_INCLUDES[@]}"
+restic --no-cache snapshots --latest 1   # the backup from step 0
+restic --no-cache restore latest --target "$STAGE" "${PRE_INSTALL_INCLUDES[@]}"
 find "$STAGE" -type f | sort
 ```
 

@@ -17,10 +17,9 @@ let
   backupName = "${hostname}";
   backup = config.services.restic.backups.${backupName};
 
-  # sftp:<user>@<host>:<path>
-  repoParts = builtins.match "sftp:([^@]+)@([^:]+):(.*)" backup.repository;
-  sftpUser = builtins.elemAt repoParts 0;
-  backupHost = builtins.elemAt repoParts 1;
+  # rest:https://<host>:<port>/<repo>/
+  repoParts = builtins.match "rest:https://([^:/]+)(:[0-9]+)?/.*" backup.repository;
+  backupHost = builtins.elemAt repoParts 0;
 
   partitions = config.disko.devices.disk.main.content.partitions;
   ageKeys = "${vars.secretsPath}/bootstrap/age-keys.txt.age";
@@ -48,12 +47,10 @@ let
 
   vals = {
     BACKUP_HOST = backupHost;
-    BACKUP_HOST_KEY = "${backupHost} ${config.programs.ssh.knownHosts.${backupHost}.publicKey}";
     RESTIC_REPOSITORY = backup.repository;
-    RESTIC_SFTP_USER = sftpUser;
     RESTIC_WRAPPER = "restic-${backupName}";
     RESTIC_PASSWORD_SOPS = toString config.sops.secrets.restic-password.sopsFile;
-    RESTIC_SFTP_KEY_SOPS = toString config.sops.secrets.restic-sftp-key.sopsFile;
+    RESTIC_REST_CREDENTIALS_SOPS = toString config.sops.secrets.restic-rest-credentials.sopsFile;
     AGE_KEYS = ageKeys;
     SOPS_KEY_FILE = config.sops.age.keyFile;
     INSTALL_DISK = config.disko.devices.disk.main.device;
@@ -71,7 +68,7 @@ in
   assertions = [
     {
       assertion = repoParts != null;
-      message = "bootstrap.nix: restic repository '${backup.repository}' isn't sftp:<user>@<host>:<path>.";
+      message = "bootstrap.nix: restic repository '${backup.repository}' isn't rest:https://<host>[:<port>]/<repo>/.";
     }
     {
       assertion = builtins.all backedUp preInstallRestore;

@@ -20,7 +20,9 @@
 let
   home = "/home/${vars.username}";
   backupHost = "backupServer.home.arpa";
-  sftpKey = config.sops.secrets.restic-sftp-key.path;
+  # rest-server's TLS port. Its certificate is signed by the home CA, which
+  # every host trusts (features/core/system/security).
+  backupPort = "8000";
 in
 {
   imports = [ inputs.self.modules.nixos.restic-backup ];
@@ -31,26 +33,29 @@ in
       sopsFile = "${vars.secretsPath}/secrets/gibson/restic.password";
     };
 
-    restic-sftp-key = {
+    # RESTIC_REST_USERNAME=gibson and RESTIC_REST_PASSWORD=<its htpasswd
+    # password>, one per line
+    restic-rest-credentials = {
       format = "binary";
-      sopsFile = "${vars.secretsPath}/secrets/restic/sftp.key";
+      sopsFile = "${vars.secretsPath}/secrets/gibson/restic-rest-credentials";
     };
   };
 
   features.system.resticBackups.gibson = {
-    repository = "sftp:networkBackup@${backupHost}:Linux/gibson";
+    # Append-only: gibson can add snapshots but never delete them. Retention
+    # runs on backupServer.
+    repository = "rest:https://${backupHost}:${backupPort}/gibson/";
+    appendOnly = true;
+    environmentFile = config.sops.secrets.restic-rest-credentials.path;
     backupPrepareCommand = ''
       for _ in $(seq 40); do
-        timeout 2 ${lib.getExe pkgs.bash} -c '</dev/tcp/${backupHost}/22' 2>/dev/null && exit 0
+        timeout 2 ${lib.getExe pkgs.bash} -c '</dev/tcp/${backupHost}/${backupPort}' 2>/dev/null && exit 0
         sleep 1
       done
       echo "backup server ${backupHost} unreachable" >&2
       exit 1
     '';
     passwordFile = config.sops.secrets.restic-password.path;
-    extraOptions = [
-      "sftp.command='ssh networkBackup@${backupHost} -i ${sftpKey} -o StrictHostKeyChecking=yes -s sftp'"
-    ];
     extraBackupArgs = [
       "--one-file-system"
       "--exclude-caches"
