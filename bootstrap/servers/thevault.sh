@@ -45,6 +45,6 @@ push_secrets() {
   # Read by restic at each run, so nothing to restart
   sops --decrypt "$SECRETS_PATH/secrets/vaultwarden/restic.password" \
     | push_secret /var/lib/vaultwarden-secrets/restic-password
-  sops --decrypt "$SECRETS_PATH/secrets/restic/sftp.key" \
-    | push_secret /var/lib/vaultwarden-secrets/restic-sftp-key
+  sops --decrypt "$SECRETS_PATH/secrets/vaultwarden/restic-rest-credentials" \
+    | push_secret /var/lib/vaultwarden-secrets/restic-rest-credentials
 }

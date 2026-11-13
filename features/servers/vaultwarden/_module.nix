@@ -21,11 +21,14 @@
       "/var/lib/vaultwarden/icon_cache" # re-downloaded on demand
       "/var/lib/vaultwarden/tmp"
     ];
-    repository = "sftp:networkBackup@backupServer.home.arpa:Linux/bitwarden";
+    # Append-only on rest-server (TLS, home CA): thevault can add snapshots
+    # but never delete them; retention runs on backupServer.
+    repository = "rest:https://backupServer.home.arpa:8000/bitwarden/";
+    appendOnly = true;
     passwordFile = "/var/lib/vaultwarden-secrets/restic-password";
-    extraOptions = [
-      "sftp.command='ssh networkBackup@backupServer.home.arpa -i /var/lib/vaultwarden-secrets/restic-sftp-key -o StrictHostKeyChecking=yes -s sftp'"
-    ];
+    # RESTIC_REST_USERNAME=bitwarden and RESTIC_REST_PASSWORD, pushed by
+    # bootstrap/servers/thevault.sh
+    environmentFile = "/var/lib/vaultwarden-secrets/restic-rest-credentials";
     extraBackupArgs = [
       "--tag nix"
     ];

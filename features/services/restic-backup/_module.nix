@@ -30,6 +30,26 @@ in
           paths = mkOption { type = types.listOf types.str; };
           repository = mkOption { type = types.str; };
           passwordFile = mkOption { type = types.str; };
+          environmentFile = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = ''
+              A file of VAR=value lines for restic, outside the Nix store:
+              RESTIC_REST_USERNAME and RESTIC_REST_PASSWORD for a rest-server
+              repository, so the password isn't in the repository URL.
+            '';
+          };
+          appendOnly = mkOption {
+            type = types.bool;
+            default = false;
+            description = ''
+              The repository is on a rest-server in --append-only mode, which
+              refuses every delete except of locks. Retention then runs on the
+              server, so the client never forgets or prunes (pruneOpts is
+              ignored). Backups and checks wait up to an hour for a lock the
+              server's prune holds rather than failing.
+            '';
+          };
           extraOptions = mkOption {
             type = types.listOf types.str;
             default = [ ];
@@ -64,6 +84,7 @@ in
             };
           };
           pruneOpts = mkOption {
+            description = "Options for `restic forget --prune` after each backup. Ignored when appendOnly is set.";
             type = types.listOf types.str;
             default = [
               "--keep-daily 7"
@@ -101,12 +122,6 @@ in
   };
 
   config = lib.mkIf (cfg != { }) {
-    # The home backup server that every repository here is on (gibson's and
-    # thevault's). Pinned so ssh verifies it from the first run on a rebuilt
-    # host, rather than failing until someone accepts the key by hand.
-    programs.ssh.knownHosts."backupServer.home.arpa".publicKey =
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPF26LRZNEBi4ufLCnxehiKa26R5JBh3+JIUop4C6MtH";
-
     assertions = [
       {
         assertion = lib.allUnique (lib.mapAttrsToList (_: b: b.statusFile) cfg);
@@ -114,30 +129,41 @@ in
       }
     ];
 
-    services.restic.backups = lib.mapAttrs (_: b: {
-      inherit (b)
-        paths
-        repository
-        passwordFile
-        extraOptions
-        extraBackupArgs
-        exclude
-        inhibitsSleep
-        timerConfig
-        pruneOpts
-        ;
-      # services.restic puts these straight into ExecStart, where systemd
-      # reads "%" as a specifier; "%%" is how a literal "%" gets through.
-      checkOpts = map (lib.replaceStrings [ "%" ] [ "%%" ]) b.checkOpts;
-      # Status file truncated first, before any caller-supplied
-      # prepare step — if that step itself fails, onFailure below
-      # still fires and overwrites with "local failure" regardless,
-      # but truncating first keeps the intent readable: this run's
-      # status starts clean before anything else happens.
-      backupPrepareCommand =
-        ": > ${b.statusFile}"
-        + lib.optionalString (b.backupPrepareCommand != null) ("\n" + b.backupPrepareCommand);
-    }) cfg;
+    services.restic.backups = lib.mapAttrs (
+      _: b:
+      let
+        # restic's global --retry-lock (0.16+) waits for a lock rather than
+        # failing; here, the server's nightly prune.
+        retryLock = lib.optional b.appendOnly "--retry-lock 1h";
+      in
+      {
+        inherit (b)
+          paths
+          repository
+          passwordFile
+          environmentFile
+          extraOptions
+          exclude
+          inhibitsSleep
+          timerConfig
+          ;
+        pruneOpts = if b.appendOnly then [ ] else b.pruneOpts;
+        extraBackupArgs = b.extraBackupArgs ++ retryLock;
+        # services.restic puts these straight into ExecStart, where systemd
+        # reads "%" as a specifier; "%%" is how a literal "%" gets through.
+        checkOpts =
+          map (lib.replaceStrings [ "%" ] [ "%%" ]) b.checkOpts
+          ++ lib.optionals (b.checkOpts != [ ]) retryLock;
+        # Status file truncated first, before any caller-supplied
+        # prepare step — if that step itself fails, onFailure below
+        # still fires and overwrites with "local failure" regardless,
+        # but truncating first keeps the intent readable: this run's
+        # status starts clean before anything else happens.
+        backupPrepareCommand =
+          ": > ${b.statusFile}"
+          + lib.optionalString (b.backupPrepareCommand != null) ("\n" + b.backupPrepareCommand);
+      }
+    ) cfg;
 
     systemd = {
       tmpfiles.rules = lib.mapAttrsToList (_: b: "f ${b.statusFile} 0644 root root -") cfg;
