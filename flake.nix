@@ -53,6 +53,11 @@
     doomemacs-modules.url = "github:doomemacs/modules";
     doomemacs-modules.flake = false;
 
+    # Built from source in features/desktop/waybar/_scripts/scroll-mpris; kept
+    # as an input so the weekly flake.lock update tracks upstream.
+    scroll-mpris.url = "github:BEST8OY/ScrollMPRIS";
+    scroll-mpris.flake = false;
+
     # Add in stylix for management of GTK theming.
     stylix.url = "github:nix-community/stylix";
     stylix.inputs.nixpkgs.follows = "nixpkgs";

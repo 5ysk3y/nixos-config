@@ -1,22 +1,27 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  inputs,
+  # The flags waybar's custom/media passes; checked in installCheckPhase.
+  args,
+  ...
+}:
 # Not my repo - Check it out here: https://github.com/BEST8OY/ScrollMPRIS
-with pkgs;
-rustPlatform.buildRustPackage {
+let
+  src = inputs.scroll-mpris;
+  cargoToml = pkgs.lib.importTOML "${src}/Cargo.toml";
+in
+pkgs.rustPlatform.buildRustPackage {
   pname = "scroll-mpris";
-  version = "0.1.0";
-  src = fetchFromGitHub {
-    owner = "BEST8OY";
-    repo = "ScrollMPRIS";
-    rev = "3e393327eff442ac74b4babbecc84dc2da82b2b6";
-    sha256 = "sha256-KWEKD5NmeMih/GPqYsx+Mn5aUTJarSqR6pp9/IYdF4Y=";
-  };
-  cargoHash = "sha256-Hs+lGesdwkQuQwQKKtwDIg4BH8iqYXS7m4izaV6SZUA=";
-  nativeBuildInputs = [ pkg-config ];
-  buildInputs = [ dbus ];
-  patches = [
-    ./customisations.patch
-  ];
-  postUnpack = ''
-    cp ${./Cargo.lock} $sourceRoot/Cargo.lock
+  version = "${cargoToml.package.version}-unstable-${src.lastModifiedDate}";
+  inherit src;
+  cargoLock.lockFile = "${src}/Cargo.lock";
+
+  # Catch upstream renaming or removing one of the flags in args.
+  # --generate-config exits after argument parsing, before D-Bus.
+  doInstallCheck = true;
+  installCheckPhase = ''
+    runHook preInstallCheck
+    $out/bin/ScrollMPRIS ${pkgs.lib.escapeShellArgs args} --generate-config >/dev/null
+    runHook postInstallCheck
   '';
 }
