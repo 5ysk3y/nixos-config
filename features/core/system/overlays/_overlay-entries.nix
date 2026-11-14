@@ -7,7 +7,7 @@
 # An entry may also carry `permittedInsecurePackages`, which ./_module.nix
 # merges into nixpkgs.config, so a permit is removed together with the entry
 # that justifies it.
-_:
+{ inputs, ... }:
 let
   # Shared by the FIDO2 overlay and the insecure-package permit below, so a
   # bump of the fork moves both and the permit can't outlive the exact build
@@ -18,6 +18,54 @@ in
   permanent = _final: _prev: { };
 
   tracked = [
+    {
+      id = "qutebrowser-qtwebengine";
+      meta = {
+        strategy = "nixpkgs-pr";
+        evalAttr = "qutebrowser";
+        description = "Build qutebrowser against QtWebEngine 6.140.0 from nixpkgs master, whose Chromium blocklists the compromised eMudhra keys, ahead of it reaching nixos-unstable";
+        systems = [
+          "aarch64-darwin"
+          "x86_64-linux"
+        ];
+        evalHosts = [
+          "gibson"
+          "macbook"
+        ];
+        trackingPRs = [
+          {
+            repo = "NixOS/nixpkgs";
+            # qt6.qtwebengine 6.140.0-rc -> 6.140.0. It merged to master after
+            # the darwin pyqt6 fix (NixOS/nixpkgs#584657), so once it's in the
+            # locked nixpkgs, that fix is too.
+            numbers = [ 587672 ];
+          }
+        ];
+        notes = "Coupled removal: also remove the nixpkgs-qtwebengine flake input. Once removed, confirm `nix eval .#nixosConfigurations.gibson.pkgs.qt6Packages.qtwebengine.version` and `nix eval .#darwinConfigurations.macbook.pkgs.qt6Packages.qtwebengine.version` both report 6.140.0 (not 6.140.0-rc), and launch qutebrowser on the macbook.";
+      };
+      # .override (not overrideAttrs) swaps the Qt/Python stack the package is
+      # called with, so this composes with the FIDO2 overlay's overrideAttrs
+      # whichever order the entries apply in. The whole stack comes from one
+      # rev on purpose, to avoid mixing Qt ABIs in one closure. It is imported
+      # with the host's config rather than via legacyPackages: the pinned
+      # python3's buildPythonApplication runs qutebrowser's meta check, and
+      # legacyPackages would apply the default config, dropping the permit
+      # below.
+      overlay =
+        _final: prev:
+        let
+          pinned = import inputs.nixpkgs-qtwebengine {
+            inherit (prev.stdenv.hostPlatform) system;
+            inherit (prev) config;
+          };
+        in
+        {
+          qutebrowser = prev.qutebrowser.override {
+            inherit (pinned) python3 qt6Packages;
+          };
+        };
+    }
+
     {
       id = "qutebrowser-emudhra-permit";
       meta = {
