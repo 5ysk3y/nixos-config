@@ -525,17 +525,17 @@
     },
     "nixpkgs-qt-darwin": {
       "locked": {
-        "lastModified": 1791956154,
-        "narHash": "sha256-jBYGPi4udQ9uo4KQp9m2J0546nJVQitG15gvZSaVVAs=",
+        "lastModified": 1794654828,
+        "narHash": "sha256-v7O9qSAuGAgkFTrIe9b8LxNP0rssiW09dpBUxymK2AI=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "55bfb4d7437bd4e09ab7cba58a43bd68eb310044",
+        "rev": "64da148f5344e4cdc5b7d83d693b662eb834611b",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "55bfb4d7437bd4e09ab7cba58a43bd68eb310044",
+        "rev": "64da148f5344e4cdc5b7d83d693b662eb834611b",
         "type": "github"
       }
     },

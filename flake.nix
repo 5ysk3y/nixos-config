@@ -7,10 +7,13 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # Stable: used for selectively pinning packages that need stability
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
-    # Temporary: last rev with qt6 6.11.2 — macbook qutebrowser's Qt/PyQt stack
-    # is taken from here until pyqt6 builds against Qt 6.12 on darwin.
-    # Remove alongside the macbook `qutebrowser-qt-pin` overlay entry.
-    nixpkgs-qt-darwin.url = "github:NixOS/nixpkgs/55bfb4d7437bd4e09ab7cba58a43bd68eb310044";
+
+    # Temporary: nixpkgs master with qt6.qtwebengine 6.140.0 (NixOS/nixpkgs#587672,
+    # the eMudhra fix) and the darwin pyqt6 fix (NixOS/nixpkgs#584657), both
+    # cached for aarch64-darwin. The macbook's qutebrowser takes its Qt/Python
+    # stack from here until #587672 is in the locked nixpkgs. Remove alongside
+    # the macbook `qutebrowser-qt-pin` overlay entry.
+    nixpkgs-qt-darwin.url = "github:NixOS/nixpkgs/64da148f5344e4cdc5b7d83d693b662eb834611b";
 
     # nix-darwin / mac related
     nix-darwin.url = "github:LnL7/nix-darwin";

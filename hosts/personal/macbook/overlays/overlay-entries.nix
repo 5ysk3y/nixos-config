@@ -8,27 +8,44 @@
     {
       id = "qutebrowser-qt-pin";
       meta = {
-        strategy = "nixpkgs-version";
-        description = "Build qutebrowser against the pre-Qt-6.12 python3/qt6Packages set; pyqt6 6.11.0 + Qt 6.12 fails to import on darwin (QPyTableRange symbol)";
+        strategy = "nixpkgs-pr";
+        description = "Build qutebrowser against QtWebEngine 6.140.0 from nixpkgs master, whose Chromium blocklists the compromised eMudhra keys, ahead of it reaching nixos-unstable";
         evalAttr = "qutebrowser";
-        attr = "python3Packages.pyqt6.version";
         systems = [ "aarch64-darwin" ];
-        threshold = "6.12.0";
-        notes = "This is dependant on pyqt6 reaching v6.12.0 upstream — confirm with `nix build .#darwinConfigurations.macbook.pkgs.python3Packages.pyqt6` before removing. Also remove the nixpkgs-qt-darwin flake input.";
+        trackingPRs = [
+          {
+            repo = "NixOS/nixpkgs";
+            # 584657: pyqt6 imports against Qt 6.12 on darwin (the original
+            # reason for this pin). 587672: qtwebengine 6.140.0-rc -> 6.140.0.
+            numbers = [
+              584657
+              587672
+            ];
+          }
+        ];
+        notes = "Coupled removal: also remove the nixpkgs-qt-darwin flake input. Once removed, confirm `nix eval .#darwinConfigurations.macbook.pkgs.qt6Packages.qtwebengine.version` reports 6.140.0 (not 6.140.0-rc), and launch qutebrowser on the macbook.";
       };
       # .override (not overrideAttrs) swaps the Qt/Python stack the package is
-      # called with, so this composes with the shared qutebrowser overlay's
-      # overrideAttrs (FIDO2 src) whichever order the two lists land in.
-      # Whole stack from one rev on purpose: mixing a Qt 6.11 pyqt6 with Qt 6.12
-      # qtwebengine in one closure is an ABI mismatch waiting to happen.
-      overlay = _final: prev: {
-        qutebrowser = prev.qutebrowser.override {
-          inherit (inputs.nixpkgs-qt-darwin.legacyPackages.${prev.stdenv.hostPlatform.system})
-            python3
-            qt6Packages
-            ;
+      # called with, so this composes with the shared FIDO2 overlay's
+      # overrideAttrs whichever order the lists land in. The whole stack comes
+      # from one rev on purpose, to avoid mixing Qt ABIs in one closure. It is
+      # imported with this host's config rather than via legacyPackages: the
+      # pinned python3's buildPythonApplication runs qutebrowser's meta check,
+      # and legacyPackages would apply the default config, dropping any
+      # permittedInsecurePackages entry.
+      overlay =
+        _final: prev:
+        let
+          pinned = import inputs.nixpkgs-qt-darwin {
+            inherit (prev.stdenv.hostPlatform) system;
+            inherit (prev) config;
+          };
+        in
+        {
+          qutebrowser = prev.qutebrowser.override {
+            inherit (pinned) python3 qt6Packages;
+          };
         };
-      };
     }
   ];
 }
