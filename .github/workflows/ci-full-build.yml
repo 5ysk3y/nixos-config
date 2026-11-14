@@ -31,6 +31,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       build_needed: ${{ steps.changed.outputs.build_needed }}
+      # The weekly flake.lock PR, opened by update-flake-lock.yaml from
+      # DeterminateSystems/update-flake-lock's default branch. Only this PR
+      # gets the package-changes comment.
+      weekly_update: ${{ github.event_name == 'pull_request' && github.head_ref == 'update_flake_lock_action' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -143,6 +147,16 @@ jobs:
             set -euo pipefail
             nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "$ATTIC_TOKEN"
             nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache -j 1 ./result
+      # Informational only: a failure here never fails the job or the gate.
+      - name: Package changes against the base branch
+        if: needs.changes.outputs.weekly_update == 'true'
+        continue-on-error: true
+        timeout-minutes: 60
+        uses: ./.github/actions/nvd-diff
+        with:
+          host: gibson
+          label: hosts/personal/gibson
+          attr: nixosConfigurations.gibson.config.system.build.toplevel
 
   darwin-eval-check:
     name: full build check (darwin)
@@ -196,6 +210,54 @@ jobs:
             set -euo pipefail
             nix run --inputs-from . nixpkgs#attic-client -- login home http://${{ env.ATTIC_HOST }}:8080 "$ATTIC_TOKEN"
             nix run --inputs-from . nixpkgs#attic-client -- push home:home-cache -j 1 ./result
+      # Informational only: a failure here never fails the job or the gate.
+      - name: Package changes against the base branch
+        if: needs.changes.outputs.weekly_update == 'true'
+        continue-on-error: true
+        timeout-minutes: 60
+        uses: ./.github/actions/nvd-diff
+        with:
+          host: macbook
+          label: hosts/personal/macbook
+          attr: darwinConfigurations.macbook.config.system.build.toplevel
+
+  # Posts the two hosts' package changes as one comment on the weekly
+  # flake.lock PR, updated in place on later pushes. Not a dependency of
+  # ci-gate, so it can't block a merge.
+  nvd-comment:
+    name: post package changes
+    needs:
+      - changes
+      - eval-check
+      - darwin-eval-check
+    if: |
+      always() &&
+      needs.changes.outputs.weekly_update == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      needs.changes.outputs.build_needed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      # Matches nothing when both diff steps failed; the script then exits
+      # without posting.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        continue-on-error: true
+        with:
+          pattern: nvd-*
+          merge-multiple: true
+          path: nvd
+      - name: Post or update the PR comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          HOSTS: gibson macbook
+        run: bash .github/scripts/post-nvd-comment.sh nvd
 
   ci-gate:
     name: CI required status

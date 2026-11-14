@@ -1,0 +1,46 @@
+# Builds the same system from the PR's base commit and diffs it against
+# ./result with nvd-summary, for the nvd-comment job to post. Run after
+# the job's own build, so ./result is the PR's system.
+name: Package changes against the base branch
+description: Build the base commit's system and upload an nvd diff against ./result
+
+inputs:
+  host:
+    description: Short host name, used for the artifact and file names.
+    required: true
+  label:
+    description: Heading for this host in the PR comment.
+    required: true
+  attr:
+    description: Flake attribute of the system toplevel, as built into ./result.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        HOST: ${{ inputs.host }}
+        LABEL: ${{ inputs.label }}
+        ATTR: ${{ inputs.attr }}
+      run: |
+        set -euo pipefail
+        # actions/checkout fetched only the PR's merge commit. A worktree of
+        # the base fails in a shallow clone (Nix's git fetcher looks for its
+        # missing parent), so build the base commit straight from the repo.
+        git fetch --no-tags --depth=1 origin "$BASE_SHA"
+        nix build "git+file://${PWD}?rev=${BASE_SHA}&shallow=1#${ATTR}" -L -o result-base
+
+        mkdir -p nvd
+        printf '%s\n' "$LABEL" > "nvd/${HOST}.label"
+        nix run .#nvd-summary -- result-base result > "nvd/${HOST}.txt"
+        nix run .#nvd-summary -- --all result-base result > "nvd/${HOST}-full.txt"
+        cat "nvd/${HOST}.txt"
+
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      with:
+        name: nvd-${{ inputs.host }}
+        path: nvd/
+        if-no-files-found: error
+        retention-days: 7
