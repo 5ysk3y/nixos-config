@@ -1,0 +1,26 @@
+--- a/qutebrowser/browser/webengine/webenginetab.py
++++ b/qutebrowser/browser/webengine/webenginetab.py
+@@ -1290,6 +1290,12 @@
+             self._ux_request_cancelled()
+         elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.RequestFailed:
+             self._ux_request_failed()
++        elif state.value == 7:
++            # WebAuthUxState.Discovery, added in QtWebEngine 6.12: no
++            # authenticator is visible yet, and the request continues once
++            # one appears. Matched by value because PyQt6-WebEngine 6.11
++            # doesn't name it.
++            self._ux_discovery()
+         else:
+             raise utils.Unreachable(state)
+ 
+@@ -1305,6 +1311,10 @@
+             log.webview.debug("User verification aborted by user")
+             self._request.cancel()
+ 
++    def _ux_discovery(self) -> None:
++        log.webview.debug("Webauth waiting for an authenticator")
++        message.info("Please insert your device.")
++
+     def _ux_finish_token_collection(self) -> None:
+         log.webview.debug("Finish Webauth token collection")
+         message.info("Please touch your device now.")
