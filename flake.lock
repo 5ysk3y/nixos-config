@@ -660,9 +660,26 @@
         "nixpkgs": "nixpkgs_5",
         "nixpkgs-qtwebengine": "nixpkgs-qtwebengine",
         "nixpkgs-stable": "nixpkgs-stable",
+        "scroll-mpris": "scroll-mpris",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "wayland-pipewire-idle-inhibit": "wayland-pipewire-idle-inhibit"
+      }
+    },
+    "scroll-mpris": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789726218,
+        "narHash": "sha256-9NlInhEBS7VjYE8K0UyJRhzkPgbWVGdrq2Vu52pN5EU=",
+        "owner": "BEST8OY",
+        "repo": "ScrollMPRIS",
+        "rev": "21df3617577758ef5f8a92255faece8ecceec22a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BEST8OY",
+        "repo": "ScrollMPRIS",
+        "type": "github"
       }
     },
     "sops-nix": {

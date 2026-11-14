@@ -1,12 +1,25 @@
 {
   lib,
   pkgs,
+  inputs,
   ...
 }:
 let
+  # Used by custom/media, and checked against the binary at build time.
+  scrollMprisArgs = [
+    "--freeze"
+    "-b"
+    "vlc"
+    "--format"
+    # Only the [scroll] block scrolls; the icons stay fixed in front.
+    "{player_icon} {status_icon} [scroll]{title} - {artist}[/scroll]"
+  ];
   scripts = {
     waybar = import ./_scripts { inherit pkgs; };
-    scroll_mpris = import ./_scripts/scroll-mpris { inherit pkgs; };
+    scroll_mpris = import ./_scripts/scroll-mpris {
+      inherit pkgs inputs;
+      args = scrollMprisArgs;
+    };
   };
 in
 {
@@ -113,7 +126,7 @@ in
           "on-click-right" = "playerctl -s stop";
           "on-scroll-up" = "playerctl -s next";
           "on-scroll-down" = "playerctl -s previous";
-          exec = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS --freeze -b vlc --format '{title} - {artist}'";
+          exec = "${scripts.scroll_mpris.outPath}/bin/ScrollMPRIS ${lib.escapeShellArgs scrollMprisArgs}";
         };
 
         pulseaudio = {
