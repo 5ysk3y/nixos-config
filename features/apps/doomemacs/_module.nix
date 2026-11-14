@@ -52,6 +52,19 @@ let
     key="${emacsPkg}|${inputs.doomemacs}|${inputs.doomemacs-modules}|${./doom}"
   '';
 
+  # Removes straight.el clones whose tracked branch no longer exists upstream,
+  # so a sync that fails because an upstream renamed its branch can be retried
+  # (see installDoomEmacs)
+  pruneStaleRepos = pkgs.writeShellApplication {
+    name = "doom-prune-stale-repos";
+    runtimeInputs = [
+      pkgs.git
+      pkgs.coreutils
+      pkgs.findutils
+    ];
+    text = builtins.readFile ./_prune-stale-repos.sh;
+  };
+
   # installDoomEmacs (below) runs via the system-level ${hmUnit}, which has
   # no ordering relative to user-level units, and with linger the user
   # manager starts at boot alongside it. On a cold boot they race; this
@@ -187,7 +200,19 @@ mkMerge [
             elif [ ! -f "$stamp" ] || [ "$(cat "$stamp")" != "$key" ] || [ ! -d "$EMACSDIR/.local/straight" ]; then
               echo "doom: inputs changed, running doom sync -u --force"
               rm -f "$EMACSDIR/.local/etc/sync"
-              "${config.xdg.configHome}/emacs/bin/doom" sync -u --force
+              doom="${config.xdg.configHome}/emacs/bin/doom"
+              if ! "$doom" sync -u --force; then
+                # A clone whose upstream renamed or deleted its branch fails
+                # every sync. Remove any such clones and retry once; any other
+                # failure still fails activation.
+                echo "doom: sync failed, checking for repos whose tracked branch is gone upstream"
+                if ! ${lib.getExe pruneStaleRepos} "$EMACSDIR/.local/straight/repos"; then
+                  echo "doom: none found, so that isn't the cause" >&2
+                  exit 1
+                fi
+                echo "doom: retrying doom sync -u --force"
+                "$doom" sync -u --force
+              fi
               echo "$key" > "$stamp"
 
               ${lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
