@@ -7,8 +7,9 @@
           game-cleanup = pkgs.callPackage ./game-cleanup { };
           xivlauncher-rb = pkgs.callPackage ./nixos-xivlauncher-rb { };
         }
-        // {
-          nix-build-system = pkgs.callPackage ./nix-build-system { };
+        // rec {
+          nvd-summary = pkgs.callPackage ./nvd-summary { };
+          nix-build-system = pkgs.callPackage ./nix-build-system { inherit nvd-summary; };
         };
     };
 
