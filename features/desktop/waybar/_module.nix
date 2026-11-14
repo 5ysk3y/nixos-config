@@ -50,7 +50,7 @@ in
 
         "custom/rbw" = {
           format = "{}";
-          escape = "true";
+          escape = true;
           interval = 30;
           exec = "${scripts.waybar.check_rbw.outPath}/bin/check_rbw";
         };
@@ -108,7 +108,7 @@ in
 
         "custom/media" = {
           "return-type" = "json";
-          escape = "true";
+          escape = true;
           "on-click" = "playerctl -s play-pause";
           "on-click-right" = "playerctl -s stop";
           "on-scroll-up" = "playerctl -s next";
