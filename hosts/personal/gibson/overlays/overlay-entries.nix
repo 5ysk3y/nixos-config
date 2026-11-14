@@ -16,8 +16,7 @@
 # `final.<key>`, never `prev.<key>` — `final` is always the fully-resolved
 # fixed point regardless of list order; `prev` only reflects entries earlier
 # in this same list.
-{ inputs }:
-{
+_: {
   permanent = _final: prev: {
     steam = prev.steam.override {
       extraPkgs =
@@ -37,50 +36,6 @@
   };
 
   tracked = [
-    {
-      id = "mpv-unwrapped";
-      meta = {
-        strategy = "nixpkgs-version";
-        description = "Backport fence-sync fix milestoned for mpv 0.42.0";
-        evalAttr = "mpv-unwrapped";
-        systems = [ "x86_64-linux" ];
-        threshold = "0.42.0";
-        notes = "mpv override is a coupled removal — remove both entries together.";
-      };
-      overlay = _final: prev: {
-        mpv-unwrapped = prev.mpv-unwrapped.overrideAttrs (old: {
-          patches = (old.patches or [ ]) ++ [
-            ./patches/mpv-fence-leak.patch
-          ];
-        });
-      };
-    }
-
-    {
-      id = "mpv-coupled";
-      exempt = true; # coupled to mpv-unwrapped above, no independent tracking
-      overlay = final: prev: {
-        mpv = prev.mpv.override {
-          inherit (final) mpv-unwrapped;
-        };
-      };
-    }
-
-    {
-      id = "waybar";
-      meta = {
-        strategy = "nixpkgs-version";
-        description = "waybar 0.16.0 from nixpkgs PR #583754 pending merge";
-        evalAttr = "waybar";
-        systems = [ "x86_64-linux" ];
-        threshold = "0.16.0";
-        notes = "Also remove the waybar-pr flake input from flake.nix. The PR's package.nix is called against our locked nixpkgs, so it can drift from it; if the PR is force-pushed, re-pin the input to the new head commit.";
-      };
-      overlay = _final: prev: {
-        waybar = prev.callPackage inputs.waybar-pr { };
-      };
-    }
-
     {
       id = "bitwarden-desktop";
       meta = {
