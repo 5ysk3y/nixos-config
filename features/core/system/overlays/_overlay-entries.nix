@@ -12,7 +12,7 @@ let
   # Shared by the FIDO2 overlay and the insecure-package permit below, so a
   # bump of the fork moves both and the permit can't outlive the exact build
   # it was granted for.
-  qutebrowserVersion = "unstable-2026-08-04";
+  qutebrowserVersion = "unstable-2026-11-11";
 in
 {
   permanent = _final: _prev: { };
@@ -70,15 +70,21 @@ in
         ];
       };
       # Unstable qutebrowser build with unmerged FIDO2 support.
-      # Remove once upstream merges https://github.com/qutebrowser/qutebrowser/pull/8642
+      # Remove once upstream merges https://github.com/qutebrowser/qutebrowser/pull/8642,
+      # checking first that the merged code handles WebAuthUxState.Discovery
+      # (see ./patches/qutebrowser-webauth-discovery.patch).
       overlay = final: prev: {
-        qutebrowser = prev.qutebrowser.overrideAttrs (_old: {
+        qutebrowser = prev.qutebrowser.overrideAttrs (old: {
           version = qutebrowserVersion;
+          # The fork raises on WebAuthUxState.Discovery (QtWebEngine 6.12+:
+          # waiting for an authenticator to appear); handle it as a prompt.
+          # Not in the fork or qutebrowser/qutebrowser#8642 as of 2026-11-14.
+          patches = (old.patches or [ ]) ++ [ ./patches/qutebrowser-webauth-discovery.patch ];
           src = final.fetchFromGitHub {
             owner = "coderkun";
             repo = "qutebrowser";
-            rev = "4c0fc4fdf6721028957cddd3075d8df09e170951";
-            hash = "sha256-BVCbCSh80J7UQm5G2Ub1Ah4yzm58PYiNHR/mbSynDeE=";
+            rev = "ccfb65e90972ebee7c6921858103239beb5bf942";
+            hash = "sha256-+bkgQFqo5y69VMXHtJf4fpRl11odzaZYiEB/+xoMozc=";
           };
         });
       };
