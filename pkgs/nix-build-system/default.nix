@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, nvd-summary }:
 let
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
 
@@ -19,11 +19,7 @@ let
 in
 pkgs.writeShellApplication {
   name = "nix-build-system";
-  runtimeInputs = with pkgs; [
-    nvd
-    gawk
-    gnused
-  ];
+  runtimeInputs = [ nvd-summary ];
   text = ''
     CONFIG="''${NIXOS_CONFIG:-$HOME/nixos-config}"
     OUTFILE="$HOME/changes_$(date +%d-%m-%y).out"
@@ -35,10 +31,7 @@ pkgs.writeShellApplication {
     echo "Build complete. Providing result:"
     echo ""
     rm -rf ~/changes_*
-    nvd diff /run/current-system "$CONFIG"/result > "$OUTFILE"
-    #Cleanup
-    awk -i inplace '{$0=gensub(/\s*\S+/,"",2)}1' "$OUTFILE"
-    sed -i -e '1,2d' -e 's/Version/Changed\/Updated:/g' -e 's/Added/\nAdded:/g' -e 's/Removed/\nRemoved:/g' -e '$d' "$OUTFILE"
+    nvd-summary /run/current-system "$CONFIG"/result > "$OUTFILE"
     rm "$CONFIG"/result
     cat "$OUTFILE"
     echo "Result has been stored in $OUTFILE. Finished"
