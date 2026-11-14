@@ -523,7 +523,7 @@
         "type": "github"
       }
     },
-    "nixpkgs-qt-darwin": {
+    "nixpkgs-qtwebengine": {
       "locked": {
         "lastModified": 1794654828,
         "narHash": "sha256-v7O9qSAuGAgkFTrIe9b8LxNP0rssiW09dpBUxymK2AI=",
@@ -658,7 +658,7 @@
         "nix-darwin": "nix-darwin",
         "nix-secrets": "nix-secrets",
         "nixpkgs": "nixpkgs_5",
-        "nixpkgs-qt-darwin": "nixpkgs-qt-darwin",
+        "nixpkgs-qtwebengine": "nixpkgs-qtwebengine",
         "nixpkgs-stable": "nixpkgs-stable",
         "sops-nix": "sops-nix",
         "stylix": "stylix",

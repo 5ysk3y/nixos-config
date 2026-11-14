@@ -1,6 +1,6 @@
-_:
+{ inputs, ... }:
 let
-  entries = import ./_overlay-entries.nix { };
+  entries = import ./_overlay-entries.nix { inherit inputs; };
 in
 {
   nixpkgs.overlays = [
