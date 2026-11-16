@@ -15,6 +15,7 @@
     inputs.disko.nixosModules.disko
     inputs.self.modules.nixos.nvidia
     inputs.self.modules.nixos.steelseries
+    inputs.self.modules.nixos.claude-desktop
   ];
 
   networking = {
