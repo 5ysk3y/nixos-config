@@ -1,5 +1,6 @@
 {
   config,
+  inputs,
   vars,
   pkgs,
   ...
@@ -7,6 +8,7 @@
 {
   imports = [
     ./applications/waybar/waybar.nix
+    inputs.self.modules.homeManager.claude-desktop
   ];
 
   home = {
