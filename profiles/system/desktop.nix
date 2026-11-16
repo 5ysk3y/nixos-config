@@ -4,6 +4,7 @@
 {
   infra.profiles.nixos.desktop = {
     imports = with config.flake.modules.nixos; [
+      claude-desktop
       pentesting
       virtualisation
       desktop-services

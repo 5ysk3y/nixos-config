@@ -8,6 +8,7 @@
         inputs.wayland-pipewire-idle-inhibit.homeModules.default
       ]
       ++ (with config.flake.modules.homeManager; [
+        claude-desktop
         dimland
         fuzzel
         gaming
