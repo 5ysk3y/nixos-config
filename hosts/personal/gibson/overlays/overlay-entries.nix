@@ -66,5 +66,46 @@ _: {
         };
       };
     }
+
+    {
+      id = "linux-zen-workqueue-null-deref";
+      meta = {
+        strategy = "nixpkgs-pr";
+        description = "Patch linux_zen 7.3.4-zen1's mis-merged process_one_work(), which NULL-derefs on BH workers and panics gibson at boot";
+        evalAttr = "linuxPackages_zen.kernel";
+        systems = [ "x86_64-linux" ];
+        trackingPRs = [
+          {
+            repo = "NixOS/nixpkgs";
+            # linux_zen: 7.3.4-zen1 -> 7.3.4-zen2 (ships zen-kernel d0c3b48,
+            # fixing zen-kernel/zen-kernel#425).
+            numbers = [ 586820 ];
+          }
+        ];
+        notes = "kernel.version reads 7.3.4 for both zen1 and zen2; check modDirVersion instead. Once landed, `nix eval .#nixosConfigurations.gibson.config.boot.kernelPackages.kernel.modDirVersion` should report 7.3.4-zen2 or later. Once upstream merges remove the overlay and the associated patch file";
+      };
+      # Mirrors how nixos/modules/system/boot/kernel.nix applies
+      # boot.kernelPatches (extend + kernel.override), but as an overlay so
+      # it's audited. Rebuilds the kernel and its out-of-tree modules
+      # (nvidia-open) locally rather than substituting from cache.nixos.org.
+      overlay = _final: prev: {
+        linuxPackages_zen = prev.linuxPackages_zen.extend (
+          _kfinal: kprev: {
+            kernel =
+              if kprev.kernel.modDirVersion == "7.3.4-zen1" then
+                kprev.kernel.override (orig: {
+                  kernelPatches = (orig.kernelPatches or [ ]) ++ [
+                    {
+                      name = "zen-workqueue-bh-null-deref";
+                      patch = ./patches/zen-workqueue-bh-null-deref.patch;
+                    }
+                  ];
+                })
+              else
+                prev.lib.warn "linux-zen-workqueue-null-deref: linux_zen is now ${kprev.kernel.modDirVersion}, overlay is inert; remove it" kprev.kernel;
+          }
+        );
+      };
+    }
   ];
 }
