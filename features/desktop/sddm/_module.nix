@@ -32,6 +32,10 @@ in
   };
   config = {
     environment.systemPackages = [ sddm-astronaut ];
+    # The theme ships its fonts (e.g. KogniGear for cyberpunk) in the
+    # package's share/fonts; fontconfig only reads fonts.packages, so without
+    # this the greeter falls back to a default font
+    fonts.packages = [ sddm-astronaut ];
     services.displayManager.sddm = {
       enable = true;
       wayland = {
