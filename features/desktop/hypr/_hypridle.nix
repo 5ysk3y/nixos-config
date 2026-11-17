@@ -33,8 +33,31 @@ let
         sleep 2
       fi
     '';
+  cfg = config.features.home.hyprland;
+
+  # The NVIDIA driver doesn't resend an output's HDR metadata after DPMS:
+  # Hyprland and aquamarine recommit the same metadata, the driver sees
+  # nothing new, and the monitor gets a BT.2020 signal without PQ metadata
+  # (on the BenQ EX2780Q, "HDR emulation"). Switching the output to SDR and
+  # back changes the metadata, so the driver sends it again. hl.monitor only
+  # updates the fields given on the existing rule.
+  setCm = output: cm: lib.escapeShellArg ''hl.monitor({ output = "${output}", cm = "${cm}" })'';
+  reassertHdr = lib.optionalString (cfg.hdrOutputs != [ ]) (
+    ''
+      sleep 1
+    ''
+    + lib.concatMapStrings (output: ''
+      hyprctl eval ${setCm output "srgb"}
+      sleep 1
+      hyprctl eval ${setCm output "hdr"}
+    '') cfg.hdrOutputs
+  );
+
   dpmsOn = ''
     hyprctl dispatch 'hl.dsp.dpms({ action = "enable" })'
+  ''
+  + reassertHdr
+  + ''
     ${pkgs.wtype}/bin/wtype -k escape
   '';
 
@@ -78,11 +101,24 @@ let
   );
 in
 {
-  options.features.home.hyprland.resumeCommands = lib.mkOption {
-    type = lib.types.listOf lib.types.str;
-    default = [ ];
-    example = [ "openrgb -c 0000FF -m Direct" ];
-    description = "Commands run after waking from sleep, before the displays are turned back on.";
+  options.features.home.hyprland = {
+    resumeCommands = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "openrgb -c 0000FF -m Direct" ];
+      description = "Commands run after waking from sleep, before the displays are turned back on.";
+    };
+
+    hdrOutputs = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "desc:BNQ BenQ EX2780Q 66L07726019" ];
+      description = ''
+        Outputs (as in their hl.monitor rule's `output`) running cm = "hdr"
+        whose HDR metadata is resent after the displays turn back on, by
+        switching them to SDR and back. Each one blanks for about a second.
+      '';
+    };
   };
 
   config = {
