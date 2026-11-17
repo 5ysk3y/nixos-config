@@ -117,6 +117,24 @@ in
           with no `#` ("nixpkgs PR 586820").
         - The `(#123)` GitHub appends to a squash-merged subject is fine:
           GitHub adds it, so don't write it yourself.
+
+        ## Style
+
+        - Write for someone who hasn't read the diff: say what a thing is
+          before what was wrong with it, and don't leave them to connect
+          the dots.
+        - Why is a short story in two to four sentences: the problem, then
+          how this change fixes it. Each sentence follows from the one
+          before. Never state a fact without saying why it matters.
+        - Side fixes go in What as bullets, not in Why.
+        - One idea per sentence, in plain words. Don't chain clauses with
+          colons, semicolons or "so".
+        - What bullets are short, ideally one line: the option, file or
+          package, then the change in plain words.
+        - Leave out anything a reader would delete: how the change was
+          verified, internal mechanics, restatements.
+        - Notes holds only what someone needs before or after switching,
+          in a sentence or two.
       '';
 
       settings = {

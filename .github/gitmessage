@@ -8,14 +8,15 @@
 # Each section's heading goes on a line of its own, its text below it.
 
 # Why:
-#   What was wrong or needed, its cause, and why this approach.
-#   Not the changes themselves.
+#   Two to four sentences: what was wrong or missing, then how this
+#   change fixes it. Not a list of the changes.
 
 # What:
-#   One bullet per change, naming the option, file or package.
+#   One short bullet per change: the option, file or package, then
+#   the change in plain words.
 #   Leave it out for a single change the subject already describes.
 # -
 
 # Notes:
-#   Caveats, follow-ups, what to check before or after switching.
+#   Only what someone needs before or after switching.
 #   Leave it out if there's nothing to say.
