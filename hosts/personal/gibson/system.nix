@@ -92,7 +92,7 @@
           "device.profile.priority.rules" = [
             {
               matches = [ { "device.name" = "alsa_card.pci-0000_08_00.1"; } ];
-              actions.update-props.priorities = [ "output:hdmi-stereo-extra1" ];
+              actions.update-props.priorities = [ "output:hdmi-stereo" ];
             }
           ];
         };
@@ -106,7 +106,7 @@
             "pulse.cmd" = [
               {
                 cmd = "load-module";
-                args = "module-combine-sink sink_name=HDMI_External sink_properties='device.description=\"HDMI / External\" priority.session=2000' slaves=alsa_output.pci-0000_0a_00.4.analog-stereo,alsa_output.pci-0000_08_00.1.hdmi-stereo-extra1";
+                args = "module-combine-sink sink_name=HDMI_External sink_properties='device.description=\"HDMI / External\" priority.session=2000' slaves=alsa_output.pci-0000_0a_00.4.analog-stereo,alsa_output.pci-0000_08_00.1.hdmi-stereo";
               }
             ];
           };
