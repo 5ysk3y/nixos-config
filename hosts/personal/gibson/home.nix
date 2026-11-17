@@ -42,6 +42,9 @@
         luaConfig = ./applications/hypr/hyprland-host.lua;
         # Back to the desk lighting OpenRGB keeps (services.hardware.openrgb)
         resumeCommands = [ "openrgb -c 0000FF -m Direct" ];
+        # The BenQ (cm = "hdr" in hyprland-host.lua) otherwise wakes in its
+        # HDR emulation mode
+        hdrOutputs = [ "desc:BNQ BenQ EX2780Q 66L07726019" ];
       };
 
       # The clock and password field on the middle monitor, and the
