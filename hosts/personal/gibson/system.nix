@@ -93,34 +93,30 @@
     pipewire = {
       wireplumber = {
         enable = true;
-        extraConfig = {
-          "00-profile-enforcement" = {
-            context.objects = [
-              {
-                factory = "policy-node";
-                args = {
-                  "priority.session" = 1000;
-                  "target.object" = "alsa_card.pci-0000_08_00.1";
-                  "target.profile" = "output:hdmi-stereo-extra1";
-                };
-              }
-            ];
-          };
-          "01-default-sink" = {
-            default-nodes = {
-              "audio.sink" = "HDMI_External";
-            };
-          };
+        # The GPU's HDMI audio card on the profile the combined sink below
+        # uses. WirePlumber 0.5 consults these rules only when it has no
+        # stored profile for the card (find-preferred-profile runs after
+        # find-stored-profile), so a profile picked by hand in pavucontrol
+        # still wins until its state is cleared.
+        extraConfig."51-gibson-hdmi-profile" = {
+          "device.profile.priority.rules" = [
+            {
+              matches = [ { "device.name" = "alsa_card.pci-0000_08_00.1"; } ];
+              actions.update-props.priorities = [ "output:hdmi-stereo-extra1" ];
+            }
+          ];
         };
       };
 
+      # priority.session makes the combined sink WirePlumber's default when
+      # no default sink has been chosen (or the chosen one is missing)
       extraConfig = {
         pipewire-pulse = {
           "00-combined-sink" = {
             "pulse.cmd" = [
               {
                 cmd = "load-module";
-                args = "module-combine-sink sink_name=HDMI_External sink_properties='device.description=\"HDMI / External\"' slaves=alsa_output.pci-0000_0a_00.4.analog-stereo,alsa_output.pci-0000_08_00.1.hdmi-stereo-extra1";
+                args = "module-combine-sink sink_name=HDMI_External sink_properties='device.description=\"HDMI / External\" priority.session=2000' slaves=alsa_output.pci-0000_0a_00.4.analog-stereo,alsa_output.pci-0000_08_00.1.hdmi-stereo-extra1";
               }
             ];
           };
