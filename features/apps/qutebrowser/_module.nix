@@ -22,7 +22,7 @@ let
         rofi-rbw
       else
         kitty -T "rbw password prompt" rbw unlock \
-        && hyprctl dispatch focuswindow qutebrowser \
+        && hyprctl dispatch 'hl.dsp.focus({ window = "class:org.qutebrowser.qutebrowser" })' \
         && rofi-rbw
       fi
     '';

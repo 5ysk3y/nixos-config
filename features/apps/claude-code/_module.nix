@@ -104,6 +104,21 @@ in
     claude-code = {
       enable = true;
 
+      # Loaded in every local session, whatever the repo
+      rules.commit-messages = ''
+        # Commit messages and PR descriptions
+
+        - Never link or reference PRs or issues in a way GitHub turns into a
+          link: no `#123`, no `owner/repo#123`, no `GH-123`, and no github.com
+          URLs to PRs, issues or commits. Each one adds a cross-reference to
+          the target and makes noise.
+        - When the history matters, describe it in words ("the earlier
+          HYPRLAND_NO_RT workaround") or name an upstream change in plain text
+          with no `#` ("nixpkgs PR 586820").
+        - The `(#123)` GitHub appends to a squash-merged subject is fine:
+          GitHub adds it, so don't write it yourself.
+      '';
+
       settings = {
         permissions.deny =
           map (dirRule "Read") secretDirs
