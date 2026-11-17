@@ -1,8 +1,4 @@
-{
-  pkgs,
-  inputs,
-  ...
-}:
+{ pkgs, ... }:
 {
   programs.mangohud = {
     enable = true;
@@ -13,7 +9,7 @@
   };
 
   home.packages = [
-    inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.game-cleanup
+    pkgs.game-cleanup
     (pkgs.xivlauncher-rb.override {
       useGameMode = true;
     })
