@@ -50,6 +50,8 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 
 The config follows the [dendritic pattern](https://saylesss88.github.io/flakes/dendritic_flake_parts.html) — features are small, self-contained modules composed into hosts via profiles rather than monolithic per-host config files. Nothing references another directory by path (`../`); modules, profiles and hosts are referenced by name, so directories can be moved without breaking the wiring (enforced by a check in CI and the pre-commit hook). [flake-parts](https://github.com/hercules-ci/flake-parts) and [import-tree](https://github.com/denful/import-tree) handle the wiring.
 
+Inside a feature, files starting with `_` are its modules (import-tree skips them; the feature's `default.nix` publishes them). A feature that publishes one module, or one file for several classes, calls it `_module.nix`. A feature with a module per class names each one after its class: `_home.nix`, `_nixos.nix` and `_darwin.nix`, plus `_common.nix` for a base the system modules share. Directories that publish several unrelated modules (`features/apps`, `features/core/home`) name each file after its module.
+
 Profiles group the features that a kind of machine shares. A feature only one host uses is imported by that host's own `system.nix` or `home.nix` instead (NVIDIA and backups on gibson, the linux-builder on the macbook, each server's role).
 
 | Host | System profiles | Home profiles |
