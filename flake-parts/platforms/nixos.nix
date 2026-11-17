@@ -18,8 +18,6 @@ let
       hasSecretsAndHome = host.kind == "nixos";
     in
     inputs.nixpkgs.lib.nixosSystem {
-      inherit (host) system;
-
       specialArgs = {
         inherit inputs;
         inherit (host) hostname system vars;
@@ -32,6 +30,7 @@ let
         ++ [
           {
             nixpkgs.config = nixpkgsConfig;
+            nixpkgs.hostPlatform = host.system;
             networking.hostName = host.hostname;
           }
         ]

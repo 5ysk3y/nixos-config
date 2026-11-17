@@ -40,7 +40,7 @@ _: {
       id = "bitwarden-desktop";
       meta = {
         strategy = "nixpkgs-issue";
-        description = "Fixes an issue with bitwarden holding hibernation lock, preventing the system from entering hibnerate";
+        description = "Fixes an issue with bitwarden holding hibernation lock, preventing the system from entering hibernation";
         evalAttr = "bitwarden-desktop";
         systems = [ "x86_64-linux" ];
         trackingIssues = [

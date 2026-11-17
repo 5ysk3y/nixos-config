@@ -1,0 +1,8 @@
+# nix build output links
+/result
+/result-*
+
+# Editor and per-machine Claude Code state
+.idea/
+.vscode/
+.claude/settings.local.json
