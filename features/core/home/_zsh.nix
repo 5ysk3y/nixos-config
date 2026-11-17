@@ -102,6 +102,7 @@ in
           "- Notes: caveats, follow-ups, or what to check before switching (a build, a closure diff) or after. Only suggest checks that apply to this repo's hosts. Leave it out if there's nothing to say."
           "- Don't say the same thing in Why and What."
           "- Describe only what the diff does: don't present code it leaves unchanged as changed, in the subject or the body."
+          "- Never reference PRs, issues or commits in a form GitHub links: no #123, no owner/repo#123, no GitHub URLs, even when the recent subjects or the diff contain them. Describe earlier changes in words, or name an upstream change as plain text without a # (e.g. nixpkgs PR 586820)."
         )
 
         # flake.lock's diff is all hashes; --stat still lists the file
@@ -119,8 +120,9 @@ in
             "$(git diff --cached --stat)" \
             "$diff")
         fi
+        # Without the (#123) GitHub appends on merge, so Claude doesn't copy it
         context=$(printf 'Recent commit subjects:\n%s\n\n%s' \
-          "$(git log -20 --format=%s 2>/dev/null)" \
+          "$(git log -20 --format=%s 2>/dev/null | sed -E 's/ \(#[0-9]+\)$//')" \
           "$context")
 
         if ! msg=$(printf '%s' "$context" \
