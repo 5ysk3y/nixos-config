@@ -212,7 +212,55 @@ return function(WS)
   hl.window_rule({ match = { class = "^(org.jellyfin.JellyfinDesktop)$" }, group = "invade always" })
   hl.window_rule({ match = { class = "^(org.qutebrowser.qutebrowser)$" }, group = "set lock always" })
   hl.window_rule({ match = { class = "^(com.anthropic.Claude)$" }, group = "invade always" })
-  
+
+  -- "invade" only joins the group of the focused window, and only if that
+  -- window is on the workspace the new one opens on. These apps open on
+  -- another workspace than the one in focus (their workspace rules), and
+  -- Electron apps take a variable time to appear, so they often end up
+  -- tiled beside their group instead. This puts each one into its partner's
+  -- group whenever either window opens, whatever has focus and whichever
+  -- opens first. The group is unlocked just for the add: Group:add refuses
+  -- a locked group once the window's first map is over.
+  local GROUP_WITH = {
+    -- { joins, the app whose group it joins }
+    { "com.anthropic.Claude", "org.qutebrowser.qutebrowser" },
+    { "org.jellyfin.JellyfinDesktop", "cider" },
+    { "signal", "discord" },
+  }
+
+  local function first_tiled(class)
+    for _, w in ipairs(hl.get_windows({ class = class })) do
+      if w.mapped and not w.floating then
+        return w
+      end
+    end
+  end
+
+  local function join_group(joiner_class, host_class)
+    local host = first_tiled(host_class)
+    local joiner = first_tiled(joiner_class)
+    local group = host and host.group
+    if not (group and joiner) or joiner.group then
+      return
+    end
+    local locked = group.locked
+    if locked then
+      hl.dispatch(hl.dsp.group.lock({ window = host, action = "off" }))
+    end
+    group:add(joiner)
+    if locked then
+      hl.dispatch(hl.dsp.group.lock({ window = host, action = "on" }))
+    end
+  end
+
+  hl.on("window.open", function(w)
+    for _, pair in ipairs(GROUP_WITH) do
+      if w.class == pair[1] or w.class == pair[2] then
+        join_group(pair[1], pair[2])
+      end
+    end
+  end)
+
   ------------------------------------------------------------------------
   -- AUTOSTART
   ------------------------------------------------------------------------
@@ -223,12 +271,11 @@ return function(WS)
     hl.exec_cmd([[mpvpaper '*' /home/rickie/.config/Wallpapers/Cyberpunk/Cyberpunk-2077-Game-4K-Animated-Desktop.mp4 --mpv-options="profile=wallpaper" -f]])
     hl.exec_cmd("bitwarden")
     hl.exec_cmd("kitty -1")
+    -- Grouped with qutebrowser, Cider and Discord by the window.open hook
+    -- above
     hl.exec_cmd("claude-desktop")
-    hl.exec_cmd([[sleep 3 && hyprctl dispatch 'hl.dsp.window.move({ into_group = "l" })']])
     hl.exec_cmd("jellyfin-desktop")
-    hl.exec_cmd([[sleep 0.5 && hyprctl dispatch 'hl.dsp.window.move({ into_group = "l" })']])
-    hl.exec_cmd("sleep 3 && signal-desktop")
-    hl.exec_cmd([[sleep 0.5 && hyprctl dispatch 'hl.dsp.window.move({ into_group = "l" })']])
+    hl.exec_cmd("signal-desktop")
     hl.exec_cmd("jellyfin-mpv-shim")
     hl.exec_cmd("openrgb -c 0000FF -m Direct > /dev/null 2>&1")
   end)
