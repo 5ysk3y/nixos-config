@@ -58,7 +58,7 @@ in
             ",M" = "hint links spawn mpv {hint-url}";
             ",m" = "spawn mpv {url}";
             ";M" = "hint --rapid links spawn mpv {hint-url}";
-            "<Ctrl+Shift+i>:" = "devtools";
+            "<Ctrl+Shift+i>" = "devtools";
             "xb" = "config-cycle statusbar.show always never";
             "er" = "spawn -u readability";
           }
@@ -107,7 +107,6 @@ in
           fullscreen.window = false;
           geolocation = false;
           headers.user_agent = "Mozilla/5.0 ({os_info}) AppleWebKit/{webkit_version} (KHTML, like Gecko) {qt_key}/{qt_version} {upstream_browser_key}/{upstream_browser_version} Safari/{webkit_version}";
-          xss_auditing = true;
         };
 
         tabs = {
