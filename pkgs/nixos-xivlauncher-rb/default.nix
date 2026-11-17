@@ -99,11 +99,14 @@ buildDotnetModule rec {
       in
       ''
         substituteInPlace $out/bin/XIVLauncher.Core \
-          --replace 'exec' 'exec ${steam-run}/bin/steam-run'
+          --replace-fail 'exec' 'exec ${steam-run}/bin/steam-run'
       ''
     )
     + ''
-      wrapProgram $out/bin/XIVLauncher.Core --prefix GST_PLUGIN_SYSTEM_PATH_1_0 ":" "$GST_PLUGIN_SYSTEM_PATH_1_0" --prefix XL_NVNGXPATH ":" ${nvngxPath}
+      wrapProgram $out/bin/XIVLauncher.Core \
+        --prefix GST_PLUGIN_SYSTEM_PATH_1_0 ":" "$GST_PLUGIN_SYSTEM_PATH_1_0"${
+          lib.optionalString (nvngxPath != "") " --prefix XL_NVNGXPATH : ${lib.escapeShellArg nvngxPath}"
+        }
       # the reference to aria2 gets mangled as UTF-16LE and isn't detectable by nix: https://github.com/NixOS/nixpkgs/issues/220065
       mkdir -p $out/nix-support
       echo ${aria2} >> $out/nix-support/depends
