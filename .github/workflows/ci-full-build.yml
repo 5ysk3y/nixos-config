@@ -58,14 +58,16 @@ jobs:
             "${{ github.event.pull_request.base.sha }}" \
             "${{ github.event.pull_request.head.sha }}")"
 
-          # `nix flake check` only evaluates, so build whenever a PR changes
-          # what gets compiled rather than just how it's configured: any
-          # flake input (not only nixpkgs), the local packages, the overlays,
-          # any patch, and the waybar scripts' own packages.
+          # The full build is for flake.lock changes: mainly the weekly
+          # update PR, which changes what every host builds at once, and
+          # catches upstream breakage and overlays that stop applying. Other
+          # changes (packages, overlays, patches) are tested on the hosts
+          # they affect before they merge; ci-checks.yml still evaluates them.
+          # Run this workflow by hand with force_full_build to build anyway.
           changed="$(git diff --name-only "$fork_point" "${{ github.event.pull_request.head.sha }}")"
           echo "changed files:"
           while IFS= read -r f; do echo "  $f"; done <<<"$changed"
-          if grep -qE '^flake\.lock$|^pkgs/|overlay|\.patch$|/_scripts/' <<<"$changed"; then
+          if grep -qx 'flake.lock' <<<"$changed"; then
             echo "build_needed=true" >> "$GITHUB_OUTPUT"
           else
             echo "build_needed=false" >> "$GITHUB_OUTPUT"
