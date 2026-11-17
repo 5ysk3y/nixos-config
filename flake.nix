@@ -18,8 +18,18 @@
     # nix-darwin / mac related
     nix-darwin.url = "github:LnL7/nix-darwin";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
-    mac-app-util.url = "github:hraban/mac-app-util";
-    mac-app-util.inputs.nixpkgs.follows = "nixpkgs";
+    mac-app-util = {
+      url = "github:hraban/mac-app-util";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+        cl-nix-lite.inputs = {
+          nixpkgs.follows = "nixpkgs";
+          flake-parts.follows = "flake-parts";
+          treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+        };
+      };
+    };
 
     # Disk partitioning at install time (nixos-anywhere / disko-install)
     disko.url = "github:nix-community/disko";
@@ -35,15 +45,23 @@
 
     # other stuff
     flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts.inputs.nixpkgs-lib.follows = "nixpkgs";
     import-tree.url = "github:denful/import-tree";
 
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-    wayland-pipewire-idle-inhibit.url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
-    wayland-pipewire-idle-inhibit.inputs.nixpkgs.follows = "nixpkgs";
+    wayland-pipewire-idle-inhibit = {
+      url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
     claude-code-nix.url = "github:sadjow/claude-code-nix";
-    dimland.url = "github:keifufu/dimland";
-    dimland.inputs.nixpkgs.follows = "nixpkgs";
+    claude-code-nix.inputs.nixpkgs.follows = "nixpkgs";
+    dimland = {
+      url = "github:keifufu/dimland";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
 
     # Used as a Nix store path in features/apps/doomemacs/_module.nix for the
     # rsync-based activation script. The input hash drives the stamp-based
@@ -59,8 +77,11 @@
     scroll-mpris.flake = false;
 
     # Add in stylix for management of GTK theming.
-    stylix.url = "github:nix-community/stylix";
-    stylix.inputs.nixpkgs.follows = "nixpkgs";
+    stylix = {
+      url = "github:nix-community/stylix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
   };
 
   outputs =
