@@ -8,7 +8,8 @@ let
   username = "rickie";
 
   # Applies an overlay-entries.nix: its permanent overlay, then every tracked
-  # one, in order
+  # one, in order. Shared through infraLib with the features that own
+  # overlay entries (core/system/overlays, apps/claude-desktop).
   overlaysModule =
     entriesFile:
     let
@@ -132,6 +133,8 @@ in
 
   config = {
     _module.args.infraLib = {
+      inherit overlaysModule;
+
       # pkgsFor provides supplementary package sets passed as specialArgs.
       # pkgs-stable: for packages that need pinning against the stable channel.
       # Add further sets here if a new supplementary channel input is introduced.

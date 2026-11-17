@@ -1,9 +1,10 @@
 # Claude Desktop's temporary overlay and its audit metadata. See
 # hosts/personal/gibson/overlays/overlay-entries.nix for the convention.
-# Applied by ./_nixos.nix, audited via infra.sharedOverlayEntries (./default.nix).
+# Applied and audited from ./default.nix (infraLib.overlaysModule and
+# infra.sharedOverlayEntries).
 #
 # Once NixOS/nixpkgs#587988 merges, delete this file and ./_package.nix, and
-# drop their references from ./default.nix and ./_nixos.nix.
+# drop their references from ./default.nix.
 _: {
   permanent = _final: _prev: { };
 
@@ -22,7 +23,7 @@ _: {
             numbers = [ 587988 ];
           }
         ];
-        notes = "Coupled removal: delete features/apps/claude-desktop/_package.nix and this file, and their references in that feature's default.nix and _nixos.nix. The rest of the feature stays, on nixpkgs' pkgs.claude-desktop.";
+        notes = "Coupled removal: delete features/apps/claude-desktop/_package.nix and this file, and their references in that feature's default.nix. The rest of the feature stays, on nixpkgs' pkgs.claude-desktop.";
       };
       # Adds a package rather than overriding one. callPackage on `final`, so
       # its claude-code is the claude-code-nix overlay's, not nixpkgs'.

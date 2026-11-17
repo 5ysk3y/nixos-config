@@ -72,9 +72,9 @@ let
   # exempt) never forces evaluation of the `overlay` function bodies, so a
   # host whose overlay-entries.nix also wants a real `pkgs` (e.g. for
   # deriving `system`) still works correctly here via laziness; it only
-  # needs the real value when actually building, which happens through the
-  # registry's overlaysModule (flake-parts/hosts/registry.nix), not through
-  # this metadata-only import.
+  # needs the real value when actually building, which happens through
+  # overlaysModule (flake-parts/hosts/registry.nix, also in infraLib), not
+  # through this metadata-only import.
   readAudits =
     key: entriesFile:
     let

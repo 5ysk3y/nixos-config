@@ -1,8 +1,15 @@
 # Claude Desktop (Linux only: Anthropic's apt repo has no macOS build).
-# A host opts in by importing both modules.
-_: {
+# The desktop profiles import both modules.
+{ infraLib, ... }:
+{
   flake.modules = {
-    nixos.claude-desktop = ./_nixos.nix;
+    # The package comes from the vendored overlay, applied at system level on
+    # purpose: with home-manager.useGlobalPkgs = true, an nixpkgs.overlays set
+    # in a Home Manager module has no effect.
+    nixos.claude-desktop.imports = [
+      (infraLib.overlaysModule ./_overlay-entries.nix)
+      ./_nixos.nix
+    ];
     homeManager.claude-desktop = ./_home.nix;
   };
 
