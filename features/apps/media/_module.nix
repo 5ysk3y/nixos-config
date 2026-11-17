@@ -125,8 +125,11 @@ in
         ];
       };
 
-      yt-dlp.settings = {
-        cookies-from-browser = "chromium:'~/.local/share/qutebrowser'";
+      yt-dlp = {
+        enable = true;
+        settings = {
+          cookies-from-browser = "chromium:'~/.local/share/qutebrowser'";
+        };
       };
     };
   };
