@@ -16,11 +16,10 @@
           ];
         };
       };
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-        xdg-desktop-portal-gtk # Added as per https://wiki.hyprland.org/Hypr-Ecosystem/xdg-desktop-portal-hyprland/
-      ];
-      configPackages = [ pkgs.hyprland ];
+      # xdg-desktop-portal-hyprland comes from the Hyprland module
+      # (wayland.windowManager.hyprland.portalPackage); gtk handles the
+      # interfaces it doesn't, e.g. the file chooser
+      extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
     };
   };
 }
