@@ -24,8 +24,8 @@
     NVD_BACKEND = "direct";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
     __GL_MaxFramesAllowed = "1";
-    __GL_GSYNC_ALLOWED = "0";
-    __GL_VRR_ALLOWED = "0";
+    # VRR is left to each host's Hyprland monitor rules (gibson: vrr = 2,
+    # fullscreen only); __GL_VRR_ALLOWED=0 here would opt every GL app out
   };
 
   hardware = {
