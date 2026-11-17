@@ -133,6 +133,20 @@ in
           failIfUnavailable = true;
           # The Nix evaluation cache, which nix eval and nix build write to
           filesystem.allowWrite = [ "~/.cache/nix" ];
+          # Evaluating or building this repo's flake can't work sandboxed on
+          # Linux: the seccomp filter blocks the nix-daemon's Unix socket, and
+          # the placeholder the sandbox mounts over the protected .gitmodules
+          # breaks git flake fetching. These run unsandboxed (builds are
+          # still sandboxed by the daemon) but keep their permission prompts.
+          # `nix run` and `nix develop` are left out: they execute code.
+          excludedCommands = [
+            "nix eval *"
+            "nix build *"
+            "nix flake check *"
+            "nix flake show *"
+            "nix flake metadata *"
+            "nix fmt *"
+          ];
         };
       };
     };
