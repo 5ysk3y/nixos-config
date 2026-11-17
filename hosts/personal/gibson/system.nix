@@ -68,7 +68,6 @@
       ddcutil
       expect
       i2c-tools
-      libmodule
       lm_sensors
       nix-prefetch-github
       openssl
@@ -77,15 +76,6 @@
       vim
       xdg-utils
     ];
-
-    sessionVariables = {
-      ADW_DISABLE_PORTAL = "1";
-      CLIPBOARD_NOGUI = "1";
-      ENABLE_DPMS = "1";
-      ENABLE_DDC = "1";
-      GSETTINGS_BACKEND = "keyfile";
-      GTK_THEME = "adw-gtk3:dark";
-    };
   };
 
   # Security Ruleset
