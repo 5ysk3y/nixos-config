@@ -1,4 +1,4 @@
 _: {
-  flake.modules.homeManager.hypr = ./_module.nix;
-  flake.modules.nixos.hypr = ./_system.nix;
+  flake.modules.homeManager.hypr = ./_home.nix;
+  flake.modules.nixos.hypr = ./_nixos.nix;
 }

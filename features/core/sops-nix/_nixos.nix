@@ -2,7 +2,7 @@
 # only, and I'm in that group so sops can decrypt as me.
 { vars, ... }:
 {
-  imports = [ ./_system.nix ];
+  imports = [ ./_common.nix ];
 
   users = {
     groups.sops = { };
