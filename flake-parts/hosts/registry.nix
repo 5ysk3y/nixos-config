@@ -7,6 +7,62 @@
 let
   username = "rickie";
 
+  # Whether a nixpkgs-version entry's package has reached its threshold in
+  # `prev`. Reads the same attribute the audit script checks (meta.attr,
+  # else <id>.version), so the two agree on when an entry is obsolete.
+  # Returns null for entries that can't retire themselves.
+  versionRetired =
+    e:
+    if (e.meta.strategy or null) == "nixpkgs-version" then
+      prev:
+      let
+        attr = if (e.meta.attr or null) != null then e.meta.attr else "${e.id}.version";
+        current = lib.getAttrFromPath (lib.splitString "." attr) prev;
+      in
+      lib.versionAtLeast current e.meta.threshold
+    else
+      null;
+
+  # A nixpkgs-version entry stops applying once nixpkgs reaches its
+  # threshold, so a weekly flake.lock bump that ships the fix doesn't fail on
+  # an override it no longer needs (a backported patch that no longer
+  # applies, say). The audit still flags the entry as obsolete, and a warning
+  # names it on every eval, until it's removed. An exempt entry with
+  # `coupledTo = "<id>"` retires with that entry.
+  #
+  # The gate works per attribute: the attribute names stay whatever the
+  # entry's overlay returns, and only their values switch back to `prev`.
+  # Choosing between `{ }` and the overlay would make the fixed point's
+  # attribute names depend on a package's version, which recurses.
+  gateTracked =
+    tracked:
+    let
+      byId = lib.listToAttrs (map (e: lib.nameValuePair e.id e) tracked);
+      gate =
+        e:
+        let
+          owner = if e ? coupledTo then byId.${e.coupledTo} else e;
+          retired = versionRetired owner;
+        in
+        if retired == null then
+          e.overlay
+        else
+          final: prev:
+          let
+            isRetired = retired prev;
+          in
+          lib.mapAttrs (
+            name: value:
+            if isRetired then
+              lib.warn
+                "overlay ${e.id}: nixpkgs has reached ${owner.meta.threshold}, so it no longer applies; remove it"
+                prev.${name}
+            else
+              value
+          ) (e.overlay final prev);
+    in
+    map gate tracked;
+
   # Applies an overlay-entries.nix: its permanent overlay, then every tracked
   # one, in order. Shared through infraLib with the features that own
   # overlay entries (core/system/overlays, apps/claude-desktop).
@@ -17,7 +73,7 @@ let
     in
     {
       _file = entriesFile;
-      nixpkgs.overlays = [ entries.permanent ] ++ map (e: e.overlay) entries.tracked;
+      nixpkgs.overlays = [ entries.permanent ] ++ gateTracked entries.tracked;
     };
 
   # Per-host values handed to every module as the `vars` special arg.

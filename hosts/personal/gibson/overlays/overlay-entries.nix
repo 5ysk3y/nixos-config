@@ -8,6 +8,12 @@
 #                        flake-parts/exports/overlay-audits.nix and checked
 #                        by both the pre-commit hook and the weekly CI audit
 #
+# A `nixpkgs-version` entry stops applying by itself once the locked nixpkgs
+# reaches its threshold, and warns until it's removed. That way the weekly
+# flake.lock bump that ships the fix doesn't fail on the override. An exempt
+# entry that only exists to support one of these sets
+# `coupledTo = "<that entry's id>"` to stop applying with it.
+#
 # There is no third way for an entry to exist here without going through one
 # of those two paths — this file *is* what builds nixpkgs.overlays, so an
 # omitted exempt/meta isn't a missed check, it structurally has nowhere to go.

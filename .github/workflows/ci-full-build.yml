@@ -128,8 +128,20 @@ jobs:
       # rebuilds a broken derivation from scratch and doubles the wait for
       # a red result. Weekly-update builds here: mean 31 min, longest 75.
       - name: Full build test
+        id: build
         timeout-minutes: 120
-        run: nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L
+        run: |
+          set -euo pipefail
+          nix build .#nixosConfigurations.gibson.config.system.build.toplevel --no-write-lock-file -L \
+            2>&1 | tee "$RUNNER_TEMP/build.log"
+      # Reporting only: names the tracked overlays behind a failed build in
+      # the job summary and as annotations, so a red weekly flake.lock PR
+      # says what to fix on its branch. The job stays failed either way.
+      - name: Name overlays behind the failure
+        if: failure() && steps.build.outcome == 'failure'
+        continue-on-error: true
+        timeout-minutes: 20
+        run: bash .github/scripts/name-overlay-failures.sh gibson "$RUNNER_TEMP/build.log"
       # Only what CI built: attic skips paths signed by the cache's upstream
       # (cache.nixos.org), which machines fetch from there. Those were
       # 75-88% of push time over the tailnet, and both failed uploads seen.
@@ -191,8 +203,20 @@ jobs:
       # rebuilds a broken derivation from scratch and doubles the wait for
       # a red result. Weekly-update builds here: mean 5 min, longest 9.
       - name: Full build test
+        id: build
         timeout-minutes: 60
-        run: nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L
+        run: |
+          set -euo pipefail
+          nix build .#darwinConfigurations.macbook.config.system.build.toplevel --no-write-lock-file -L \
+            2>&1 | tee "$RUNNER_TEMP/build.log"
+      # Reporting only: names the tracked overlays behind a failed build in
+      # the job summary and as annotations, so a red weekly flake.lock PR
+      # says what to fix on its branch. The job stays failed either way.
+      - name: Name overlays behind the failure
+        if: failure() && steps.build.outcome == 'failure'
+        continue-on-error: true
+        timeout-minutes: 20
+        run: bash .github/scripts/name-overlay-failures.sh macbook "$RUNNER_TEMP/build.log"
       # Only what CI built: attic skips paths signed by the cache's upstream
       # (cache.nixos.org), which machines fetch from there. Those were
       # 75-88% of push time over the tailnet, and both failed uploads seen.
