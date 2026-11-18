@@ -14,8 +14,6 @@ let
       packages = infraLib.pkgsFor host.system;
     in
     inputs.nix-darwin.lib.darwinSystem {
-      inherit (host) system;
-
       specialArgs = {
         inherit inputs;
         inherit (host) hostname system vars;
@@ -28,6 +26,7 @@ let
         ++ [
           {
             nixpkgs.config = nixpkgsConfig;
+            nixpkgs.hostPlatform = host.system;
             networking.hostName = host.hostname;
           }
         ]

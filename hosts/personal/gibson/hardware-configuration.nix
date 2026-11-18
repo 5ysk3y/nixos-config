@@ -1,7 +1,6 @@
 {
   pkgs,
   modulesPath,
-  system,
   vars,
   ...
 }:
@@ -33,7 +32,6 @@
       "zswap.shrinker_enabled=1"
       "pcie_aspm=off"
     ];
-    extraModulePackages = [ ];
     loader = {
       timeout = 0;
       systemd-boot = {
@@ -45,8 +43,6 @@
     # The system disk's LUKS device, filesystems, swap and resume device
     # come from disko.nix
     initrd = {
-      kernelModules = [
-      ];
       availableKernelModules = [
         "nvme"
         "xhci_pci"
@@ -86,6 +82,4 @@
     };
 
   };
-
-  nixpkgs.hostPlatform = "${system}";
 }

@@ -30,7 +30,8 @@
     # bootstrap/servers/thevault.sh
     environmentFile = "/var/lib/vaultwarden-secrets/restic-rest-credentials";
     extraBackupArgs = [
-      "--tag nix"
+      "--tag"
+      "nix"
     ];
     backupPrepareCommand = ''
       mkdir -p /var/lib/vaultwarden/backup

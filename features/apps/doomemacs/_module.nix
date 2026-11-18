@@ -14,7 +14,6 @@
   inputs,
   ...
 }:
-with lib;
 let
   envExtra = ''
     export PATH="${config.xdg.configHome}/emacs/bin:$PATH"
@@ -139,8 +138,13 @@ let
       echo "doom-sync: emacs.service failed to start" >&2
   '';
 in
-mkMerge [
+lib.mkMerge [
   {
+    xdg.configFile.doom = {
+      source = ./doom;
+      recursive = true;
+    };
+
     home = {
       packages = with pkgs; [
         emacsPkg
@@ -153,11 +157,6 @@ mkMerge [
         cmake
         gnumake
       ];
-
-      file."${config.xdg.configHome}/doom" = {
-        source = ./doom;
-        recursive = true;
-      };
 
       # Before reloadSystemd, where Home Manager (re)starts user units, so
       # Doom's files (and the files-ready marker) are in place by then
@@ -227,7 +226,7 @@ mkMerge [
     programs.zsh.envExtra = envExtra;
   }
 
-  (mkIf pkgs.stdenv.hostPlatform.isLinux {
+  (lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     services.emacs = {
       enable = true;
       package = emacsPkg;
@@ -268,7 +267,7 @@ mkMerge [
     };
   })
 
-  (mkIf pkgs.stdenv.hostPlatform.isDarwin {
+  (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     launchd.agents.emacs-daemon = {
       enable = true;
       config = {

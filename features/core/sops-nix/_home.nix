@@ -20,7 +20,7 @@
   home.sessionVariables.SOPS_AGE_KEY_FILE = vars.age.keyFile;
 
   sops = {
-    age.keyFile = "${vars.age.keyFile}";
+    age.keyFile = vars.age.keyFile;
     defaultSopsFile = "${vars.secretsPath}/secrets/secrets.yaml";
     defaultSopsFormat = "yaml";
   };

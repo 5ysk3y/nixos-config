@@ -59,7 +59,8 @@ in
     extraBackupArgs = [
       "--one-file-system"
       "--exclude-caches"
-      "--tag nix"
+      "--tag"
+      "nix"
     ];
     # gibson is often off or asleep: missed runs happen at next boot
     # (Persistent, from the feature's default timerConfig), and sleep is
