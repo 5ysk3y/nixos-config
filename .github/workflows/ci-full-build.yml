@@ -105,22 +105,34 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Free up disk space
+      # The runner's / has about 88G free. Deleting the preinstalled
+      # toolchains adds about 22G more but took 1.5-4 minutes in the
+      # foreground, so it runs in the background while the tailnet, Nix and
+      # evaluation steps go ahead. Background processes outlive their step
+      # and are only stopped at the end of the job.
+      # /opt/hostedtoolcache is left alone: the tailnet step unpacks its
+      # cached Tailscale binary there.
+      - name: Free disk space in the background
         run: |
-          set -euo pipefail
-          df -h
-          sudo rm -rf /usr/share/dotnet /opt/ghc /opt/hostedtoolcache /usr/local/lib/android
-          df -h
+          sudo nohup rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+            >/dev/null 2>&1 &
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Join the tailnet
         uses: ./.github/actions/tailnet
         with:
           authkey: ${{ secrets.TS_AUTHKEY }}
           ping: ${{ env.ATTIC_HOST }}
+      # min-free/max-free: if the store's disk drops below 10G free during a
+      # build, Nix garbage-collects until 30G is free. It only removes paths
+      # the running build no longer needs, so nothing is rebuilt. A safety
+      # net for weeks with large local builds; normally it never triggers.
       - uses: ./.github/actions/nix-setup
         with:
           attic-host: ${{ env.ATTIC_HOST }}
-          extra-nix-config: max-silent-time = 2700
+          extra-nix-config: |
+            max-silent-time = 2700
+            min-free = 10737418240
+            max-free = 32212254720
       - uses: ./.github/actions/private-flake-access
         with:
           ssh-private-key: ${{ secrets.CI_GITHUB_SSH_KEY }}
@@ -142,6 +154,12 @@ jobs:
         continue-on-error: true
         timeout-minutes: 20
         run: bash .github/scripts/name-overlay-failures.sh gibson "$RUNNER_TEMP/build.log"
+      # What the build left free on /, after the background cleanup and any
+      # min-free collection. If this gets near zero, the build needs more
+      # room than the runner has.
+      - name: Disk headroom after build
+        if: always() && steps.build.outcome != 'skipped'
+        run: df -h /
       # Only what CI built: attic skips paths signed by the cache's upstream
       # (cache.nixos.org), which machines fetch from there. Those were
       # 75-88% of push time over the tailnet, and both failed uploads seen.
@@ -212,7 +230,7 @@ jobs:
       # Reporting only: names the tracked overlays behind a failed build in
       # the job summary and as annotations, so a red weekly flake.lock PR
       # says what to fix on its branch. The job stays failed either way.
-      - name: Name overlays behind the failure
+      - name: Highlight overlays behind any failure(s)
         if: failure() && steps.build.outcome == 'failure'
         continue-on-error: true
         timeout-minutes: 20
