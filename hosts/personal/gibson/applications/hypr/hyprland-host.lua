@@ -5,12 +5,12 @@ return function(WS)
       non_shader_cm = 2,
       cm_auto_hdr = 1,
     },
-   scrolling = {
+    scrolling = {
       follow_min_visible = 1.0,
-     },
-   cursor = {
-     default_monitor = "desc:BNQ BenQ EX2780Q 66L07726019",
-   },
+    },
+    cursor = {
+      default_monitor = "desc:BNQ BenQ EX2780Q 66L07726019",
+    },
   })
 
   hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
@@ -30,7 +30,7 @@ return function(WS)
     mode = "2560x1440@144",
     position = "1920x0",
     scale = 1.25,
-    vrr = 2, 
+    vrr = 2,
     cm = "hdr",
     bitdepth = 10,
     supports_hdr = 1,
@@ -181,7 +181,7 @@ return function(WS)
     workspace = "name:" .. WS.WS3,
   })
   hl.window_rule({ match = { title = "^(Wine System Tray)$" }, move = { 4313, 42 }, workspace = "name:" .. WS.WS3 })
-  hl.window_rule({ match = { class = "^explorer.exe$" }, float = true,  move  = "-2000 -2000", size  = "1 1", no_focus = true })
+  hl.window_rule({ match = { class = "^explorer.exe$" }, float = true, move = { -2000, -2000 }, size = { 1, 1 }, no_focus = true })
   hl.window_rule({ match = { class = "^(gamescope)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { title = "^(007 First Light)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { class = "^(steam_app_0)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
@@ -193,7 +193,7 @@ return function(WS)
   hl.window_rule({ match = { title = "^(th3h4x0r)$" }, idle_inhibit = "focus" })
 
   ------------------------------------------------------------------------
-  -- WINDOW RULES: tags 
+  -- WINDOW RULES: tags
   ------------------------------------------------------------------------
   hl.window_rule({ match = { workspace = "name:" .. WS.WS3, fullscreen = true }, tag = "+game" })
   hl.window_rule({ match = { class = "^(XIVLauncher.Core|heroic|steam|steam_app|battle.net)" }, tag = "+game_launcher" })
@@ -203,7 +203,7 @@ return function(WS)
   hl.window_rule({ match = { class = "^(burp-StartBurp|firefox)$" }, tag = "+h4x0r" })
 
   ------------------------------------------------------------------------
-  -- GROUP MANAGEMENT 
+  -- GROUP MANAGEMENT
   ------------------------------------------------------------------------
 
   hl.window_rule({ match = { class = "^(discord)$" }, group = "set lock always" })
@@ -268,7 +268,7 @@ return function(WS)
     hl.exec_cmd("[group new lock] discord")
     hl.exec_cmd("[group new lock] cider-2")
     hl.exec_cmd("[group new lock] qutebrowser")
-    hl.exec_cmd([[mpvpaper '*' /home/rickie/.config/Wallpapers/Cyberpunk/Cyberpunk-2077-Game-4K-Animated-Desktop.mp4 --mpv-options="profile=wallpaper" -f]])
+    hl.exec_cmd([[mpvpaper '*' "$HOME"/.config/Wallpapers/Cyberpunk/Cyberpunk-2077-Game-4K-Animated-Desktop.mp4 --mpv-options="profile=wallpaper" -f]])
     hl.exec_cmd("bitwarden")
     hl.exec_cmd("kitty -1")
     -- Grouped with qutebrowser, Cider and Discord by the window.open hook

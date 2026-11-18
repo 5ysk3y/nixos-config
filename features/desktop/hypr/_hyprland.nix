@@ -72,7 +72,6 @@
           },
 
           cursor = {
-            default_monitor = "DP-2",
             inactive_timeout = 5,
           },
 
