@@ -46,6 +46,9 @@ bash "$(git rev-parse --show-toplevel)/.githooks/lib/no-parent-paths.sh" --cache
 echo "Parsing Nix files"
 bash "$(git rev-parse --show-toplevel)/.githooks/lib/nix-parse.sh" --cached
 
+echo "Shellcheck"
+bash "$(git rev-parse --show-toplevel)/.githooks/lib/shellcheck.sh" --cached
+
 # ── Overlay audit liveness check ────────────────────────────────────────────
 # Every host's and the system-wide overlays/overlay-entries.nix is the single
 # source of truth for both the actual override and its audit metadata — a

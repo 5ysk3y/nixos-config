@@ -105,6 +105,8 @@ jobs:
         run: bash .githooks/lib/no-parent-paths.sh
       - name: Nix files parse
         run: bash .githooks/lib/nix-parse.sh
+      - name: shellcheck
+        run: bash .githooks/lib/shellcheck.sh
 
   # Runs on every change, docs included: a skipped job reports success even
   # as a required check, and a pasted token is as likely in a README as in Nix.
