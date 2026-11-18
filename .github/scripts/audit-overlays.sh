@@ -91,7 +91,9 @@ find_closing_commit() {
   local owner_part repo_part gql_response commit
   owner_part="${repo%%/*}"
   repo_part="${repo##*/}"
-  # gh exits non-zero on HTTP errors and on a GraphQL "errors" response
+  # gh exits non-zero on HTTP errors and on a GraphQL "errors" response.
+  # $owner, $repo and $issue in the query are GraphQL variables, not shell.
+  # shellcheck disable=SC2016
   if ! gql_response=$(gh api graphql \
     -F owner="${owner_part}" \
     -F repo="${repo_part}" \
@@ -151,7 +153,11 @@ check_github_items() {
     fi
     if [ "$item_type" = "pull" ]; then
       merged=$(echo "$api_response" | jq -r '.merged')
-      state=$([ "$merged" = "true" ] && echo "merged" || echo "$(echo "$api_response" | jq -r '.state')")
+      if [ "$merged" = "true" ]; then
+        state="merged"
+      else
+        state=$(jq -r '.state' <<<"$api_response")
+      fi
       merge_commit_sha=$(echo "$api_response" | jq -r '.merge_commit_sha // empty')
     else
       state=$(echo "$api_response" | jq -r '.state')

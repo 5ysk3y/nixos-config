@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Usage: doom-prune-stale-repos <straight repos dir>
 #
 # Doom clones every straight.el repo shallow and single-branch, so each clone

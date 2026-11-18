@@ -1,4 +1,7 @@
-#!/usr/bin/env bash
+# shellcheck shell=bash
+# Host-specific config for bootstrap/deploy.sh attic, which sources this
+# file and reads TARGET
+# shellcheck disable=SC2034
 TARGET="root@192.168.1.110"
 
 push_secrets() {
