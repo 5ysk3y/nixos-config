@@ -57,8 +57,20 @@ let
         e:
         lib.assertMsg ((e.exempt or false) || (e ? meta))
           "overlayAudits: ${hostKey} / ${e.id or "<unknown>"} has neither 'exempt = true' nor 'meta' — every tracked overlay entry must declare one or the other";
+
+      # `coupledTo` makes an exempt entry retire with another entry in the
+      # same list (see gateTracked in flake-parts/hosts/registry.nix), so it
+      # must name one that carries meta.
+      metaIds = map (e: e.id) (builtins.filter (e: e ? meta) tracked);
+      checkCoupling =
+        e:
+        !(e ? coupledTo)
+        ||
+          lib.assertMsg ((e.exempt or false) && lib.elem e.coupledTo metaIds)
+            "overlayAudits: ${hostKey} / ${e.id or "<unknown>"} has coupledTo = \"${e.coupledTo}\", but only an exempt entry may set it, and it must name an entry with meta in the same list";
     in
     assert lib.all checkEntry tracked;
+    assert lib.all checkCoupling tracked;
     tracked;
 
   # Reads one overlay-entries.nix — the same file that builds
@@ -175,7 +187,12 @@ in
             threshold = lib.mkOption {
               type = lib.types.nullOr lib.types.str;
               default = null;
-              description = "Minimum version to consider overlay obsolete (nixpkgs-version only).";
+              description = ''
+                Minimum version to consider overlay obsolete (nixpkgs-version only).
+                Once the locked nixpkgs reaches it, the overlay also stops applying
+                (gateTracked in flake-parts/hosts/registry.nix), so a lock bump that
+                ships the fix doesn't fail on the override.
+              '';
             };
 
             trackingIssues = lib.mkOption {
