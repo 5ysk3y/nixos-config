@@ -1,4 +1,5 @@
-# attic reads $XDG_CONFIG_HOME/attic/config.toml. token-file makes it read the
+# attic reads $XDG_CONFIG_HOME/attic/config.toml. The push daemons and my own
+# attic command (_home.nix) share this one. token-file makes it read the
 # sops-decrypted token itself, so the token never appears in a process's
 # arguments (as `attic login home <url> <token>` would put it) or in a
 # plaintext config written by `attic login`.

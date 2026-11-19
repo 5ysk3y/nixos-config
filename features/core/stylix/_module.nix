@@ -6,6 +6,11 @@
 }:
 
 {
+  # Hack, the font the darwin overrides below give Ghostty and qutebrowser.
+  # An override only names the font, so it has to be installed. gibson gets
+  # it from the desktop's system fonts.
+  home.packages = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin [ pkgs.hack-font ];
+
   stylix = {
     enable = true;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-city-dark.yaml";
