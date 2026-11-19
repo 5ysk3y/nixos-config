@@ -11,6 +11,7 @@
     systemProfiles = with config.infra.profiles.darwin; [
       base
       personal
+      desktop
     ];
 
     homeProfiles = with config.infra.profiles.homeManager; [

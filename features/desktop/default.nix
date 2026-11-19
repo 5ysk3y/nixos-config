@@ -1,5 +1,5 @@
 # The Linux desktop's smaller pieces. Hyprland, Waybar and SDDM live in
-# subdirectories here, each registering itself.
+# subdirectories here, each registering itself, as do the macOS settings.
 { inputs, ... }: {
   flake.modules = {
     homeManager = {
