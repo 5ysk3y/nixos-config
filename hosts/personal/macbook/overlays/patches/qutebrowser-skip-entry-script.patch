@@ -1,0 +1,16 @@
+--- a/qutebrowser/app.py
++++ b/qutebrowser/app.py
+@@ -578,6 +578,13 @@
+         if e.type() != QEvent.Type.FileOpen:
+             return super().event(e)
+ 
++        # Started through a Nix wrapper, the process runs as
++        # `python <entry script> ...`, and macOS passes that script on as a
++        # file to open. Skip it rather than open it in a tab.
++        main = getattr(sys.modules.get('__main__'), '__file__', None)
++        if main and e.file() and os.path.realpath(e.file()) == os.path.realpath(main):
++            return True
++
+         url = e.url()
+         if url.isValid():
+             open_url(url, no_raise=True)
