@@ -35,7 +35,7 @@ The repo is public as a rebuild reference for myself, and in case anything here 
 │   └── images/<image>/        # Installer and LXC staging images (nixosConfigurations, not hosts)
 ├── features/                  # Feature modules — home and system, published by name
 │   ├── core/                  # Shared foundations: nix, locale, secrets, shell, git, theming, Tailscale
-│   ├── desktop/               # The Linux desktop: Hyprland, Waybar, SDDM, notifications
+│   ├── desktop/               # The desktop: Hyprland, Waybar, SDDM, notifications; macOS settings
 │   ├── apps/                  # Applications: editors, browser, terminals, media, gaming
 │   ├── services/              # Background services and VMs: attic push, Syncthing, backups
 │   ├── servers/               # Server roles: the LXC baseline, attic, Vaultwarden, Zabbix
@@ -57,7 +57,7 @@ Profiles group the features that a kind of machine shares. A feature only one ho
 | Host | System profiles | Home profiles |
 |---|---|---|
 | `gibson` | `base`, `personal`, `desktop` | `common`, `personal`, `desktop` |
-| `macbook` | `base`, `personal` | `common`, `personal`, `darwin` |
+| `macbook` | `base`, `personal`, `desktop` | `common`, `personal`, `darwin` |
 | `attic`, `theVault` | `base`, `lxc-server` | none (no Home Manager) |
 
 ---
