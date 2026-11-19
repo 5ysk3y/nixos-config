@@ -1,0 +1,22 @@
+--- a/qutebrowser/browser/webengine/webenginetab.py
++++ b/qutebrowser/browser/webengine/webenginetab.py
+@@ -1282,7 +1282,7 @@
+             log.webview.debug("Webauth not started")
+         elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.SelectAccount:
+             self._ux_account_selection()
+-        if state == QWebEngineWebAuthUxRequest.WebAuthUxState.CollectPin:
++        elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.CollectPin:
+             self._ux_pin_request()
+         elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.FinishTokenCollection:
+             self._ux_finish_token_collection()
+@@ -1292,7 +1292,9 @@
+             self._ux_request_cancelled()
+         elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.Completed:
+             self._ux_request_completed()
+-        elif state == QWebEngineWebAuthUxRequest.WebAuthUxState.Discovery:
++        elif state.value == 7:
++            # WebAuthUxState.Discovery, added in QtWebEngine 6.12. Matched by
++            # value because PyQt6-WebEngine 6.11 doesn't name it.
+             self._ux_discovery()
+         else:
+             raise utils.Unreachable(state)
