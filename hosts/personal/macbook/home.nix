@@ -5,14 +5,16 @@
   ...
 }:
 {
-  imports = [ inputs.self.modules.homeManager.wireshark ];
+  imports = with inputs.self.modules.homeManager; [
+    attic-client
+    wireshark
+  ];
 
   home = {
     pointerCursor.enable = false;
 
     packages = with pkgs; [
       arp-scan
-      attic-client
       bfg-repo-cleaner
       e2fsprogs
       nmap

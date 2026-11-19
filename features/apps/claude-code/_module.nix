@@ -101,6 +101,10 @@ in
   # profiles. Its wrapper puts bubblewrap and socat, the sandbox's Linux
   # dependencies, on PATH.
   programs = {
+    # Claude Code's record of the files a session writes, which it keeps
+    # in each repo's .claude directory
+    git.ignores = [ "**/.claude/.cc-writes/" ];
+
     claude-code = {
       enable = true;
 
