@@ -52,7 +52,7 @@ The config follows the [dendritic pattern](https://saylesss88.github.io/flakes/d
 
 Inside a feature, files starting with `_` are its modules (import-tree skips them; the feature's `default.nix` publishes them). A feature that publishes one module, or one file for several classes, calls it `_module.nix`. A feature with a module per class names each one after its class: `_home.nix`, `_nixos.nix` and `_darwin.nix`, plus `_common.nix` for a base the system modules share. Directories that publish several unrelated modules (`features/apps`, `features/core/home`) name each file after its module.
 
-Profiles group the features that a kind of machine shares. A feature only one host uses is imported by that host's own `system.nix` or `home.nix` instead (NVIDIA and backups on gibson, the linux-builder on the macbook, each server's role).
+Profiles group the features that a kind of machine shares. A feature only one host uses is imported by that host's own `system.nix` or `home.nix` instead (NVIDIA and backups on gibson, the linux-builder and Wireshark on the macbook, each server's role).
 
 | Host | System profiles | Home profiles |
 |---|---|---|

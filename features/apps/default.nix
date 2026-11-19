@@ -2,6 +2,7 @@
 # subdirectories here, each registering itself.
 _: {
   flake.modules.homeManager = {
+    app-store = ./_app-store.nix;
     bitwarden = ./_bitwarden.nix;
     ghostty = ./_ghostty.nix;
     hugo = ./_hugo.nix;

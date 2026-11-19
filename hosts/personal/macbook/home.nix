@@ -1,15 +1,25 @@
 {
+  inputs,
   pkgs,
   vars,
   ...
 }:
 {
+  imports = [ inputs.self.modules.homeManager.wireshark ];
+
   home = {
     pointerCursor.enable = false;
 
     packages = with pkgs; [
+      arp-scan
       attic-client
+      bfg-repo-cleaner
+      e2fsprogs
+      nmap
+      restic
+      socat
       syncthingtray
+      utm
     ];
   };
 
