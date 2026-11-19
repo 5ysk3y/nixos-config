@@ -1,3 +1,6 @@
 _: {
-  flake.modules.darwin.macos = ./_module.nix;
+  flake.modules = {
+    darwin.macos = ./_darwin.nix;
+    homeManager.macos = ./_home.nix;
+  };
 }

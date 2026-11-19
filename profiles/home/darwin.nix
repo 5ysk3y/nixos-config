@@ -1,13 +1,9 @@
 # Home configuration for macOS
-{ config, inputs, ... }:
+{ config, ... }:
 {
-  infra.profiles.homeManager.darwin = {
-    imports = [
-      inputs.mac-app-util.homeManagerModules.default
-    ]
-    ++ (with config.flake.modules.homeManager; [
-      app-store
-      ghostty
-    ]);
-  };
+  infra.profiles.homeManager.darwin.imports = with config.flake.modules.homeManager; [
+    app-store
+    ghostty
+    macos
+  ];
 }
