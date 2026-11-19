@@ -337,3 +337,8 @@ nix-secrets is a private flake input fetched over SSH (`git+ssh://git@github.com
    exit
    ```
    From then on, `rebuild` rebuilds the Mac.
+7. Install the apps Nix can't. Sign in to the App Store first, then run `app-store-restore`, which installs the App Store apps listed in `features/apps/_app-store.nix`. Download the rest from their vendors as/when necessary:
+   - Claude 
+   - Steam, Battle.net and the Epic Games Launcher
+   - Yubico Authenticator 
+   - Raspberry Pi Imager/balenaEtcher/SD Card Formatter

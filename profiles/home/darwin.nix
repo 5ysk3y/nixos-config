@@ -6,6 +6,7 @@
       inputs.mac-app-util.homeManagerModules.default
     ]
     ++ (with config.flake.modules.homeManager; [
+      app-store
       ghostty
     ]);
   };

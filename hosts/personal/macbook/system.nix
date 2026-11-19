@@ -4,7 +4,10 @@
   ...
 }:
 {
-  imports = [ inputs.self.modules.darwin.linux-builder ];
+  imports = with inputs.self.modules.darwin; [
+    linux-builder
+    wireshark
+  ];
 
   environment.systemPackages = with pkgs; [
     nixos-rebuild

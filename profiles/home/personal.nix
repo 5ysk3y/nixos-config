@@ -11,6 +11,8 @@
       doomemacs
       github-cli
       hugo
+      media
+      messaging
       qutebrowser
       sops-nix
       stylix
