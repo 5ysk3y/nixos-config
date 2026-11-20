@@ -1,5 +1,7 @@
 {
+  config,
   inputs,
+  lib,
   pkgs,
   vars,
   ...
@@ -23,6 +25,31 @@
       syncthingtray
       utm
     ];
+
+    # Makes qutebrowser the default browser. Its bundle only declares web
+    # links through the macbook overlay, so macOS is told to re-read it first.
+    # macOS keeps every qutebrowser build it has seen in the store, and sends
+    # links to whichever it likes, often an old one. Such a link starts a
+    # second qutebrowser, which hands the tab to the running one and leaves
+    # its window in the background. So only the current build stays known.
+    # defaultbrowser runs only when it isn't the default already, because
+    # macOS asks you to confirm each change.
+    activation.defaultBrowser = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+      app="${config.programs.qutebrowser.package}/Applications/qutebrowser.app"
+      $lsregister -dump \
+        | { grep -o '/nix/store/[^ ]*-qutebrowser-[^/ ]*/Applications/qutebrowser\.app' || true; } \
+        | sort -u \
+        | while read -r old; do
+            if [ "$old" != "$app" ]; then
+              run $lsregister -u "$old"
+            fi
+          done
+      run $lsregister -f "$app"
+      if ! ${lib.getExe pkgs.defaultbrowser} | grep -qx '\* qutebrowser'; then
+        run ${lib.getExe pkgs.defaultbrowser} qutebrowser
+      fi
+    '';
   };
 
   programs = {

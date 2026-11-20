@@ -1,0 +1,11 @@
+--- a/qutebrowser/app.py
++++ b/qutebrowser/app.py
+@@ -587,7 +587,7 @@
+ 
+         url = e.url()
+         if url.isValid():
+-            open_url(url, no_raise=True)
++            open_url(url)
+         else:
+             message.error("Invalid URL: {}".format(url.errorString()))
+ 
