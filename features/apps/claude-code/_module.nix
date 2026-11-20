@@ -170,6 +170,22 @@ in
             "nix fmt *"
           ];
         };
+
+        # Context for auto mode's classifier. Kept to what it needs to judge
+        # an action: the rest of this setup stays out of a public repo.
+        # "$defaults" keeps the built-in template and its rules.
+        autoMode = {
+          environment = [
+            "$defaults"
+            "**Trusted repo**: ${vars.configDir}, whose origin (github.com:5ysk3y/nixos-config) is the only remote to push to"
+            "**Repository visibility**: public, so any push is publishing. Never commit secrets or private details about this setup"
+            "**Default / protected branches**: `main` is protected. Changes reach it through pull requests with signed commits"
+          ];
+          soft_deny = [
+            "$defaults"
+            "Bash(rm:*) under ${vars.configDir} when targeting files outside a known-transient build/result path — irreversible local destruction risk"
+          ];
+        };
       };
     };
   };
