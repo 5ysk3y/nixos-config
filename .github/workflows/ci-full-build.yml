@@ -149,7 +149,7 @@ jobs:
       # Reporting only: names the tracked overlays behind a failed build in
       # the job summary and as annotations, so a red weekly flake.lock PR
       # says what to fix on its branch. The job stays failed either way.
-      - name: Name overlays behind the failure
+      - name: Name overlays behind any failure(s)
         if: failure() && steps.build.outcome == 'failure'
         continue-on-error: true
         timeout-minutes: 20
