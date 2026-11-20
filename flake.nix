@@ -57,6 +57,13 @@
     };
     claude-code-nix.url = "github:sadjow/claude-code-nix";
     claude-code-nix.inputs.nixpkgs.follows = "nixpkgs";
+    # Head branch of the unmerged claude-desktop init PR (nixpkgs PR 587988).
+    # Only its package.nix is read, so the weekly lock bump follows the PR.
+    # Remove once it merges: see features/apps/claude-desktop/_overlay-entries.nix.
+    claude-desktop-pr = {
+      url = "github:brudel/nixpkgs/claude-desktop";
+      flake = false;
+    };
     dimland = {
       url = "github:keifufu/dimland";
       inputs.nixpkgs.follows = "nixpkgs";

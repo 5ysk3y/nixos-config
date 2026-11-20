@@ -3,13 +3,10 @@
 { infraLib, ... }:
 {
   flake.modules = {
-    # The package comes from the vendored overlay, applied at system level on
-    # purpose: with home-manager.useGlobalPkgs = true, an nixpkgs.overlays set
-    # in a Home Manager module has no effect.
-    nixos.claude-desktop.imports = [
-      (infraLib.overlaysModule ./_overlay-entries.nix)
-      ./_nixos.nix
-    ];
+    # The system side only applies the package's temporary overlay, on
+    # purpose at system level: with home-manager.useGlobalPkgs = true, an
+    # nixpkgs.overlays set in a Home Manager module has no effect.
+    nixos.claude-desktop = infraLib.overlaysModule ./_overlay-entries.nix;
     homeManager.claude-desktop = ./_home.nix;
   };
 

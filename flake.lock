@@ -114,6 +114,23 @@
         "type": "github"
       }
     },
+    "claude-desktop-pr": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795194122,
+        "narHash": "sha256-GoX28hNjzSpa/Tkrk4IBWbw3TfhfCmjMxgB7ZFnyeQE=",
+        "owner": "brudel",
+        "repo": "nixpkgs",
+        "rev": "471c5f3e59bf37fae2f412c10b34970c455b7064",
+        "type": "github"
+      },
+      "original": {
+        "owner": "brudel",
+        "ref": "claude-desktop",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "dimland": {
       "inputs": {
         "flake-parts": [
@@ -470,6 +487,7 @@
     "root": {
       "inputs": {
         "claude-code-nix": "claude-code-nix",
+        "claude-desktop-pr": "claude-desktop-pr",
         "dimland": "dimland",
         "disko": "disko",
         "doomemacs": "doomemacs",
