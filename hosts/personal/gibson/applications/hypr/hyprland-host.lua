@@ -89,6 +89,9 @@ return function(WS)
   hl.bind("SUPER + SHIFT + l", hl.dsp.exec_cmd("hyprlock --grace 0"))
   hl.bind("SUPER + SHIFT + j", hl.dsp.group.prev())
   hl.bind("SUPER + SHIFT + k", hl.dsp.group.next())
+  -- Reorder the focused window inside its group; the group stays the same
+  hl.bind("SUPER + CTRL + SHIFT + j", hl.dsp.group.move_window({ forward = false }))
+  hl.bind("SUPER + CTRL + SHIFT + k", hl.dsp.group.move_window({ forward = true }))
 
   ------------------------------------------------------------------------
   -- KEYBINDS: apps / launchers
@@ -229,7 +232,9 @@ return function(WS)
   -- tiled beside their group instead. This puts each one into its partner's
   -- group whenever either window opens, whatever has focus and whichever
   -- opens first. The group is unlocked just for the add: Group:add refuses
-  -- a locked group once the window's first map is over.
+  -- a locked group once the window's first map is over. A joiner left on
+  -- its own in the old group (its partner was closed and reopened) is
+  -- still moved: Group:add takes a window out of its current group.
   local GROUP_WITH = {
     -- { joins, the app whose group it joins }
     { "com.anthropic.Claude", "org.qutebrowser.qutebrowser" },
@@ -249,12 +254,18 @@ return function(WS)
     local host = first_tiled(host_class)
     local joiner = first_tiled(joiner_class)
     local group = host and host.group
-    if not (group and joiner) or joiner.group then
+    if not (group and joiner) or joiner.group == group then
       return
     end
     local locked = group.locked
     if locked then
       hl.dispatch(hl.dsp.group.lock({ window = host, action = "off" }))
+    end
+    -- Group:add also refuses a window whose current group is locked. That
+    -- old group is empty after the move, so it isn't locked again.
+    local old = joiner.group
+    if old and old.locked then
+      hl.dispatch(hl.dsp.group.lock({ window = joiner, action = "off" }))
     end
     group:add(joiner)
     if locked then
