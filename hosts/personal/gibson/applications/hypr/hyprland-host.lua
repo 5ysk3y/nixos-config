@@ -185,7 +185,6 @@ return function(WS)
   hl.window_rule({ match = { class = "^(gamescope)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { title = "^(007 First Light)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
   hl.window_rule({ match = { class = "^(steam_app_0)$" }, no_blur = true, workspace = "name:" .. WS.WS3 })
-  hl.window_rule({ match = { tag = "game", fullscreen = true }, confine_pointer = true })
 
   ------------------------------------------------------------------------
   -- WINDOW RULES: idle inhibit
@@ -201,6 +200,16 @@ return function(WS)
   hl.window_rule({ match = { class = "^(discord|signal)$" }, tag = "+social" })
   hl.window_rule({ match = { class = "^(cider|org.jellyfin.JellyfinDesktop)" }, tag = "+media" })
   hl.window_rule({ match = { class = "^(burp-StartBurp|firefox)$" }, tag = "+h4x0r" })
+
+  ------------------------------------------------------------------------
+  -- WINDOW RULES: games
+  ------------------------------------------------------------------------
+  -- Below the tag rules on purpose: Hyprland applies dynamic rules in one
+  -- pass in config order, and a tag added by an earlier rule doesn't re-run
+  -- rules that match on tags, so above the "+game" rule this never matched.
+  -- no_auto_hdr keeps the BenQ in HDR (its cm = "hdr") even if a fullscreen
+  -- game's surface turns SDR; a game's own HDR metadata still passes through.
+  hl.window_rule({ match = { tag = "game", fullscreen = true }, confine_pointer = true, no_auto_hdr = true })
 
   ------------------------------------------------------------------------
   -- GROUP MANAGEMENT
