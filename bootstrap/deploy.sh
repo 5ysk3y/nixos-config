@@ -52,8 +52,19 @@ fi
 # given, try-restart it (a restart only if it's running), so the service
 # picks up a rotated secret even when the switch below leaves the unit
 # itself unchanged.
+#
+# Empty input is refused before anything reaches the server. A failed
+# `sops --decrypt` in the pipe feeding this prints nothing, and installing
+# that would replace the live secret with an empty file and restart the
+# service on it. The x keeps a trailing newline that $(...) would strip.
 push_secret() {
-  local dest="$1" unit="${2:-}" remote
+  local dest="$1" unit="${2:-}" remote content
+  content="$(cat; printf x)"
+  content="${content%x}"
+  if [ -z "$content" ]; then
+    echo "error: no content for $dest (did decryption fail?); left it unchanged" >&2
+    return 1
+  fi
   read -r -d '' remote <<'REMOTE' || true
 set -eu
 tmp=$(mktemp)
@@ -69,7 +80,8 @@ if ! cmp -s "$tmp" "$dest"; then
 fi
 REMOTE
   # shellcheck disable=SC2029 # dest/unit are meant to expand here, %q-quoted
-  ssh "${SSH_OPTS[@]}" "$TARGET" "dest=$(printf '%q' "$dest"); unit=$(printf '%q' "$unit"); $remote"
+  printf '%s' "$content" |
+    ssh "${SSH_OPTS[@]}" "$TARGET" "dest=$(printf '%q' "$dest"); unit=$(printf '%q' "$unit"); $remote"
 }
 
 # shellcheck source=/dev/null
