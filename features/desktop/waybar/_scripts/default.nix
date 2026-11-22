@@ -1,12 +1,13 @@
 {
   pkgs,
+  rbw,
 }:
 {
   check_rbw = pkgs.writeShellApplication {
     name = "check_rbw";
-    runtimeInputs = with pkgs; [
+    runtimeInputs = [
       rbw
-      coreutils
+      pkgs.coreutils
     ];
     text = ''
       if ! rbw unlocked 2>/dev/null

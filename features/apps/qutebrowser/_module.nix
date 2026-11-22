@@ -1,36 +1,19 @@
 {
+  config,
   lib,
   pkgs,
   ...
 }:
 let
-  inherit (pkgs.stdenv.hostPlatform) isLinux;
-
-  quteRbw = pkgs.writeShellApplication {
-    name = "qute-rbw";
-
-    runtimeInputs = [
-      pkgs.rbw
-      pkgs.kitty
-      pkgs.rofi-rbw-wayland
-      pkgs.pinentry-curses
-      pkgs.hyprland
-    ];
-
-    text = ''
-      if rbw unlocked > /dev/null 2>&1; then
-        rofi-rbw
-      else
-        kitty -T "rbw password prompt" rbw unlock \
-        && hyprctl dispatch 'hl.dsp.focus({ window = "class:org.qutebrowser.qutebrowser" })' \
-        && rofi-rbw
-      fi
-    '';
+  # Fills and copies Bitwarden logins. Comes with the rbw feature.
+  quteRbw = import ./_qute-rbw {
+    inherit lib pkgs;
+    rbw = config.programs.rbw.package;
   };
+  rbw = command: "spawn -u ${lib.getExe quteRbw} ${command}";
+  withRbw = lib.mkIf config.programs.rbw.enable;
 in
 {
-  home.packages = lib.mkIf isLinux [ quteRbw ];
-
   programs = {
     qutebrowser = {
       enable = true;
@@ -62,13 +45,26 @@ in
             "xb" = "config-cycle statusbar.show always never";
             "er" = "spawn -u readability";
           }
-          (lib.mkIf isLinux {
-            "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${quteRbw}/bin/qute-rbw";
+          (withRbw {
+            # Fill the login form: username, password, and the TOTP code
+            # onto the clipboard for the next step
+            "<Ctrl+l>" = rbw "login";
+            # Pick from every match, even when one is an obvious fit
+            ",pl" = rbw "--pick login";
+            # Fill one field: the focused one, or the likeliest on the page
+            ",pu" = rbw "username";
+            ",pp" = rbw "password";
+            ",pt" = rbw "totp";
+            # Copy one field, cleared again after a while
+            ",yu" = rbw "--copy username";
+            ",yp" = rbw "--copy password";
+            ",yt" = rbw "--copy totp";
           })
         ];
 
-        insert = lib.mkIf isLinux {
-          "<Ctrl+l>" = "mode-enter insert ;; spawn -u ${quteRbw}/bin/qute-rbw";
+        insert = withRbw {
+          "<Ctrl+l>" = rbw "login";
+          "<Ctrl+t>" = rbw "totp";
         };
 
         passthrough = {
@@ -140,7 +136,5 @@ in
       };
 
     };
-
-    rofi.enable = isLinux;
   };
 }

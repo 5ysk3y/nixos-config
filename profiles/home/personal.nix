@@ -13,7 +13,9 @@
       hugo
       media
       messaging
+      password-management
       qutebrowser
+      rbw
       sops-nix
       stylix
       syncthing

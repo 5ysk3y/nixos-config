@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   inputs,
@@ -15,7 +16,10 @@ let
     "{player_icon} {status_icon} [scroll]{title} - {artist}[/scroll]"
   ];
   scripts = {
-    waybar = import ./_scripts { inherit pkgs; };
+    waybar = import ./_scripts {
+      inherit pkgs;
+      rbw = config.programs.rbw.package;
+    };
     scroll_mpris = import ./_scripts/scroll-mpris {
       inherit pkgs inputs;
       args = scrollMprisArgs;
@@ -61,12 +65,20 @@ in
           ];
         };
 
-        "custom/rbw" = {
-          format = "{}";
-          escape = true;
-          interval = 30;
-          exec = "${scripts.waybar.check_rbw.outPath}/bin/check_rbw";
-        };
+        "custom/rbw" =
+          let
+            rbw = lib.getExe config.programs.rbw.package;
+          in
+          {
+            format = "{}";
+            escape = true;
+            interval = 30;
+            # qute-rbw sends this after unlocking, so the icon needn't wait
+            signal = 8;
+            exec = "${scripts.waybar.check_rbw.outPath}/bin/check_rbw";
+            on-click = "${rbw} unlock; pkill -RTMIN+8 waybar";
+            on-click-right = "${rbw} lock; pkill -RTMIN+8 waybar";
+          };
 
         idle_inhibitor = {
           format = "{icon}";
