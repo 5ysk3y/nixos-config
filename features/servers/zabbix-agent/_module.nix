@@ -8,8 +8,9 @@
     enable = true;
     package = pkgs.zabbix70.agent2;
     server = "192.168.1.3";
+    # No LogFile: the NixOS module sets LogType = "console", so the agent
+    # logs to the journal (journalctl -u zabbix-agent)
     settings = {
-      LogFile = "/var/log/zabbix/zabbix_agent2.log";
       ServerActive = "192.168.1.3";
       PluginSocket = "/run/zabbix/agent.plugin.sock";
       ControlSocket = "/run/zabbix/zabbix_agent2.sock";
