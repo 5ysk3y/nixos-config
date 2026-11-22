@@ -88,7 +88,8 @@ in
           force = true;
         };
 
-        "jellyfin-mpv-shim/input.json".text = ''
+        # mpv key bindings
+        "jellyfin-mpv-shim/input.conf".text = ''
           q run "/bin/sh" "-c" "hyprctl --batch 'dispatch hl.dsp.window.close(); dispatch hl.dsp.focus({ workspace = [[m-1]] })'"
         '';
 
