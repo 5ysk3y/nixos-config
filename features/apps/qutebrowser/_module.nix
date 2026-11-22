@@ -79,8 +79,6 @@ in
       settings = {
 
         downloads.remove_finished = 300000;
-        fonts.default_size = lib.mkForce "8pt";
-        qt.chromium.process_model = "process-per-site";
         scrolling.smooth = true;
         statusbar.show = "in-mode";
         url.default_page = "https://search.brave.com/";
