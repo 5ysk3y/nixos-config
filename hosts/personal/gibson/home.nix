@@ -1,6 +1,6 @@
 {
   config,
-  inputs,
+  lib,
   vars,
   pkgs,
   ...
@@ -34,6 +34,10 @@
 
   programs = {
     git.settings.user.signingKey = "7D73BA8CF10F7F67";
+
+    # A smaller UI font than Stylix's applications size. mkForce beats the
+    # value Stylix sets; pages keep the default font size Stylix gives them.
+    qutebrowser.settings.fonts.default_size = lib.mkForce "8pt";
   };
 
   features = {
