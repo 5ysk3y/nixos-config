@@ -11,6 +11,8 @@ let
   # This means `nix eval .#overlayAudits` fails loudly with a clear message
   # if an audit entry is structurally wrong, rather than silently producing
   # a bad result that only surfaces when CI runs.
+  # `entry` is the meta exactly as written, before the option defaults below
+  # fill it in, so a missing field reads as `or` its default here.
   validateEntry =
     hostKey: id: entry:
     let
@@ -18,15 +20,15 @@ let
       loc = "${hostKey} / ${id}";
 
       assertVersionFields = lib.assertMsg (
-        entry.threshold != null
+        (entry.threshold or null) != null
       ) "overlayAudits: ${loc} uses nixpkgs-version but is missing required field 'threshold'";
 
       assertIssueFields = lib.assertMsg (
-        entry.trackingIssues != [ ]
+        (entry.trackingIssues or [ ]) != [ ]
       ) "overlayAudits: ${loc} uses nixpkgs-issue but 'trackingIssues' is empty";
 
       assertPRFields = lib.assertMsg (
-        entry.trackingPRs != [ ]
+        (entry.trackingPRs or [ ]) != [ ]
       ) "overlayAudits: ${loc} uses nixpkgs-pr but 'trackingPRs' is empty";
 
       valid =
