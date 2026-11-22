@@ -58,10 +58,6 @@
         user.signingKey = "D4D5DFADF6AE96D9";
       };
     };
-
-    qutebrowser.extraConfig = ''
-      c.fonts.default_size = "12pt"
-    '';
   };
 
   launchd.agents.syncthingtray = {

@@ -29,7 +29,9 @@
       };
       sizes = {
         terminal = 10; # already set
-        applications = 12; # qutebrowser UI — bump if 12pt is still too small for you
+        # GUI apps. For qutebrowser it's the UI font, and its pages' default
+        # font size is derived from it; gibson sets a smaller UI font itself.
+        applications = 12;
         desktop = 13; # waybar — raise from the 10pt default
         popups = 12; # mako, rofi
       };
