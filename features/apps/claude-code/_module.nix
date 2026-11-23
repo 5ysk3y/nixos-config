@@ -42,7 +42,7 @@ let
     "${dataHome}/pass"
     "${vars.syncthingPath}/Files/nix/gnupg"
 
-    # rbw (Bitwarden CLI): its sops-written config, vault cache and agent
+    # rbw (Bitwarden CLI): its config, vault cache and agent
     "${configHome}/rbw"
     "${cacheHome}/rbw"
     "${dataHome}/rbw"
@@ -66,6 +66,10 @@ let
     "${configHome}/discord"
   ]
   ++ lib.optionals isDarwin [
+    # rbw's config, vault cache and agent logs: macOS's own directories
+    "${appSupport}/rbw"
+    "${homeDirectory}/Library/Caches/rbw"
+
     "${appSupport}/Syncthing"
     "${appSupport}/qutebrowser"
     "${appSupport}/Bitwarden"

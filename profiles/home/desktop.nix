@@ -13,7 +13,6 @@
     kitty
     mako
     obs-studio
-    password-management
     playerctld
     waybar
     wayland-idle-inhibit
