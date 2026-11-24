@@ -18,6 +18,13 @@ in
     qutebrowser = {
       enable = true;
 
+      # Lets Sign in with Apple get past the email step; see the script's header
+      greasemonkey = [
+        (pkgs.writeText "apple-webauthn-capabilities.js" (
+          builtins.readFile ./_apple-webauthn-capabilities.js
+        ))
+      ];
+
       extraConfig = ''
         # Ignore settings made via :set (autoconfig.yml); config lives here
         config.load_autoconfig(False)
