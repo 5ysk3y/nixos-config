@@ -27,6 +27,23 @@ let
   };
 in
 {
+  # The single producer for custom/steelseries (see _scripts). A
+  # long-running loop rather than a timer, so the journal doesn't get two
+  # lines every 10 seconds.
+  systemd.user.services.mouse-battery = {
+    Unit = {
+      Description = "Mouse battery reading for Waybar's custom/steelseries";
+      PartOf = config.programs.waybar.systemd.targets;
+      After = config.programs.waybar.systemd.targets;
+    };
+    Service = {
+      ExecStart = lib.getExe scripts.waybar.mouse_battery_producer;
+      Restart = "on-failure";
+      RestartSec = 5;
+    };
+    Install.WantedBy = config.programs.waybar.systemd.targets;
+  };
+
   programs.waybar = {
     enable = true;
     systemd.enable = true;
@@ -126,8 +143,10 @@ in
             "0" = "  ";
             charging = "  ";
           };
+          # Only reads the file mouse-battery.service writes. That service
+          # sends this signal, so every bar's copy refreshes at once.
           exec = "${scripts.waybar.mouse_battery.outPath}/bin/mouse_battery";
-          "restart-interval" = 10;
+          signal = 9;
           "on-click" = "${scripts.waybar.mouse_colour.outPath}/bin/mouse_colour";
         };
 
