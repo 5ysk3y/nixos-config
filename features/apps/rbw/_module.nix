@@ -24,8 +24,28 @@ let
   # Settings that belong to this host rather than to the account. A native
   # dialog on each OS, so unlocking works without a terminal.
   hostSettings = (pkgs.formats.json { }).generate "rbw-host-settings.json" {
-    pinentry = if isDarwin then lib.getExe pkgs.pinentry_mac else "${pkgs.pinentry-qt}/bin/pinentry-qt";
+    pinentry = if isDarwin then lib.getExe pkgs.pinentry_mac else "${pinentryQt}";
   };
+
+  # Qt reads the theme stylix sets (qtct and Kvantum) from these variables.
+  # rbw-agent starts the pinentry with only a few display variables of the
+  # caller's, so the dialog sets them itself.
+  qtTheme = lib.filterAttrs (
+    name: _:
+    lib.elem name [
+      "QT_QPA_PLATFORMTHEME"
+      "QT_STYLE_OVERRIDE"
+      "QT_PLUGIN_PATH"
+      "QML2_IMPORT_PATH"
+    ]
+  ) config.systemd.user.sessionVariables;
+
+  pinentryQt = pkgs.writeShellScript "pinentry-qt" ''
+    ${lib.concatStrings (
+      lib.mapAttrsToList (name: value: "export ${name}=${lib.escapeShellArg (toString value)}\n") qtTheme
+    )}
+    exec ${pkgs.pinentry-qt}/bin/pinentry-qt "$@"
+  '';
 
   secret = config.sops.secrets."services/rbw/config".path;
 
