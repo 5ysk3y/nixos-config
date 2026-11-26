@@ -46,6 +46,16 @@ let
     '';
   };
 
+  # The lock screen's hint: a touch when a YubiKey (Yubico's USB vendor ID,
+  # 1050) is plugged in, otherwise the password
+  unlockHint = pkgs.writeShellScript "hyprlock-unlock-hint" ''
+    if ${pkgs.gnugrep}/bin/grep -qsx 1050 /sys/bus/usb/devices/*/idVendor; then
+      echo "Touch your YubiKey"
+    else
+      echo "Type your password"
+    fi
+  '';
+
   # Shared by every monitor's background
   background = {
     color = "rgba(0, 0, 0, 1)";
@@ -95,7 +105,9 @@ in
         input-field = [
           {
             monitor = cfg.primaryMonitor;
-            fade_on_empty = false;
+            # Hidden until the first keypress, since a YubiKey touch needs
+            # no field. The hint label below says which one is needed.
+            fade_on_empty = true;
             dots_center = true;
             size = "250, 50";
             outer_color = "rgb(255, 184, 108)";
@@ -133,7 +145,17 @@ in
             shadow_color = "rgba(255, 184, 108, 0.5)";
             shadow_boost = 1.6;
           }
-        ];
+        ]
+        ++ lib.optional osConfig.security.pam.u2f.enable {
+          monitor = cfg.primaryMonitor;
+          text = "cmd[update:2000] ${unlockHint}";
+          font_family = "Hack";
+          position = "0, -60";
+          halign = "center";
+          valign = "center";
+          color = "rgba(255, 255, 255, 0.7)";
+          font_size = 14;
+        };
       };
     };
   };
