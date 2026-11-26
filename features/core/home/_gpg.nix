@@ -29,6 +29,13 @@ in
     enableSshSupport = true;
     defaultCacheTtl = 600;
     maxCacheTtl = 7200;
-    pinentry.package = if isDarwin then pkgs.pinentry_mac else pkgs.pinentry-curses;
+    # A dialog on the desktop rather than a prompt in a terminal. For SSH,
+    # gpg-agent sends the PIN prompt to the last tty any client recorded,
+    # and a client without a terminal can leave that unusable. The prompt
+    # then fails at once, as on the first git pull after hibernate, when
+    # the YubiKey has forgotten its PIN. pinentry-qt falls back to curses
+    # when there's no display. It gets the stylix Qt theme from gpg-agent's
+    # systemd environment.
+    pinentry.package = if isDarwin then pkgs.pinentry_mac else pkgs.pinentry-qt;
   };
 }

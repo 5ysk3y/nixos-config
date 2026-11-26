@@ -22,8 +22,8 @@
   # Started at boot as well as on demand from its socket
   systemd.services.pcscd.wantedBy = [ "multi-user.target" ];
 
-  # gpg-agent serves SSH keys from the YubiKey: point it at the terminal
-  # ssh runs in, so its PIN prompt appears there
+  # gpg-agent serves SSH keys from the YubiKey: point it at the display and
+  # terminal ssh runs in, so its PIN prompt appears there
   programs.ssh.extraConfig = ''
     Match host * exec "gpg-connect-agent updatestartuptty /bye >/dev/null 2>&1"
   '';
