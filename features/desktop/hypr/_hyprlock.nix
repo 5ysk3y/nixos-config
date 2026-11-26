@@ -1,6 +1,50 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  osConfig,
+  ...
+}:
 let
   cfg = config.features.home.hyprlock;
+
+  # Unlocks with a YubiKey touch alongside the password field, the way
+  # hyprlock's fingerprint support works. While hyprlock runs, a loop asks
+  # the hyprlock-u2f PAM service (pam_u2f only, see ./_nixos.nix) for a
+  # touch, starts a new request each time one times out or fails, and sends
+  # hyprlock SIGUSR1 (its unlock signal) once one succeeds. After resume, the
+  # next request finds the key again as soon as it's back on USB.
+  wrapper = pkgs.writeShellScript "hyprlock" ''
+    ${pkgs.hyprlock}/bin/hyprlock "$@" &
+    lock=$!
+    user=$(${pkgs.coreutils}/bin/id -un)
+    (
+      while kill -0 "$lock" 2>/dev/null; do
+        if ${pkgs.pamtester}/bin/pamtester hyprlock-u2f "$user" authenticate >/dev/null 2>&1; then
+          kill -USR1 "$lock"
+          exit
+        fi
+        sleep 1
+      done
+    ) &
+    watcher=$!
+    wait "$lock"
+    status=$?
+    # After a password unlock, the loop is still waiting for a touch
+    ${pkgs.procps}/bin/pkill -P "$watcher"
+    kill "$watcher" 2>/dev/null
+    exit "$status"
+  '';
+
+  hyprlock = pkgs.symlinkJoin {
+    name = "hyprlock-u2f-${pkgs.hyprlock.version}";
+    paths = [ pkgs.hyprlock ];
+    inherit (pkgs.hyprlock) meta;
+    postBuild = ''
+      rm $out/bin/hyprlock
+      ln -s ${wrapper} $out/bin/hyprlock
+    '';
+  };
 
   # Shared by every monitor's background
   background = {
@@ -34,6 +78,7 @@ in
   config = {
     programs.hyprlock = {
       enable = true;
+      package = if osConfig.security.pam.u2f.enable then hyprlock else pkgs.hyprlock;
 
       settings = {
         general = {

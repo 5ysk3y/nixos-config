@@ -1,7 +1,6 @@
 {
   config,
   vars,
-  pkgs,
   ...
 }:
 {
@@ -21,11 +20,19 @@
   services.libinput.enable = true;
 
   security = {
-    pam.services.hyprlock.rules.auth.u2f-retry = {
-      order = config.security.pam.services.hyprlock.rules.auth.u2f.order + 1;
-      control = "sufficient";
-      modulePath = "${pkgs.pam_u2f}/lib/security/pam_u2f.so";
-      inherit (config.security.pam.u2f) settings;
+    # hyprlock runs one PAM conversation at a time and starts the next only
+    # after a password is submitted. With pam_u2f in that stack, the touch
+    # wait ran out a minute after locking (or broke when the YubiKey dropped
+    # off USB for sleep), and the conversation sat at the password prompt
+    # until a wrong password restarted it. So hyprlock's own stack is
+    # password only, and the hyprlock wrapper (./_hyprlock.nix) keeps
+    # retrying the YubiKey against hyprlock-u2f the whole time it's locked.
+    pam.services = {
+      hyprlock.u2fAuth = false;
+      hyprlock-u2f = {
+        u2fAuth = config.security.pam.u2f.enable;
+        unixAuth = false;
+      };
     };
     sudo.extraRules = [
       {
