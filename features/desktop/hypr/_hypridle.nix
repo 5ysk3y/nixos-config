@@ -61,8 +61,8 @@ let
     ${pkgs.wtype}/bin/wtype -k escape
   '';
 
-  # After a hibernate that hypridle itself started (the 900s listener), both
-  # after_sleep_cmd and the 600s listener's on-resume fire. They share this
+  # After a sleep that hypridle itself started (the 1800s listener), both
+  # after_sleep_cmd and the 420s listener's on-resume fire. They share this
   # lock so the listener's DPMS enable can't land in the middle of the
   # resume script's reload: the resume script waits for the lock, and the
   # listener skips its run while the resume script holds it, since that
@@ -132,6 +132,9 @@ in
             after_sleep_cmd = lib.concatStringsSep "; " (
               config.features.home.hyprland.resumeCommands ++ [ "${resumeAfterSleep}" ]
             );
+            # Also lock when something else starts the sleep. hypridle holds
+            # off the sleep until the screen is locked.
+            before_sleep_cmd = "loginctl lock-session";
             on_unlock_cmd = "wtype -k escape";
           };
 
@@ -146,13 +149,14 @@ in
               on-timeout = "loginctl lock-session";
             }
             {
-              timeout = 600;
+              timeout = 420;
               on-timeout = "sleep 1 && hyprctl dispatch 'hl.dsp.dpms({ action = \"disable\" })'";
               on-resume = "${dpmsOnWhenActive}";
             }
             {
-              timeout = 900;
-              on-timeout = "systemctl hibernate";
+              # Suspend first, then hibernate after HibernateDelaySec (./_nixos.nix)
+              timeout = 1800;
+              on-timeout = "systemctl suspend-then-hibernate";
             }
           ];
         };
