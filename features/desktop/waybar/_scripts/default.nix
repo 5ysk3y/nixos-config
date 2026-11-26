@@ -12,9 +12,9 @@
     text = ''
       if ! rbw unlocked 2>/dev/null
       then
-          echo ""
+          echo ""
       else
-          echo ""
+          echo ""
       fi
     '';
   };
