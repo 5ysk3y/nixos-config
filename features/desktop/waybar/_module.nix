@@ -27,6 +27,8 @@ let
   };
 in
 {
+  imports = [ ./_scaled-outputs.nix ];
+
   # The single producer for custom/steelseries (see _scripts). A
   # long-running loop rather than a timer, so the journal doesn't get two
   # lines every 10 seconds.
@@ -69,6 +71,15 @@ in
 
         "hyprland/window" = {
           separate-outputs = 1;
+          # One fixed, centred width on every output: long titles end in
+          # "…" and short ones sit in the middle.
+          min-length = 60;
+          max-length = 60;
+          align = 0.5;
+          # The underline hugs the title, not the fixed slot. GTK's CSS
+          # underline can't take its own colour or a gap, so it's Pango's:
+          # "low" sits below the descenders, in a dimmed style.css cyan.
+          format = "<span underline='low' underline_color='#04808a'>{title}</span>";
         };
 
         "group/quickHacks" = {
@@ -105,14 +116,17 @@ in
           };
         };
 
+        # The icon <span> colours below mirror style.css's palette:
+        # cyan #00f0ff, yellow #fcee0a, orange #ff9e00, red #ff003c (alerts),
+        # violet #b967ff, magenta #ff2a6d, green #39ff14.
         cpu = {
-          format = " {usage}%";
+          format = "<span foreground='#00f0ff'></span> {usage}%";
           interval = 10;
           tooltip = false;
         };
 
         memory = {
-          format = " {used:0.1f}G";
+          format = "<span foreground='#b967ff'></span> {used:0.1f}G";
         };
 
         disk = {
@@ -123,8 +137,8 @@ in
 
         temperature = {
           "critical-threshold" = 80;
-          "format-critical" = "{icon} {temperatureC}󰔄";
-          format = "{icon} {temperatureC}󰔄";
+          "format-critical" = "<span foreground='#ff003c'>{icon}</span> {temperatureC}󰔄";
+          format = "<span foreground='#ff9e00'>{icon}</span> {temperatureC}󰔄";
           "format-icons" = [
             ""
             ""
@@ -136,12 +150,12 @@ in
           format = "  {icon}{text} ";
           "return-type" = "json";
           "format-icons" = {
-            "100" = "  ";
-            "75" = "  ";
-            "50" = "  ";
-            "25" = "  ";
-            "0" = "  ";
-            charging = "  ";
+            "100" = "<span foreground='#39ff14'>  </span>";
+            "75" = "<span foreground='#39ff14'>  </span>";
+            "50" = "<span foreground='#fcee0a'>  </span>";
+            "25" = "<span foreground='#ff9e00'>  </span>";
+            "0" = "<span foreground='#ff003c'>  </span>";
+            charging = "<span foreground='#00f0ff'>  </span>";
           };
           # Only reads the file mouse-battery.service writes. That service
           # sends this signal, so every bar's copy refreshes at once.
@@ -161,8 +175,8 @@ in
         };
 
         pulseaudio = {
-          format = "{icon}{volume}%";
-          "format-muted" = "  Muted";
+          format = "<span foreground='#ff2a6d'>{icon}</span>{volume}%";
+          "format-muted" = "<span foreground='#fcee0a'>  </span>Muted";
           "scroll-step" = 10;
           "format-icons" = [
             " "
@@ -179,194 +193,11 @@ in
       };
     };
 
-    style = ''
-      @define-color bg0 rgba(8, 10, 18, 0.55);
-      @define-color panel rgba(12, 16, 28, 0.68);
-      @define-color panel2 rgba(16, 20, 34, 0.72);
-
-      @define-color fg #e6e6e6;
-      @define-color fgDim rgba(230, 230, 230, 0.75);
-
-      @define-color neonCyan rgba(120, 255, 240, 0.85);
-      @define-color neonPink rgba(255, 0, 200, 0.72);
-      @define-color neonPurple rgba(180, 120, 255, 0.70);
-      @define-color warn rgba(255, 190, 80, 0.85);
-      @define-color crit rgba(255, 70, 70, 0.85);
-
-      * {
-        font-family: noto sans mono, FontAwesome6Free, SymbolsNerdFont;
-        font-size: 10px;
-        min-height: 0;
-        border: none;
-        border-radius: 0;
-      }
-
-      window#waybar {
-        background-image: repeating-linear-gradient(
-          to bottom,
-          rgba(255, 255, 255, 0.03),
-          rgba(255, 255, 255, 0.03) 1px,
-          rgba(0, 0, 0, 0.0) 3px,
-          rgba(0, 0, 0, 0.0) 3px
-        );
-        background-color: @bg0;
-        color: @fg;
-        transition-property: background-color;
-        transition-duration: 0.25s;
-      }
-
-      window#waybar.hidden {
-        opacity: 0.5;
-      }
-
-      #window {
-        padding-left: 10px;
-        padding-right: 10px;
-        background: transparent;
-        border-bottom: 2px solid rgba(180, 120, 255, 0.45);
-        color: @fgDim;
-      }
-
-      #clock,
-      #cpu,
-      #memory,
-      #disk,
-      #temperature,
-      #pulseaudio,
-      #custom-media,
-      #custom-rbw,
-      #idle_inhibitor,
-      #custom-steelseries,
-      #mode {
-        padding: 6px 10px;
-        margin: 6px 4px;
-        background: @panel;
-        border: 1px solid rgba(120, 255, 240, 0.14);
-        border-radius: 12px;
-        color: @fg;
-        box-shadow:
-          0 0 0 1px rgba(255, 0, 200, 0.06) inset,
-          0 6px 16px rgba(0, 0, 0, 0.35);
-      }
-
-      #workspaces,
-      #window {
-        background-color: transparent;
-      }
-
-      #workspaces button {
-        all: initial;
-        font-family: noto sans mono, FontAwesome6Free, SymbolsNerdFont;
-        font-size: 10px;
-
-        min-width: 0;
-        padding: 6px 10px;
-        margin: 6px 3px;
-
-        border-radius: 12px;
-        background: @panel;
-        color: @fgDim;
-
-        border: 1px solid rgba(120, 255, 240, 0.12);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.30);
-        transition: all 120ms ease;
-      }
-
-      #workspaces button:hover {
-        color: @fg;
-        border-color: rgba(120, 255, 240, 0.35);
-        box-shadow: 0 0 18px rgba(120, 255, 240, 0.18);
-      }
-
-      #workspaces button.active {
-        color: rgba(8, 10, 18, 0.90);
-        background: rgba(120, 255, 240, 0.92);
-        border-color: rgba(120, 255, 240, 0.65);
-        box-shadow:
-          0 0 0 1px rgba(255, 0, 200, 0.22) inset,
-          0 0 24px rgba(120, 255, 240, 0.26);
-      }
-
-      #workspaces button.urgent {
-        border-color: @crit;
-        box-shadow: 0 0 20px rgba(255, 70, 70, 0.25);
-      }
-
-      .modules-left > widget:first-child > #workspaces { margin-left: 0; }
-      .modules-right > widget:last-child > #workspaces { margin-right: 0; }
-
-      label { all: unset; }
-      label:focus { background-color: #000000; }
-
-      #cpu { border-left: 3px solid rgba(120, 255, 240, 0.55); }
-      #memory { border-left: 3px solid rgba(180, 120, 255, 0.55); }
-      #temperature { border-left: 3px solid rgba(255, 190, 80, 0.55); }
-      #pulseaudio { border-left: 3px solid rgba(255, 0, 200, 0.45); }
-      #clock { border-left: 3px solid rgba(180, 120, 255, 0.45); }
-      #custom-media { border-left: 3px solid rgba(120, 255, 240, 0.45); }
-      #custom-steelseries { border-left: 3px solid rgba(255, 0, 200, 0.45); }
-      #idle_inhibitor { border-left: 3px solid rgba(180, 120, 255, 0.45); }
-      #custom-rbw { border-left: 3px solid rgba(120, 255, 240, 0.35); }
-
-      #custom-media {
-        min-width: 140px;
-                  }
-
-      #temperature.critical {
-        border-left: 3px solid @crit;
-        box-shadow: 0 0 24px rgba(255, 70, 70, 0.18);
-      }
-
-      #pulseaudio.muted {
-        border-left: 3px solid @warn;
-        color: @fgDim;
-      }
-
-      #idle_inhibitor.activated {
-        border-left: 3px solid @neonPink;
-        box-shadow: 0 0 18px rgba(255, 0, 200, 0.18);
-      }
-
-      #custom-steelseries.fine {
-        border-left: 3px solid rgba(120, 255, 240, 0.60);
-      }
-
-      #custom-steelseries.nearlylowbat {
-        border-left: 3px solid @warn;
-        box-shadow: 0 0 18px rgba(255, 190, 80, 0.15);
-      }
-
-      @keyframes blink {
-        to {
-          border-left-color: rgba(255, 70, 70, 1.0);
-          box-shadow: 0 0 22px rgba(255, 70, 70, 0.25);
-        }
-      }
-
-      #custom-steelseries.lowbat:not(.fine) {
-        border-left: 3px solid @crit;
-        animation-name: blink;
-        animation-duration: 1.0s;
-        animation-timing-function: ease-in-out;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
-      }
-
-      .sub-icons > * {
-        margin-left: 6px;
-      }
-
-      tooltip {
-        background: rgba(8, 10, 18, 0.92);
-        border: 1px solid rgba(120, 255, 240, 0.25);
-        border-radius: 12px;
-        box-shadow: 0 12px 22px rgba(0, 0, 0, 0.45);
-      }
-
-      tooltip label {
-        color: @fg;
-        padding: 6px 8px;
-      }
-    '';
+    # A file rather than a string, so nix run .#waybar-preview can run a
+    # second bar from a checkout's copy and reload it on every save.
+    style = ./style.css;
   };
+
+  # The theme's text and clock faces (see style.css)
+  home.packages = [ (import ./_theme-fonts.nix pkgs) ];
 }

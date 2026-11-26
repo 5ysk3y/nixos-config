@@ -1,4 +1,8 @@
 _: {
+  # DP-1 runs at 1.25x, which drew its bar a quarter bigger than the side
+  # ones. Its bar gets a 0.9x copy that style.css shrinks to match.
+  features.home.waybar.scaledOutputs = [ "DP-1" ];
+
   programs.waybar.settings.mainBar = {
     output = [
       "DP-1"
