@@ -9,6 +9,11 @@
 
   services.displayManager.defaultSession = "hyprland";
 
+  # hypridle suspends with suspend-then-hibernate (./_hypridle.nix). A short
+  # break wakes from RAM in a second, and a long absence still ends up
+  # hibernated, with the RAM powered off.
+  systemd.sleep.settings.Sleep.HibernateDelaySec = "2h";
+
   # No X server: Hyprland and the SDDM greeter (kwin) are Wayland, and X11
   # apps run under XWayland. services.libinput defaults to
   # services.xserver.enable, and it's what installs libinput's udev rules

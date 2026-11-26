@@ -59,6 +59,24 @@
           '';
         };
       };
+
+      # The RAM stays powered while suspended, and so do the RGB controllers
+      # on its sticks, which keep showing their last colour. Setting them
+      # black first keeps the case dark. home.nix's resumeCommands set the
+      # desk lighting again on wake. Runs as the user, like that command, so
+      # it reads the same OpenRGB device settings.
+      rgb-off-before-sleep = {
+        description = "Turn the RGB lighting off before sleep";
+        wantedBy = [ "sleep.target" ];
+        before = [ "sleep.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          User = vars.username;
+          ExecStart = "${config.services.hardware.openrgb.package}/bin/openrgb -c 000000 -m Direct";
+          # Never hold up the sleep for long
+          TimeoutStartSec = 20;
+        };
+      };
     };
   };
 
