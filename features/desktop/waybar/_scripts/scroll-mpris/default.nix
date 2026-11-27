@@ -16,6 +16,16 @@ pkgs.rustPlatform.buildRustPackage {
   inherit src;
   cargoLock.lockFile = "${src}/Cargo.lock";
 
+  # The marquee joins the title's end to its start with a hard-coded three
+  # spaces, which reads as a gap. A pipe marks the seam instead. It's still
+  # three characters, so the scroll window keeps its width. --replace-fail
+  # stops the build if upstream changes that line.
+  postPatch = ''
+    substituteInPlace src/scroll.rs \
+      --replace-fail 'pub const WRAP_SPACER: &str = "   ";' \
+                     'pub const WRAP_SPACER: &str = " | ";'
+  '';
+
   # Catch upstream renaming or removing one of the flags in args.
   # --generate-config exits after argument parsing, before D-Bus.
   doInstallCheck = true;
