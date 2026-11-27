@@ -99,6 +99,18 @@ let
     ''
     + dpmsOn
   );
+
+  # Idle sleep. From 08:00 to midnight, when the PC may be used again soon,
+  # suspend first and hibernate after HibernateDelaySec (./_nixos.nix).
+  # Overnight, hibernate straight away, since it draws less power than
+  # suspend and nobody is likely to wake it before morning.
+  idleSleep = pkgs.writeShellScript "hypr-idle-sleep" ''
+    hour=$(${pkgs.coreutils}/bin/date +%-H)
+    if [ "$hour" -ge 8 ]; then
+      exec ${pkgs.systemd}/bin/systemctl suspend-then-hibernate
+    fi
+    exec ${pkgs.systemd}/bin/systemctl hibernate
+  '';
 in
 {
   options.features.home.hyprland = {
@@ -154,9 +166,8 @@ in
               on-resume = "${dpmsOnWhenActive}";
             }
             {
-              # Suspend first, then hibernate after HibernateDelaySec (./_nixos.nix)
               timeout = 1800;
-              on-timeout = "systemctl suspend-then-hibernate";
+              on-timeout = "${idleSleep}";
             }
           ];
         };
