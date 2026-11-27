@@ -243,6 +243,10 @@ label:focus {
 /* ── Media (ScrollMPRIS: playing, paused or stopped, plus the player) ─ */
 
 #custom-media {
+  /* ScrollMPRIS scrolls a fixed number of characters. In Oxanium their
+     width changes as they scroll and the tab shuffles; Neon Mono is a
+     monospaced Oxanium (_neon-mono.py), so it keeps the tab still. */
+  font-family: "Neon Mono", "Symbols Nerd Font", "Noto Sans Mono";
   min-width: 140px;
   border-left-color: @magenta;
   color: @chrome;
