@@ -35,6 +35,7 @@ in
         width = 400;
         height = 170;
         max-icon-size = 32;
+        outer-margin = "2,7,0,0";
 
         "urgency=normal" = {
           on-notify = "exec ${pkgs.vlc}/bin/cvlc --play-and-exit ${config.xdg.configHome}/mako/notification.wav";
