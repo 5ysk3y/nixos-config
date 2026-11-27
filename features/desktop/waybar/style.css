@@ -1,0 +1,434 @@
+/*
+ * Waybar theme: neon-noir HUD.
+ *
+ * A near-black glass bar with scanlines, chrome text, and three neon
+ * accents: a hard yellow for focus, a hot red for alerts, and a cold cyan
+ * for "netrunner" info. Modules are tabs with one chamfered corner, and
+ * critical states glitch with a red/cyan split.
+ *
+ * Preview it next to the live bar from a checkout:
+ *   nix run .#waybar-preview
+ * The preview reloads whenever this file is saved.
+ *
+ * GTK3 CSS, not browser CSS: no transform, clip-path, or text-transform.
+ */
+
+/* ── Palette ─────────────────────────────────────────────────────────── */
+
+@define-color void rgba(4, 6, 10, 0.82);
+@define-color panel rgba(12, 14, 20, 0.90);
+@define-color panelHi rgba(24, 26, 36, 0.94);
+@define-color tooltipBg rgba(4, 6, 10, 0.95);
+
+@define-color chrome #d9dde4;
+@define-color ink #07080c;
+
+@define-color yellow #fcee0a;
+@define-color red #ff003c;
+@define-color cyan #00f0ff;
+@define-color orange #ff9e00;
+
+/* Secondary neons, for icons and tab edges only. Red stays for alerts. */
+@define-color magenta #ff2a6d;
+@define-color violet #b967ff;
+@define-color green #39ff14;
+
+/* Dim and glow shades of the accents */
+
+@define-color chromeDim alpha(@chrome, 0.55);
+@define-color yellowDim alpha(@yellow, 0.45);
+@define-color yellowGlow alpha(@yellow, 0.22);
+@define-color redDim alpha(@red, 0.45);
+@define-color redGlow alpha(@red, 0.25);
+@define-color cyanGlow alpha(@cyan, 0.20);
+@define-color magentaDim alpha(@magenta, 0.45);
+@define-color magentaGlow alpha(@magenta, 0.22);
+
+/* ── Base ────────────────────────────────────────────────────────────── */
+
+* {
+  /* Oxanium for text; the symbol fonts supply the module icons. */
+  font-family: Oxanium, "Symbols Nerd Font", FontAwesome6Free, "Noto Sans Mono";
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+}
+
+window#waybar {
+  /* Scanlines over the glass */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.035),
+    rgba(255, 255, 255, 0.035) 1px,
+    rgba(0, 0, 0, 0) 1px,
+    rgba(0, 0, 0, 0) 3px
+  );
+  background-color: @void;
+  color: @chrome;
+  transition-property: background-color;
+  transition-duration: 0.25s;
+}
+
+window#waybar.hidden {
+  opacity: 0.5;
+}
+
+/* Custom modules render as a bare label in Waybar 0.16, so this reset
+   must stay below the ID selectors that style them. */
+label {
+  all: unset;
+}
+
+label:focus {
+  background-color: #000000;
+}
+
+/* ── Module tabs ─────────────────────────────────────────────────────── */
+
+#clock,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#pulseaudio,
+#custom-media,
+#custom-rbw,
+#idle_inhibitor,
+#custom-steelseries,
+#mode {
+  padding: 4px 10px;
+  margin: 6px 3px;
+  background-color: @panel;
+  color: @chrome;
+  /* One chamfered corner, top right. */
+  border-radius: 0 9px 0 0;
+  border-left: 3px solid @chromeDim;
+  box-shadow:
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.45);
+  transition: all 150ms ease;
+}
+
+#cpu:hover,
+#memory:hover,
+#disk:hover,
+#temperature:hover,
+#pulseaudio:hover,
+#idle_inhibitor:hover {
+  background-color: @panelHi;
+}
+
+/* ── Workspaces ──────────────────────────────────────────────────────── */
+
+#workspaces,
+#window {
+  background-color: transparent;
+}
+
+#workspaces {
+  margin-left: 6px;
+}
+
+#workspaces button {
+  /* Drops GTK's own button look; the font has to be set again after it. */
+  all: initial;
+  font-family: Orbitron, "Symbols Nerd Font", "Noto Sans Mono";
+  font-size: 10px;
+  font-weight: 700;
+
+  min-width: 0;
+  padding: 4px 10px;
+  margin: 6px 2px;
+
+  background-color: @panel;
+  color: @chromeDim;
+  border-radius: 0 7px 0 0;
+  border-bottom: 2px solid alpha(@chrome, 0.12);
+  transition: all 120ms ease;
+}
+
+#workspaces button:hover {
+  color: @cyan;
+  border-bottom-color: @cyan;
+  box-shadow: 0 0 14px @cyanGlow;
+}
+
+#workspaces button.active {
+  color: @ink;
+  background-color: @yellow;
+  border-bottom-color: @red;
+  box-shadow: 0 0 18px @yellowGlow;
+}
+
+#workspaces button.urgent {
+  color: @ink;
+  background-color: @red;
+  border-bottom-color: @cyan;
+  animation: glitch-bg 0.9s steps(2) infinite;
+}
+
+/* Hyprland keeps a focused workspace after its last window closes, so a
+   button can be active and empty at once; it keeps the active look. */
+#workspaces button.empty:not(.active) {
+  color: alpha(@chrome, 0.30);
+}
+
+/* ── Window title ────────────────────────────────────────────────────── */
+
+/* #window is a box (it can hold an app icon); the title is the label in it. */
+#window {
+  padding: 0 12px;
+  margin: 6px 0;
+  color: @cyan;
+}
+
+#window label {
+  /* Its width and its underline come from hyprland/window in _module.nix. */
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px @cyanGlow;
+}
+
+/* ── Clock: the yellow signature block ───────────────────────────────── */
+
+#clock {
+  font-family: Orbitron, "Symbols Nerd Font", "Noto Sans Mono";
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: @ink;
+  background-color: @yellow;
+  border-left: 3px solid @red;
+  border-radius: 0 11px 0 0;
+  margin-right: 8px;
+  box-shadow: 0 0 20px @yellowGlow;
+}
+
+/* ── System readouts ─────────────────────────────────────────────────── */
+
+#cpu {
+  border-left-color: @cyan;
+}
+
+#memory {
+  border-left-color: @violet;
+}
+
+#disk {
+  border-left-color: @chromeDim;
+}
+
+#temperature {
+  border-left-color: @orange;
+}
+
+#temperature.critical {
+  color: @red;
+  border-left-color: @red;
+  animation: glitch 0.6s steps(2) infinite;
+}
+
+#pulseaudio {
+  border-left-color: @magenta;
+}
+
+#pulseaudio.muted {
+  color: @chromeDim;
+  border-left-color: @yellow;
+  background-color: alpha(@yellow, 0.06);
+}
+
+/* ── Media (ScrollMPRIS: playing, paused or stopped, plus the player) ─ */
+
+#custom-media {
+  min-width: 140px;
+  border-left-color: @magenta;
+  color: @chrome;
+}
+
+#custom-media.playing {
+  border-left-color: @magenta;
+  color: @chrome;
+  box-shadow:
+    inset 0 -1px 0 @magentaDim,
+    0 0 14px @magentaGlow;
+}
+
+#custom-media.paused,
+#custom-media.stopped {
+  color: @chromeDim;
+  border-left-color: @chromeDim;
+}
+
+/* ── Quickhacks drawer: rbw lock, then the idle inhibitor ────────────── */
+
+#custom-rbw {
+  color: @cyan;
+  border-left-color: @cyan;
+  text-shadow: 0 0 6px @cyanGlow;
+}
+
+#idle_inhibitor {
+  color: @chromeDim;
+  border-left-color: @chromeDim;
+}
+
+#idle_inhibitor.activated {
+  color: @violet;
+  border-left-color: @violet;
+  box-shadow: 0 0 16px alpha(@violet, 0.22);
+}
+
+.sub-icons > * {
+  margin-left: 4px;
+}
+
+/* ── Mouse battery (custom/steelseries) ──────────────────────────────── */
+
+#custom-steelseries {
+  border-left-color: @green;
+}
+
+#custom-steelseries.fine {
+  border-left-color: @green;
+}
+
+#custom-steelseries.midbat {
+  border-left-color: @yellow;
+}
+
+#custom-steelseries.nearlylowbat {
+  color: @orange;
+  border-left-color: @orange;
+  box-shadow: 0 0 14px alpha(@orange, 0.18);
+}
+
+/* :not(.fine) keeps a stale lowbat class from blinking a charged mouse. */
+#custom-steelseries.lowbat:not(.fine) {
+  color: @red;
+  border-left-color: @red;
+  animation: blink 1s ease-in-out infinite alternate;
+}
+
+#custom-steelseries.charging {
+  color: @cyan;
+  border-left-color: @cyan;
+  animation: charge 1.6s ease-in-out infinite alternate;
+}
+
+#custom-steelseries.disconnected {
+  color: alpha(@red, 0.70);
+  border-left-color: @redDim;
+  background-color: alpha(@red, 0.06);
+}
+
+/* ── Scaled outputs ──────────────────────────────────────────────────── */
+
+/* A bar named "scaled" sits on a 1.25x output. Every size here is 0.9x
+   the one above. A full 0.8x would cancel the scale in pixels, but that
+   output's pixels are denser too, so 0.8x looked much smaller in person. */
+
+window#waybar.scaled * {
+  font-size: 10.8px;
+}
+
+window#waybar.scaled #clock,
+window#waybar.scaled #cpu,
+window#waybar.scaled #memory,
+window#waybar.scaled #disk,
+window#waybar.scaled #temperature,
+window#waybar.scaled #pulseaudio,
+window#waybar.scaled #custom-media,
+window#waybar.scaled #custom-rbw,
+window#waybar.scaled #idle_inhibitor,
+window#waybar.scaled #custom-steelseries,
+window#waybar.scaled #mode {
+  padding: 4px 9px;
+  margin: 5px 3px;
+}
+
+window#waybar.scaled #workspaces {
+  margin-left: 5px;
+}
+
+window#waybar.scaled #workspaces button {
+  font-size: 9px;
+  padding: 4px 9px;
+  margin: 5px 2px;
+}
+
+window#waybar.scaled #window {
+  padding: 0 11px;
+  margin: 5px 0;
+}
+
+window#waybar.scaled #window label {
+  font-size: 10.8px;
+}
+
+window#waybar.scaled #clock {
+  font-size: 9.9px;
+  margin-right: 7px;
+}
+
+window#waybar.scaled #custom-media {
+  min-width: 126px;
+}
+
+/* ── Tooltips ────────────────────────────────────────────────────────── */
+
+tooltip {
+  background-color: @tooltipBg;
+  border: 1px solid @yellowDim;
+  border-left: 3px solid @yellow;
+  border-radius: 0 10px 0 0;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+}
+
+tooltip label {
+  color: @chrome;
+  padding: 6px 8px;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────── */
+
+/* Chromatic split: the text jumps between a red and a cyan ghost. */
+@keyframes glitch {
+  from {
+    text-shadow:
+      -2px 0 @red,
+      2px 0 @cyan;
+  }
+  to {
+    text-shadow:
+      2px 0 @red,
+      -2px 0 @cyan;
+  }
+}
+
+@keyframes glitch-bg {
+  from {
+    background-color: @red;
+    box-shadow: -2px 0 0 @cyan;
+  }
+  to {
+    background-color: @yellow;
+    box-shadow: 2px 0 0 @red;
+  }
+}
+
+@keyframes blink {
+  to {
+    border-left-color: @yellow;
+    box-shadow: 0 0 20px @redGlow;
+  }
+}
+
+@keyframes charge {
+  to {
+    box-shadow: 0 0 16px @cyanGlow;
+    border-left-color: @yellow;
+  }
+}
