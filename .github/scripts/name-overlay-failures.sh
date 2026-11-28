@@ -12,6 +12,14 @@
 # Reporting only: it never changes the build's result.
 set -euo pipefail
 
+# mapfile, and "${arr[@]}" on an empty array under set -u, need bash 4.4+.
+# macOS's /bin/bash is 3.2, so CI runs this under nixpkgs' bash.
+if [ "${BASH_VERSINFO[0]}" -lt 4 ] ||
+  { [ "${BASH_VERSINFO[0]}" -eq 4 ] && [ "${BASH_VERSINFO[1]}" -lt 4 ]; }; then
+  echo "::error::name-overlay-failures: needs bash 4.4 or later, got ${BASH_VERSION}" >&2
+  exit 1
+fi
+
 host="$1"
 log="$2"
 
@@ -27,15 +35,40 @@ if [ -z "$ns" ]; then
   exit 0
 fi
 
-# Failed derivations, split into those whose own builder failed and those
-# that only failed because a dependency did. Handles both the current
-# "Cannot build '…'. / Reason: …" form and the older one-line forms.
+# Failed derivations, one per line as <kind>\t<drv>[\t<detail>]:
+#   own  - its own builder failed
+#   dep  - it only failed because a dependency did
+#   here - this machine can't build it at all (wrong platform or missing
+#          system features). Nix only builds what no cache had, so this
+#          means no substituter has it either. <detail> is what it needs.
+# Handles the current "Cannot build '…'. / Reason: …" form and the older
+# one-line forms.
 mapfile -t failures < <(awk '
+  function flush_here() {
+    if (here != "") print "here\t" here "\t" here_detail
+    here = ""; here_detail = ""
+  }
   match($0, /Cannot build \047\/nix\/store\/[^\047]+\.drv\047/) {
+    flush_here()
     pending = substr($0, RSTART + 14, RLENGTH - 15); next
   }
   pending != "" && /Reason:/ {
-    print ((/dependenc/ ? "dep" : "own") "\t" pending); pending = ""; next
+    if (/platform mismatch|missing system features|required system or feature not available/) {
+      here = pending
+    } else {
+      print ((/dependenc/ ? "dep" : "own") "\t" pending)
+    }
+    pending = ""; next
+  }
+  here != "" && /Required (system|features):/ {
+    sub(/^.*Required /, ""); here_detail = (here_detail == "" ? $0 : here_detail "; " $0); next
+  }
+  here != "" && /Current system:|Available features:|Output paths:/ { flush_here(); next }
+  match($0, /a \047[^\047]+\047 with features \{[^}]*\} is required to build \047\/nix\/store\/[^\047]+\.drv\047/) {
+    s = substr($0, RSTART + 3, RLENGTH - 3)
+    sys = substr(s, 1, index(s, "\047") - 1)
+    d = substr(s, index(s, "required to build \047") + 19); d = substr(d, 1, length(d) - 1)
+    print "here\t" d "\tsystem: \047" sys "\047"; next
   }
   match($0, /builder for \047\/nix\/store\/[^\047]+\.drv\047 failed/) {
     s = substr($0, RSTART + 13); print "own\t" substr(s, 1, index(s, "\047") - 1); next
@@ -43,6 +76,7 @@ mapfile -t failures < <(awk '
   match($0, /dependencies of derivation \047\/nix\/store\/[^\047]+\.drv\047 failed/) {
     s = substr($0, RSTART + 28); print "dep\t" substr(s, 1, index(s, "\047") - 1)
   }
+  END { flush_here() }
 ' "$log" | sort -u)
 
 # Tracked entries that apply to this host: group, id, evalAttr, strategy,
@@ -78,13 +112,18 @@ if [ "${#failures[@]}" -gt 0 ]; then
     IFS=$'\t' read -r group id attr strategy description notes <<<"$e"
     drv=$(nix eval --raw ".#${ns}.${host}.pkgs.${attr}.drvPath" 2>/dev/null) || continue
     for f in "${failures[@]}"; do
-      [ "${f#*$'\t'}" = "$drv" ] || continue
-      if [ "${f%%$'\t'*}" = own ]; then
-        add_match "$group" "$id" "$attr" "$strategy" "$description" "$notes" "failed to build"
-      else
-        add_match "$group" "$id" "$attr" "$strategy" "$description" "$notes" \
-          "failed because one of its dependencies did"
-      fi
+      IFS=$'\t' read -r kind fdrv detail <<<"$f"
+      [ "$fdrv" = "$drv" ] || continue
+      case "$kind" in
+        own)
+          add_match "$group" "$id" "$attr" "$strategy" "$description" "$notes" "failed to build" ;;
+        here)
+          add_match "$group" "$id" "$attr" "$strategy" "$description" "$notes" \
+            "can't be built on this runner (needs ${detail:-another platform}) and no cache has it" ;;
+        *)
+          add_match "$group" "$id" "$attr" "$strategy" "$description" "$notes" \
+            "failed because one of its dependencies did" ;;
+      esac
     done
   done
 else
@@ -99,6 +138,19 @@ else
   done
 fi
 
+own=()
+here=()
+for f in "${failures[@]}"; do
+  IFS=$'\t' read -r kind fdrv detail <<<"$f"
+  case "$kind" in
+    own) own+=("$fdrv") ;;
+    here)
+      here+=("\`${fdrv}\` (needs ${detail:-another platform})")
+      echo "::error title=No cache has ${fdrv#/nix/store/*-}::${fdrv} needs ${detail:-another platform}, which this ${host} runner can't build, and no binary cache has it for the locked inputs."
+      ;;
+  esac
+done
+
 {
   printf '## Overlays behind the %s build failure\n\n' "$host"
   if [ "$matched" -gt 0 ]; then
@@ -107,10 +159,11 @@ fi
   else
     printf 'No tracked overlay matches the failure, so it is most likely upstream, or in a permanent or exempt override.\n'
   fi
-  own=()
-  for f in "${failures[@]}"; do
-    [ "${f%%$'\t'*}" = own ] && own+=("${f#*$'\t'}")
-  done
+  if [ "${#here[@]}" -gt 0 ]; then
+    printf '\nDerivations that no binary cache had and this runner (%s) cannot build:\n\n' "$(uname -sm)"
+    printf -- '- %s\n' "${here[@]}"
+    printf '\nNix only builds what it could not download, so no configured cache had these for the locked inputs. Usually Hydra has not built them (or failed to) at the locked nixpkgs revision. A later lock update normally picks up a revision where it has.\n'
+  fi
   if [ "${#own[@]}" -gt 0 ]; then
     printf '\nDerivations whose own build failed:\n\n'
     printf -- "- \`%s\`\n" "${own[@]}"

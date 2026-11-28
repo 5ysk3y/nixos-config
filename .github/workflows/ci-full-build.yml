@@ -153,7 +153,11 @@ jobs:
         if: failure() && steps.build.outcome == 'failure'
         continue-on-error: true
         timeout-minutes: 20
-        run: bash .github/scripts/name-overlay-failures.sh gibson "$RUNNER_TEMP/build.log"
+        # Run with nixpkgs' bash, gawk and jq, not the runner's: macOS ships
+        # bash 3.2 (no mapfile) and BSD awk. Pinning them keeps both runners alike.
+        run: |
+          nix shell --inputs-from . nixpkgs#bash nixpkgs#gawk nixpkgs#jq --command \
+            bash .github/scripts/name-overlay-failures.sh gibson "$RUNNER_TEMP/build.log"
       # What the build left free on /, after the background cleanup and any
       # min-free collection. If this gets near zero, the build needs more
       # room than the runner has.
@@ -234,7 +238,11 @@ jobs:
         if: failure() && steps.build.outcome == 'failure'
         continue-on-error: true
         timeout-minutes: 20
-        run: bash .github/scripts/name-overlay-failures.sh macbook "$RUNNER_TEMP/build.log"
+        # Run with nixpkgs' bash, gawk and jq, not the runner's: macOS ships
+        # bash 3.2 (no mapfile) and BSD awk. Pinning them keeps both runners alike.
+        run: |
+          nix shell --inputs-from . nixpkgs#bash nixpkgs#gawk nixpkgs#jq --command \
+            bash .github/scripts/name-overlay-failures.sh macbook "$RUNNER_TEMP/build.log"
       # Only what CI built: attic skips paths signed by the cache's upstream
       # (cache.nixos.org), which machines fetch from there. Those were
       # 75-88% of push time over the tailnet, and both failed uploads seen.
